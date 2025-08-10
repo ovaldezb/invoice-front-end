@@ -2,16 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ConfiguraCsdComponent } from '../configura-csd/configura-csd.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ConfiguraCsdComponent],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
   givenName: string = '';
   familyName: string = '';
+  activeTab: string = 'tab1';
 
   constructor(
     private authService: AuthService,

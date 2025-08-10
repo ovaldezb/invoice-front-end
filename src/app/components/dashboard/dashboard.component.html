@@ -6,26 +6,65 @@
           <h1 class="text-xl font-semibold text-gray-900">Dashboard</h1>
         </div>
         <div class="flex items-center">
-          <span class="text-gray-700 mr-4">{{givenName}} {{familyName}}</span>
+          <div class="flex items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-gray-700">{{givenName}} {{familyName}}</span>
+          </div>
           <button
             (click)="logout()"
-            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            class="p-2 rounded-full text-gray-600 hover:text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-200"
+            title="Cerrar sesión"
           >
-            Cerrar sesión
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
           </button>
         </div>
       </div>
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
-      <div class="border-4 border-dashed border-gray-200 rounded-lg h-96 flex items-center justify-center">
-        <div class="text-center">
-          <h2 class="text-2xl font-bold text-gray-900 mb-4">¡Bienvenido al Dashboard!</h2>
-          <p class="text-gray-600">Has iniciado sesión exitosamente con AWS Cognito.</p>
+  <main class="max-w-7xl mx-auto py-3 sm:px-6 lg:px-8">
+    <div class="px-4 py-2 sm:px-0">
+      <!-- Tabs Navigation -->
+      <div class="border-b border-gray-200">
+        <nav class="-mb-px flex justify-center space-x-8">
+          <button
+            (click)="activeTab = 'tab1'"
+            [ngClass]="{
+              'border-blue-500 text-blue-600': activeTab === 'tab1',
+              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'tab1'
+            }"
+            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm"
+          >
+            Ver Facturas
+          </button>
+          <button
+            (click)="activeTab = 'tab2'"
+            [ngClass]="{
+              'border-blue-500 text-blue-600': activeTab === 'tab2',
+              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'tab2'
+            }"
+            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm"
+          >
+            Configurar CSD
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="mt-4">
+        <div *ngIf="activeTab === 'tab1'" class="p-4 bg-white rounded-lg shadow">
+          <h2 class="text-xl font-semibold">Contenido del Tab 1</h2>
+          <p class="mt-2">Este es el contenido del primer tab</p>
+        </div>
+        <div *ngIf="activeTab === 'tab2'" class="p-4 bg-white rounded-lg shadow">
+          <app-configura-csd></app-configura-csd>
         </div>
       </div>
     </div>
   </main>
 </div>
+
