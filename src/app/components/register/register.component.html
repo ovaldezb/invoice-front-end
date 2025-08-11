@@ -1,7 +1,7 @@
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
   <div class="max-w-md w-full space-y-8">
     <div>
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+      <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900">
         Crear cuenta
       </h2>
       <p class="mt-2 text-center text-sm text-gray-600">
@@ -23,7 +23,7 @@
             name="nombre"
             type="text"
             required
-            [(ngModel)]="nombre"
+            [(ngModel)]="usuario.nombre"
             (blur)="markAsTouched('nombre')"
             (input)="markAsTouched('nombre')"
             [class]="getFieldClasses('nombre')"
@@ -46,7 +46,7 @@
             name="apellido"
             type="text"
             required
-            [(ngModel)]="apellido"
+            [(ngModel)]="usuario.apellido"
             (blur)="markAsTouched('apellido')"
             (input)="markAsTouched('apellido')"
             [class]="getFieldClasses('apellido')"
@@ -70,7 +70,7 @@
           name="razonSocial"
           type="text"
           required
-          [(ngModel)]="razonSocial"
+          [(ngModel)]="usuario.razon_social"
           (blur)="markAsTouched('razonSocial')"
           (input)="markAsTouched('razonSocial')"
           [class]="getFieldClasses('razonSocial')"
@@ -93,7 +93,7 @@
           name="telefono"
           type="tel"
           required
-          [(ngModel)]="telefono"
+          [(ngModel)]="usuario.telefono"
           (blur)="markAsTouched('telefono')"
           (input)="markAsTouched('telefono')"
           [class]="getFieldClasses('telefono')"
@@ -116,15 +116,15 @@
           name="email"
           type="email"
           required
-          [(ngModel)]="email"
+          [(ngModel)]="usuario.email"
           (blur)="markAsTouched('email')"
           (input)="markAsTouched('email')"
           [class]="getFieldClasses('email')"
           placeholder="Correo electrónico"
         />
         <div *ngIf="touched.email && !isFieldValid('email')" class="mt-1 text-sm text-red-600">
-          <span *ngIf="email.trim().length === 0">El correo electrónico es obligatorio</span>
-          <span *ngIf="email.trim().length > 0 && !isValidEmail(email)">Ingresa un correo electrónico válido</span>
+          <span *ngIf="usuario.email.trim().length === 0">El correo electrónico es obligatorio</span>
+          <span *ngIf="usuario.email.trim().length > 0 && !isValidEmail(usuario.email)">Ingresa un correo electrónico válido</span>
         </div>
       </div>
 
@@ -140,15 +140,15 @@
           name="confirmEmail"
           type="email"
           required
-          [(ngModel)]="confirmEmail"
+          [(ngModel)]="usuario.confirm_email"
           (blur)="markAsTouched('confirmEmail')"
           (input)="markAsTouched('confirmEmail')"
           [class]="getFieldClasses('confirmEmail')"
           placeholder="Confirmar correo electrónico"
         />
         <div *ngIf="touched.confirmEmail && !isFieldValid('confirmEmail')" class="mt-1 text-sm text-red-600">
-          <span *ngIf="confirmEmail.trim().length === 0">Confirma tu correo electrónico</span>
-          <span *ngIf="confirmEmail.trim().length > 0 && email !== confirmEmail">Los correos electrónicos no coinciden</span>
+          <span *ngIf="usuario.confirm_email.trim().length === 0">Confirma tu correo electrónico</span>
+          <span *ngIf="usuario.confirm_email.trim().length > 0 && usuario.email !== usuario.confirm_email">Los correos electrónicos no coinciden</span>
         </div>
       </div>
 
@@ -164,15 +164,15 @@
           name="password"
           type="password"
           required
-          [(ngModel)]="password"
+          [(ngModel)]="usuario.password"
           (blur)="markAsTouched('password')"
           (input)="markAsTouched('password')"
           [class]="getFieldClasses('password')"
           placeholder="Contraseña"
         />
         <div *ngIf="touched.password && !isFieldValid('password')" class="mt-1 text-sm text-red-600">
-          <span *ngIf="password.length === 0">La contraseña es obligatoria</span>
-          <span *ngIf="password.length > 0 && password.length < 8">La contraseña debe tener al menos 8 caracteres</span>
+          <span *ngIf="usuario.password.length === 0">La contraseña es obligatoria</span>
+          <span *ngIf="usuario.password.length > 0 && usuario.password.length < 8">La contraseña debe tener al menos 8 caracteres</span>
         </div>
       </div>
 
@@ -188,16 +188,16 @@
           name="confirmPassword"
           type="password"
           required
-          [(ngModel)]="confirmPassword"
+          [(ngModel)]="usuario.confirm_password"
           (blur)="markAsTouched('confirmPassword')"
           (input)="markAsTouched('confirmPassword')"
           [class]="getFieldClasses('confirmPassword')"
           placeholder="Confirmar contraseña"
         />
         <div *ngIf="touched.confirmPassword && !isFieldValid('confirmPassword')" class="mt-1 text-sm text-red-600">
-          <span *ngIf="confirmPassword.length === 0">Confirma tu contraseña</span>
-          <span *ngIf="confirmPassword.length > 0 && confirmPassword.length < 8">La contraseña debe tener al menos 8 caracteres</span>
-          <span *ngIf="confirmPassword.length >= 8 && password !== confirmPassword">Las contraseñas no coinciden</span>
+          <span *ngIf="usuario.confirm_password.length === 0">Confirma tu contraseña</span>
+          <span *ngIf="usuario.confirm_password.length > 0 && usuario.confirm_password.length < 8">La contraseña debe tener al menos 8 caracteres</span>
+          <span *ngIf="usuario.confirm_password.length >= 8 && usuario.password !== usuario.confirm_password">Las contraseñas no coinciden</span>
         </div>
       </div>
 

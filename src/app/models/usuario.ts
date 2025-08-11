@@ -6,8 +6,8 @@ export class Usuario {
         public razon_social: string,
         public telefono: string,
         public email: string,
-        public confirm_email: string,
         public password: string,
+        public confirm_email: string,
         public confirm_password: string
     ) { }
 }

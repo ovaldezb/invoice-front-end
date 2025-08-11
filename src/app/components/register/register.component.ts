@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Usuario } from '../../models/usuario';
+import { UsuariosService } from '../../services/usuarios.service';
 
 @Component({
   selector: 'app-register',
@@ -11,14 +13,8 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './register.component.html'
 })
 export class RegisterComponent {
-  nombre: string = '';
-  apellido: string = '';
-  razonSocial: string = '';
-  telefono: string = '';
-  email: string = '';
-  confirmEmail: string = '';
-  password: string = '';
-  confirmPassword: string = '';
+  
+  public usuario: Usuario = new Usuario('', '', '', '', '', '', '', '', '');
   loading: boolean = false;
   error: string = '';
   success: string = '';
@@ -37,6 +33,7 @@ export class RegisterComponent {
 
   constructor(
     private authService: AuthService,
+    private usuarioService: UsuariosService,
     private router: Router
   ) {}
 
@@ -49,21 +46,21 @@ export class RegisterComponent {
   isFieldValid(field: string): boolean {
     switch (field) {
       case 'nombre':
-        return this.nombre.trim().length > 0;
+        return this.usuario.nombre.trim().length > 0;
       case 'apellido':
-        return this.apellido.trim().length > 0;
+        return this.usuario.apellido.trim().length > 0;
       case 'razonSocial':
-        return this.razonSocial.trim().length > 0;
+        return this.usuario.razon_social.trim().length > 0;
       case 'telefono':
-        return this.telefono.trim().length > 0;
+        return this.usuario.telefono.trim().length > 0;
       case 'email':
-        return this.email.trim().length > 0 && this.isValidEmail(this.email);
+        return this.usuario.email.trim().length > 0 && this.isValidEmail(this.usuario.email);
       case 'confirmEmail':
-        return this.confirmEmail.trim().length > 0 && this.email === this.confirmEmail;
+        return this.usuario.confirm_email.trim().length > 0 && this.usuario.email === this.usuario.confirm_email;
       case 'password':
-        return this.password.length >= 8;
+        return this.usuario.password.length >= 8;
       case 'confirmPassword':
-        return this.confirmPassword.length >= 8 && this.password === this.confirmPassword;
+        return this.usuario.confirm_password.length >= 8 && this.usuario.password === this.usuario.confirm_password;
       default:
         return false;
     }
@@ -106,22 +103,22 @@ export class RegisterComponent {
   }
 
   onRegister(): void {
-    if (!this.nombre || !this.apellido || !this.razonSocial || !this.telefono || !this.email || !this.confirmEmail || !this.password || !this.confirmPassword) {
+    if (!this.usuario.nombre || !this.usuario.apellido || !this.usuario.razon_social || !this.usuario.telefono || !this.usuario.email || !this.usuario.confirm_email || !this.usuario.password || !this.usuario.confirm_password) {
       this.error = 'Por favor completa todos los campos';
       return;
     }
 
-    if (this.email !== this.confirmEmail) {
+    if (this.usuario.email !== this.usuario.confirm_email) {
       this.error = 'Los correos electrónicos no coinciden';
       return;
     }
 
-    if (this.password !== this.confirmPassword) {
+    if (this.usuario.password !== this.usuario.confirm_password) {
       this.error = 'Las contraseñas no coinciden';
       return;
     }
 
-    if (this.password.length < 8) {
+    if (this.usuario.password.length < 8) {
       this.error = 'La contraseña debe tener al menos 8 caracteres';
       return;
     }
@@ -129,27 +126,19 @@ export class RegisterComponent {
     this.loading = true;
     this.error = '';
     this.success = '';
-
-    this.authService.register(this.email, this.password,{
-      nombreUsuario: this.nombre,
-      apellido: this.apellido,
-      razonSocial: this.razonSocial,
-      telefono: this.telefono
-    }).subscribe({
-      next: (result) => {
+    
+    this.usuarioService.addUsuario(this.usuario).subscribe({
+      next: (response) => {
         this.loading = false;
-        this.success = result.message;
-        console.log('Registro exitoso:', result);
-        // Redirigir al login después de 2 segundos
-        setTimeout(() => {
-          this.router.navigate(['/verifica-usuario']);
-        }, 2000);
+        this.success = 'Registro exitoso. Por favor, inicia sesión.';
+        this.router.navigate(['/login']);
       },
       error: (error) => {
         this.loading = false;
-        this.error = error.message || 'Error en el registro';
-        console.error('Error en registro:', error);
+        console.error('Error al registrar usuario:', error);
+        this.error = 'Error al registrar usuario. Por favor, inténtalo de nuevo más tarde.';
       }
     });
+    
   }
 }
