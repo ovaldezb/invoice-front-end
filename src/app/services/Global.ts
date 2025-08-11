@@ -1,4 +1,4 @@
 export var Global = {
-    urlCerticados: 'https://7r4ahjj9yh.execute-api.us-east-1.amazonaws.com/prod/certificados',
-    urlUsuario: 'https://ym5lx3swsk.execute-api.us-east-1.amazonaws.com/prod/usuarios',
+    urlCerticados: 'https://oh5i9vx2xb.execute-api.us-east-1.amazonaws.com/prod/certificados',
+    urlUsuario: 'https://ztapajxf9h.execute-api.us-east-1.amazonaws.com/prod/usuarios',
 };

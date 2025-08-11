@@ -5,6 +5,7 @@ export class Usuario {
         public apellido: string,
         public razon_social: string,
         public telefono: string,
+        public tipo_usuario: string,
         public email: string,
         public password: string,
         public confirm_email: string,

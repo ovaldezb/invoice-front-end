@@ -3,6 +3,7 @@ import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-verifica-usuario',
@@ -20,7 +21,12 @@ export class VerificaUsuarioComponent {
   verificarUsuario(): void {
     this.authService.confirmRegistration(this.email,this.codigo).subscribe({
       next: (result) => {
-        console.log('Usuario verificado exitosamente:', result);
+        Swal.fire({
+          title: 'Éxito',
+          text: 'Usuario verificado correctamente',
+          icon: 'success',
+          timer: 1500,
+        });
         // Redirigir al login después de 2 segundos
         setTimeout(() => {
           this.router.navigate(['/login']);

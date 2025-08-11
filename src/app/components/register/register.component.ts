@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -14,7 +15,7 @@ import { UsuariosService } from '../../services/usuarios.service';
 })
 export class RegisterComponent {
   
-  public usuario: Usuario = new Usuario('', '', '', '', '', '', '', '', '');
+  public usuario: Usuario = new Usuario('', '', '', '', '', '', '', '', '', '');
   loading: boolean = false;
   error: string = '';
   success: string = '';
@@ -25,6 +26,7 @@ export class RegisterComponent {
     apellido: false,
     razonSocial: false,
     telefono: false,
+    tipoUsuario: false,
     email: false,
     confirmEmail: false,
     password: false,
@@ -53,6 +55,8 @@ export class RegisterComponent {
         return this.usuario.razon_social.trim().length > 0;
       case 'telefono':
         return this.usuario.telefono.trim().length > 0;
+      case 'tipoUsuario':
+        return this.usuario.tipo_usuario.trim().length > 0;
       case 'email':
         return this.usuario.email.trim().length > 0 && this.isValidEmail(this.usuario.email);
       case 'confirmEmail':
@@ -96,6 +100,7 @@ export class RegisterComponent {
            this.isFieldValid('apellido') &&
            this.isFieldValid('razonSocial') &&
            this.isFieldValid('telefono') &&
+           this.isFieldValid('tipoUsuario') &&
            this.isFieldValid('email') &&
            this.isFieldValid('confirmEmail') &&
            this.isFieldValid('password') &&
@@ -103,7 +108,7 @@ export class RegisterComponent {
   }
 
   onRegister(): void {
-    if (!this.usuario.nombre || !this.usuario.apellido || !this.usuario.razon_social || !this.usuario.telefono || !this.usuario.email || !this.usuario.confirm_email || !this.usuario.password || !this.usuario.confirm_password) {
+    if (!this.usuario.nombre || !this.usuario.apellido || !this.usuario.razon_social || !this.usuario.telefono || !this.usuario.tipo_usuario || !this.usuario.email || !this.usuario.confirm_email || !this.usuario.password || !this.usuario.confirm_password) {
       this.error = 'Por favor completa todos los campos';
       return;
     }
@@ -125,20 +130,50 @@ export class RegisterComponent {
 
     this.loading = true;
     this.error = '';
-    this.success = '';
-    
-    this.usuarioService.addUsuario(this.usuario).subscribe({
-      next: (response) => {
+    Swal.fire({
+      title: 'Se va a agregar un nuevo usuario',
+      text: '¿Estás seguro de que deseas continuar?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, continuar',
+      cancelButtonText: 'Cancelar'
+    })
+    .then((result) => {
+      if (result.isConfirmed) {
+        this.authService.register(this.usuario.email, this.usuario.password,
+              {
+                nombreUsuario: this.usuario.nombre,
+                apellido: this.usuario.apellido,
+                razon_social: this.usuario.razon_social,
+                telefono: this.usuario.telefono,
+                tipo_usuario: this.usuario.tipo_usuario,
+              }            
+            ).subscribe({
+              next: (res) => {
+                Swal.fire({
+                  title: 'Registro exitoso',
+                  text: 'Usuario registrado correctamente. Por favor, inicia sesión.',
+                  icon: 'success',
+                  timer: 1500,
+                });
+                this.router.navigate(['/login']);
+              },
+              error: (err) => {
+                Swal.fire({
+                  title: 'Error',
+                  text: 'No se pudo registrar el usuario. Por favor, inténtalo de nuevo más tarde.',
+                  icon: 'error',
+                  confirmButtonText: 'Aceptar'
+                });
+                this.error = 'Error al registrar usuario. Por favor, inténtalo de nuevo más tarde.';
+              }
+            });
+      } else {
         this.loading = false;
-        this.success = 'Registro exitoso. Por favor, inicia sesión.';
-        this.router.navigate(['/login']);
-      },
-      error: (error) => {
-        this.loading = false;
-        console.error('Error al registrar usuario:', error);
-        this.error = 'Error al registrar usuario. Por favor, inténtalo de nuevo más tarde.';
       }
     });
+    
+    
     
   }
 }

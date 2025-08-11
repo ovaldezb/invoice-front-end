@@ -97,14 +97,14 @@ export class AuthService {
   register(email: string, password: string, attributes?: any): Observable<any> {
     const signUpData = {
       username: email,
-      password: password,
+      password: password,      
       options: {
         userAttributes: {
           email:email,
+          'phone_number': '+52'+attributes.telefono || '',
           'given_name': attributes.nombreUsuario || '',
-          'family_name': attributes.apellido || '',
-          // Agrega otros atributos personalizados si es necesario
-          'custom:group': 'USER' // Ejemplo de atributo personalizado
+          'family_name': attributes.apellido || '',          
+          'custom:group': attributes.tipo_usuario // Ejemplo de atributo personalizado
         }
       }
     };
