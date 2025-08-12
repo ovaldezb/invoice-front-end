@@ -1,11 +1,13 @@
+import { Sucursal } from "./sucursal";
+
 export class Certificado {
     constructor(
-    public id: string,
+    public _id: string,
     public nombre: string,
     public rfc: string,
     public no_certificado: string,
     public desde: Date,
     public hasta: Date,
-    public sucursales: string[],
+    public sucursales: Sucursal[],
     public usuario:string) { }
 }

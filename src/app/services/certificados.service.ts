@@ -20,7 +20,7 @@ export class CertificadosService {
   }
 
   updateCertificado(certificado:Certificado):Observable<any>{
-    return this._http.put(Global.urlCerticados+'/'+certificado.id,certificado,{observe:'response'});
+    return this._http.put(Global.urlCerticados+'/'+certificado._id,certificado,{observe:'response'});
   }
   renewCertificado(id:string):Observable<any>{
     return this._http.delete(Global.urlCerticados+id,{observe:'response'});
