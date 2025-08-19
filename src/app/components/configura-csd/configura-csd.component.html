@@ -33,27 +33,55 @@
              [ngClass]="{'bg-blue-50 border-blue-500': csdSeleccionado?._id === certificado._id}">
           <div class="flex justify-between items-start">
             <div>
-              <h4 class="text-lg font-medium group-hover:text-blue-600">{{certificado.rfc}} - {{certificado.no_certificado}}</h4>
-              <p class="text-sm text-gray-500">Desde: {{certificado.desde | date}}</p>
-              <p class="text-sm text-gray-500">Hasta: {{certificado.hasta | date}}</p>
+              <h4 class="text-lg font-medium group-hover:text-blue-600 mb-1">{{certificado.nombre}}</h4>
+              <div class="space-y-1">
+                <p class="text-sm text-gray-700 font-medium">RFC: {{certificado.rfc}}</p>
+                <p class="text-sm text-gray-600">No. Certificado: {{certificado.no_certificado}}</p>
+                <div class="flex items-center space-x-4 text-xs text-gray-500">
+                  <span>Desde: {{certificado.desde | date}}</span>
+                  <span class="flex items-center space-x-1">
+                    <span>Hasta: {{certificado.hasta | date}}</span>
+                    <div 
+                      class="w-4 h-4 rounded-full ml-2"
+                      [ngClass]="{
+                        'bg-green-500': getTimeToExpiration(certificado.hasta) > 180,
+                        'bg-yellow-500': getTimeToExpiration(certificado.hasta) > 30 && getTimeToExpiration(certificado.hasta) <= 180,
+                        'bg-red-500': getTimeToExpiration(certificado.hasta) <= 30
+                      }"
+                      [title]="getExpirationMessage(certificado.hasta)"
+                    ></div>
+                  </span>
+                </div>
+              </div>
             </div>
-            <button
-              (click)="seleccionarCSD(certificado)"
-              class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200"
-            >
-              <span>Ver Sucursales</span>
-              <svg xmlns="http://www.w3.org/2000/svg" 
-                   class="h-5 w-5 ml-1 transition-transform duration-200"
-                   [ngClass]="{'rotate-180': csdSeleccionado?._id === certificado._id}"
-                   fill="none" 
-                   viewBox="0 0 24 24" 
-                   stroke="currentColor">
-                <path stroke-linecap="round" 
-                      stroke-linejoin="round" 
-                      stroke-width="2" 
-                      d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+            <div class="flex space-x-2">
+              <button
+                (click)="eliminaCSD(certificado)"
+                class="inline-flex items-center p-1 rounded-full text-red-600 hover:text-red-800 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                title="Eliminar CSD"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                </svg>
+              </button>
+              <button
+                (click)="seleccionarCSD(certificado)"
+                class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200"
+              >
+                <span>Ver Sucursales</span>
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                     class="h-5 w-5 ml-1 transition-transform duration-200"
+                     [ngClass]="{'rotate-180': csdSeleccionado?._id === certificado._id}"
+                     fill="none" 
+                     viewBox="0 0 24 24" 
+                     stroke="currentColor">
+                  <path stroke-linecap="round" 
+                        stroke-linejoin="round" 
+                        stroke-width="2" 
+                        d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <!-- Lista de sucursales si el CSD está seleccionado -->
@@ -78,7 +106,7 @@
                     <span>{{sucursal.codigo_sucursal}}: {{sucursal.responsable}} - {{sucursal.direccion}}</span>
                     <div class="flex space-x-1">
                       <button
-                        (click)="editarSucursal(sucursal)"
+                        (click)="editarSucursal(certificado, sucursal)"
                         class="p-1 rounded-full text-blue-600 hover:text-blue-800 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                         title="Editar sucursal"
                       >
@@ -127,7 +155,7 @@
                 <div class="flex text-sm text-gray-600">
                   <label class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                     <span>Cargar archivo</span>
-                    <input type="file" class="sr-only" accept=".cer">
+                    <input type="file" class="sr-only" (change)="onArchivoCerSeleccionado($event)" accept=".cer">
                   </label>
                 </div>
                 <p class="text-xs text-gray-500">CER hasta 10MB</p>
@@ -145,7 +173,7 @@
                 <div class="flex text-sm text-gray-600">
                   <label class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                     <span>Cargar archivo</span>
-                    <input type="file" class="sr-only" accept=".key">
+                    <input type="file" class="sr-only" (change)="onArchivoKeySeleccionado($event)" accept=".key">
                   </label>
                 </div>
                 <p class="text-xs text-gray-500">KEY hasta 10MB</p>
@@ -155,12 +183,16 @@
 
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
-            <input type="password" name="password" id="password" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Contraseña de tu archivo KEY">
+            <input type="password" name="password" id="password" [(ngModel)]="ctrsn" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Contraseña de tu archivo KEY">
           </div>
 
           <div class="flex justify-end">
             <button type="button" (click)="guardarCSD()" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              Guardar
+                <svg *ngIf="isUploading" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{isUploading ? 'Guardando...' : 'Guardar'}}</span>
             </button>
           </div>
         </form>
@@ -189,6 +221,10 @@
               <input type="text" [(ngModel)]="nuevaSucursal.codigo_sucursal" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
             </div>
             <div>
+              <label class="block text-sm font-medium text-gray-700">Serie</label>
+              <input type="text" [(ngModel)]="nuevaSucursal.serie" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
               <label class="block text-sm font-medium text-gray-700">Dirección</label>
               <input type="text" [(ngModel)]="nuevaSucursal.direccion" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
             </div>
@@ -212,7 +248,7 @@
           </button>
           <button 
             type="button" 
-            (click)="guardarSucursal()" 
+            (click)="guardaEditarSucursal()" 
             [disabled]="isSavingSucursal"
             class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
@@ -220,7 +256,7 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span>{{isSavingSucursal ? 'Guardando...' : 'Agregar'}}</span>
+            <span>{{isSavingSucursal ? 'Guardando...' : btnAction}}</span>
           </button>
         </div>
       </div>
