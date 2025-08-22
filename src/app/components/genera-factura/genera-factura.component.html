@@ -1,0 +1,350 @@
+<div class="min-h-screen bg-gray-50 py-4">
+  <!-- Primera pantalla - Consulta de ticket -->
+  <div *ngIf="isBusquedaTicket" class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Generar Factura</h1>
+      <p class="text-gray-600">Ingresa el número de ticket para consultar la venta</p>
+    </div>
+
+    <!-- Input and Button Section -->
+    <div class="space-y-6">
+      <!-- Ticket Number Input -->
+      <div>
+        <label for="ticketNumber" class="block text-sm font-medium text-gray-700 mb-2">
+          Número de Ticket
+        </label>
+        <input
+          type="text"
+          id="ticketNumber"
+          [(ngModel)]="ticketNumber"
+          [disabled]="isLoading"
+          placeholder="Ej: 001234"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+        >
+      </div>
+
+      <!-- Consultation Button -->
+      <button
+        type="button"
+        (click)="consultarVenta()"
+        [disabled]="isLoading || !ticketNumber"
+        class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105 disabled:hover:scale-100 flex items-center justify-center"
+      >
+        <!-- Spinner -->
+        <svg
+          *ngIf="isLoading"
+          class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+        
+        <!-- Button Text -->
+        <span *ngIf="!isLoading">Consultar Venta</span>
+        <span *ngIf="isLoading">Consultando...</span>
+      </button>
+    </div>
+
+    <!-- Info Card -->
+    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-blue-800">Información</h3>
+          <p class="text-sm text-blue-700 mt-1">
+            El número de ticket debe corresponder a una venta válida en el sistema.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Segunda pantalla - Datos de la venta -->
+  <div *ngIf="!isBusquedaTicket" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4">
+    <!-- Header con información del ticket -->
+    <div class="border-b pb-3 mb-3">
+      <h2 class="text-lg font-bold text-gray-900 mb-2 text-center">Sistema de Facturación de Tapetes Tufan</h2>
+      <div class="flex justify-between items-center">
+        <p class="text-sm text-gray-600">
+          Ticket: <span class="font-medium text-gray-800">{{ ventaTapete.ticket.noVenta }}</span>
+        </p>
+        <div class="flex items-center text-sm text-gray-600">
+          <svg class="h-4 w-4 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+          </svg>
+          <span class="font-medium text-gray-800">{{ ventaTapete.ticket.fecha | date:'dd/MM/yyyy hh:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de productos -->
+    <div class="overflow-x-auto mb-3">
+      <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+        <thead>
+          <tr class="bg-gray-100 text-gray-700 uppercase text-xs leading-normal">
+            <th class="py-2 px-3 text-left">Producto</th>
+            <th class="py-2 px-3 text-left">Cantidad</th>
+            <th class="py-2 px-3 text-left">Precio Unitario</th>
+            <th class="py-2 px-3 text-left">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-600 text-xs font-medium">
+          <tr *ngFor="let producto of ventaTapete.detalle">
+            <td class="py-2 px-3 border-b">{{ producto.descripcio }}</td>
+            <td class="py-2 px-3 border-b">{{ producto.cantidad }}</td>
+            <td class="py-2 px-3 border-b">{{ producto.precio / 1.16 | currency }}</td>
+            <td class="py-2 px-3 border-b">{{ producto.precio * producto.cantidad / 1.16| currency }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Resumen de totales -->
+    <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-700">Subtotal:</span>
+        <span class="font-medium text-gray-900">{{ ventaTapete.ticket.subtotal | currency }}</span>
+      </div>
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-700">IVA (16%):</span>
+        <span class="font-medium text-gray-900">{{ ventaTapete.ticket.impuesto| currency }}</span>
+      </div>
+      <div class="flex justify-between text-sm font-bold">
+        <span class="text-gray-900">Total:</span>
+        <span class="text-gray-900">{{ ventaTapete.ticket.total | currency }}</span>
+      </div>
+    </div>
+
+    <!-- Formulario de datos para facturación -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
+      <h3 class="text-md font-semibold text-blue-900 mb-3">Datos del Receptor</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- RFC -->
+        <div>
+          <input
+            type="text"
+            id="rfc"
+            [(ngModel)]="receptor.Rfc"
+            [disabled]="isLoadingFactura"
+            placeholder="RFC *"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed uppercase text-sm"
+            [class.border-red-500]="!receptor.Rfc && showValidationErrors"
+            [class.border-gray-300]="receptor.Rfc || !showValidationErrors"
+            maxlength="13"
+          >
+          <p *ngIf="!receptor.Rfc && showValidationErrors" class="mt-1 text-xs text-red-600">
+            El RFC es obligatorio
+          </p>
+        </div>
+
+        <!-- Domicilio Fiscal -->
+        <div>
+          <input
+            type="text"
+            id="domicilioFiscal"
+            [(ngModel)]="receptor.DomicilioFiscalReceptor"
+            [disabled]="isLoadingFactura"
+            placeholder="Domicilio Fiscal (CP) *"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+            [class.border-red-500]="!receptor.DomicilioFiscalReceptor && showValidationErrors"
+            [class.border-gray-300]="receptor.DomicilioFiscalReceptor || !showValidationErrors"
+            maxlength="5"
+          >
+          <p *ngIf="!receptor.DomicilioFiscalReceptor && showValidationErrors" class="mt-1 text-xs text-red-600">
+            El código postal es obligatorio
+          </p>
+        </div>
+
+        <!-- Razón Social/Nombre -->
+        <div>
+          <input
+            type="text"
+            id="nombre"
+            [(ngModel)]="receptor.Nombre"
+            [disabled]="isLoadingFactura"
+            placeholder="Razón Social/Nombre *"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+            [class.border-red-500]="!receptor.Nombre && showValidationErrors"
+            [class.border-gray-300]="receptor.Nombre || !showValidationErrors"
+          >
+          <p *ngIf="!receptor.Nombre && showValidationErrors" class="mt-1 text-xs text-red-600">
+            El nombre es obligatorio
+          </p>
+        </div>
+
+        <!-- Correo Electrónico -->
+        <div>
+          <input
+            type="email"
+            id="email"
+            [(ngModel)]="receptor.email"
+            [disabled]="isLoadingFactura"
+            placeholder="Correo Electrónico *"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+            [class.border-red-500]="(!receptor.email || !isValidEmail(receptor.email)) && showValidationErrors"
+            [class.border-gray-300]="(receptor.email && isValidEmail(receptor.email)) || !showValidationErrors"
+          >
+          <p *ngIf="!receptor.email && showValidationErrors" class="mt-1 text-xs text-red-600">
+            El correo electrónico es obligatorio
+          </p>
+          <p *ngIf="receptor.email && !isValidEmail(receptor.email) && showValidationErrors" class="mt-1 text-xs text-red-600">
+            Ingrese un correo electrónico válido
+          </p>
+        </div>
+
+        <!-- Régimen Fiscal -->
+        <div>
+          <select
+            id="regimenFiscal"
+            [(ngModel)]="receptor.RegimenFiscalReceptor"
+            (change)="buscaUsoCfdi($event)"
+            [disabled]="isLoadingFactura"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+            [class.border-red-500]="!receptor.RegimenFiscalReceptor && showValidationErrors"
+            [class.border-gray-300]="receptor.RegimenFiscalReceptor || !showValidationErrors"
+          >
+            <option value="">Seleccione Régimen Fiscal *</option>
+            <option *ngFor="let regimen of listaRegimenFiscal" [value]="regimen.regimenfiscal">
+              {{ regimen.descripcion }}
+            </option>
+          </select>
+          <p *ngIf="!receptor.RegimenFiscalReceptor && showValidationErrors" class="mt-1 text-xs text-red-600">
+            El régimen fiscal es obligatorio
+          </p>
+        </div>
+
+        <!-- Uso de CFDI -->
+        <div>
+          <select
+            id="usoCfdi"
+            [(ngModel)]="receptor.UsoCFDI"
+            [disabled]="isLoadingFactura || !receptor.RegimenFiscalReceptor"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+            [class.border-red-500]="!receptor.UsoCFDI && showValidationErrors"
+            [class.border-gray-300]="receptor.UsoCFDI || !showValidationErrors"
+          >
+            <option value="">Seleccione Uso de CFDI *</option>
+            <option *ngFor="let uso of listaUsoCfdiFiltrado" [value]="uso.usoCfdi">
+              {{ uso.descripcion }}
+            </option>
+          </select>
+          <p *ngIf="!receptor.UsoCFDI && showValidationErrors" class="mt-1 text-xs text-red-600">
+            El uso de CFDI es obligatorio
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="flex justify-between pt-3">
+      <button
+        type="button"
+        (click)="regresarAConsulta()"
+        [disabled]="isLoadingFactura"
+        class="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition duration-200 text-sm"
+      >
+        Nueva Consulta
+      </button>
+      <button
+        type="button"
+        (click)="generarFactura()"
+        [disabled]="isLoadingFactura || !isFormValid()"
+        class="bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 disabled:hover:scale-100 flex items-center justify-center min-w-[120px] text-sm"
+      >
+        <!-- Spinner -->
+        <svg
+          *ngIf="isLoadingFactura"
+          class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+        
+        <!-- Button Text -->
+        <span *ngIf="!isLoadingFactura">Generar Factura</span>
+        <span *ngIf="isLoadingFactura">Generando...</span>
+      </button>
+    </div>
+  </div>
+</div>
+         
+          
+
+    <!-- Botones de acción -->
+    <div class="flex justify-between pt-6">
+      <button
+        type="button"
+        (click)="regresarAConsulta()"
+        [disabled]="isLoadingFactura"
+        class="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-2 px-6 rounded-lg transition duration-200"
+      >
+        Nueva Consulta
+      </button>
+      <button
+        type="button"
+        (click)="generarFactura()"
+        [disabled]="isLoadingFactura || !isFormValid()"
+        class="bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white font-medium py-2 px-6 rounded-lg transition duration-200 transform hover:scale-105 disabled:hover:scale-100 flex items-center justify-center min-w-[150px]"
+      >
+        <!-- Spinner -->
+        <svg
+          *ngIf="isLoadingFactura"
+          class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+        
+        <!-- Button Text -->
+        <span *ngIf="!isLoadingFactura">Generar Factura</span>
+        <span *ngIf="isLoadingFactura">Generando...</span>
+      </button>
+    </div>
+  

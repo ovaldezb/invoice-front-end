@@ -9,6 +9,8 @@ import Swal from 'sweetalert2';
 import { Global } from '../../services/Global';
 import { SwsapienCertificadoService } from '../../services/swsapien-certificado.service';
 import { SwsapienCertificado } from '../../models/swsapienCertificado';
+import { FolioService } from '../../services/folio.service';
+import { Folio } from '../../models/folio';
 
 @Component({
   selector: 'app-configura-csd',
@@ -31,11 +33,16 @@ export class ConfiguraCsdComponent implements OnInit{
     private archivoCer: File | null = null;
     private archivoKey: File | null = null;
     public ctrsn: string = ''; 
-    public isUploading:boolean = true;
+    public isUploading:boolean = false;
+    public archivoCerSeleccionado:String='';
+    public archivoKeySeleccionado:String='';
+    public sucursalExistente: boolean = false; // Variable para verificar si la sucursal ya existe
+
     public swsapienCertificado: SwsapienCertificado = new SwsapienCertificado('', '', '', false, '', new Date(), new Date(), '');
     constructor(private certificadoService: CertificadosService, 
         private sucursalService: SucursalService,
-        private swsapienService: SwsapienCertificadoService) {}
+        private swsapienService: SwsapienCertificadoService,
+      private folioService: FolioService) {}
 
     ngOnInit(): void {
         this.loadCerts();
@@ -52,32 +59,16 @@ export class ConfiguraCsdComponent implements OnInit{
                 console.error('Error al obtener certificados:', error);
             }
     });
-
-    
-
-    /*if(this.certificadoService){
-        this.certificadoService.insertarCertificado(this.certificado)
-        .subscribe({
-            next: (response) => {
-                console.log('Certificado insertado:', response);
-            },
-            error: (error) => {
-                console.error('Error al insertar certificado:', error);
-            }
-        });
-    }else{
-        console.error('El servicio de certificados no está disponible.');
-    }    */
 }  
   
-  fetchCertificate(rfc:string):void{
+  /*fetchCertificate(rfc:string):void{
     this.swsapienService.getCertificadosByRFC(rfc)
     .subscribe(res=>{
       if(res.status==Global.OK && res.body.data.length >0){
         this.swsapienCertificado = res.body.data[0]
       }
     })
-  }
+  }*/
 
     toggleFormulario() {
         this.mostrarFormulario = !this.mostrarFormulario;
@@ -114,6 +105,13 @@ export class ConfiguraCsdComponent implements OnInit{
   }
 
   guardarSucursal() {
+    if(this.sucursalExistente){
+        Swal.fire({
+            text: 'El código de sucursal ' + this.nuevaSucursal.codigo_sucursal + ' ya está en uso, favor de corregirlo.',
+            icon: 'error'
+        });
+        return; // Si la sucursal ya existe, no continuar con el guardado
+    }
     if (this.csdActual && this.nuevaSucursal.codigo_sucursal) {
       Swal.fire({
         title: 'Confirmar',
@@ -127,6 +125,8 @@ export class ConfiguraCsdComponent implements OnInit{
             this.isSavingSucursal = true;
             this.nuevaSucursal.id_certificado = this.csdActual._id; // Asignar el ID del certificado actual a la nueva sucursal
             const certificado = this.csdActual; // Guardar el certificado actual antes de la llamada al servicio
+            this.folioService.addFolio(new Folio('', this.nuevaSucursal.codigo_sucursal, 1))
+            .subscribe();
             this.sucursalService.insertarSucursal(this.nuevaSucursal).subscribe({
                 next: (res) => {
                     certificado.sucursales.push(new Sucursal(res.body.id,'', '', '', '', '', '',''));
@@ -149,6 +149,22 @@ export class ConfiguraCsdComponent implements OnInit{
         }
       });
     }
+  }
+
+  getSucursalById():void{
+    if (!this.nuevaSucursal.codigo_sucursal) {
+      this.sucursalExistente = false; // Si no hay código de sucursal, no hay sucursal existente
+      return;
+    }
+    this.sucursalService.getSucursalById(this.nuevaSucursal.codigo_sucursal)
+    .subscribe({
+      next: (res) => {
+        this.sucursalExistente = res.status===Global.OK && res.body ? true : false; // Verificar si la sucursal ya existe
+      },
+      error: (error) => {
+        this.sucursalExistente = false; // Si hay un error, asumimos que la sucursal no existe
+      }
+    }); 
   }
 
   actualizarSucursal() {
@@ -237,19 +253,20 @@ export class ConfiguraCsdComponent implements OnInit{
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.archivoCer = input.files[0];
+      this.archivoCerSeleccionado = this.archivoCer.name;
     }
   }
   
   onArchivoKeySeleccionado(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.archivoKey = input.files[0];
+        this.archivoKey = input.files[0];
+        this.archivoKeySeleccionado = this.archivoKey.name;
     }
   }
 
   
   guardarCSD():void{
-
     Swal.fire({
       title:'Desea subir estos archivos?',
       text:'El CSD para timbrar es almacenado directametne por el PAC proveedor',
@@ -296,9 +313,14 @@ export class ConfiguraCsdComponent implements OnInit{
             this.certificadoService.insertarCertificado(certificado)
             .subscribe({
               next: (insertRes) => {
-                console.log('Certificado insertado:', insertRes);
                 this.isUploading = false;
                 this.mostrarFormulario = false;
+                this.loadCerts();
+                this.archivoCerSeleccionado='';
+                this.archivoKeySeleccionado='';
+                this.archivoCer = null;
+                this.archivoKey = null;
+                this.ctrsn = '';
                 Swal.fire({
                     title:'El CSD para timbrar se ha cargado exitosamente',
                     icon:'success',
@@ -311,13 +333,25 @@ export class ConfiguraCsdComponent implements OnInit{
     });
   }
 
-  // Métodos para el semáforo de expiración
-  getTimeToExpiration(expirationDate: Date): number {
-    const today = new Date();
-    const expiration = new Date(expirationDate);
-    const timeDifference = expiration.getTime() - today.getTime();
-    const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
-    return daysDifference;
+  eliminarArchivoCer() {
+    this.archivoCer = null;
+    this.archivoCerSeleccionado = '';
+  }
+
+  eliminarArchivoKey() {
+    this.archivoKey = null;
+    this.archivoKeySeleccionado = '';
+  }
+
+  cerrarCSD() {
+    this.mostrarFormulario = false;
+    this.isUploading = false;
+    this.archivoCer = null;
+    this.archivoKey = null;
+    this.ctrsn = '';
+    this.csdSeleccionado = null;
+    this.csdActual = {} as Certificado; // Limpiar el certificado actual
+    this.nuevaSucursal = new Sucursal('', '', '', '', '','', '','');
   }
 
   getExpirationMessage(expirationDate: Date): string {
@@ -332,6 +366,30 @@ export class ConfiguraCsdComponent implements OnInit{
     } else {
       return 'Certificado vencido';
     }
+  }
+
+  getValidityPercentage(startDate: Date, endDate: Date): number {
+    const today = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
+    const remainingDays = this.getTimeToExpiration(endDate);
+    
+    if (remainingDays <= 0) return 0;
+    if (remainingDays >= totalDays) return 100;
+    
+    const percentage = (remainingDays / totalDays) * 100;
+    return Math.max(0, Math.min(100, percentage));
+  }
+
+// Método para calcular los días restantes hasta la fecha de expiración
+  getTimeToExpiration(expirationDate: Date): number {
+    const today = new Date();
+    const expiration = new Date(expirationDate);
+    const timeDiff = expiration.getTime() - today.getTime();
+    const daysToExpiration = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    return daysToExpiration;
   }
 
   cerrarModal() {

@@ -12,18 +12,22 @@ export class SucursalService {
   constructor(private _http: HttpClient) { }
 
   insertarSucursal(sucursal: Sucursal): Observable<any> {
-    return this._http.post(Global.urlCerticados+'sucursales', sucursal, { observe: 'response' });
+    return this._http.post(Global.urlBackEnd+'sucursales', sucursal, { observe: 'response' });
+  }
+
+  getSucursalById(id: string): Observable<any> {
+    return this._http.get(Global.urlBackEnd + 'sucursales/' + id, { observe: 'response' });
   }
 
   getAllSucursales(): Observable<any> {
-    return this._http.get(Global.urlCerticados+'sucursales', { observe: 'response' });
+    return this._http.get(Global.urlBackEnd+'sucursales', { observe: 'response' });
   }
 
   updateSucursal(sucursal: Sucursal): Observable<any> {
-    return this._http.put(Global.urlCerticados + 'sucursales/' + sucursal._id, sucursal, { observe: 'response' });
+    return this._http.put(Global.urlBackEnd + 'sucursales/' + sucursal._id, sucursal, { observe: 'response' });
   }
 
   deleteSucursal(id: string): Observable<any> {
-    return this._http.delete(Global.urlCerticados + 'sucursales/' + id, { observe: 'response' });
+    return this._http.delete(Global.urlBackEnd + 'sucursales/' + id, { observe: 'response' });
   }
 }
