@@ -4,6 +4,6 @@ import { Traslados } from "./traslados";
 export class ImpuestosConcepto{
   constructor(
     public Traslados:Traslados[],
-    public Retenciones:Retenciones[]
+    //public Retenciones:Retenciones[]
   ){}
 }

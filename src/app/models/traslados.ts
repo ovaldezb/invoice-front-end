@@ -1,9 +1,9 @@
 export class Traslados{
   constructor(
-    public Base:String,
-    public Importe:String,
-    public Impuesto:String,
-    public TasaOCuota:String,
-    public TipoFactor:String
+    public Base:number,
+    public Impuesto:string,
+    public TipoFactor:string,
+    public TasaOCuota:string,
+    public Importe:number
   ){}
 }

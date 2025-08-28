@@ -1,7 +1,7 @@
 export class Emisor{
   constructor(
-    public Nombre:String,
-    public Rfc:String,
-    public RegimenFiscal:String
+    public Rfc:string,
+    public Nombre:string,
+    public RegimenFiscal:string
   ){}
 }

@@ -3,9 +3,10 @@ import { Traslados } from "./traslados";
 
 export class Impuestos{
   constructor(
-    public TotalImpuestosTrasladados: String,
-    public TotalImpuestosRetenidos: String,
-    public Retenciones: Retenciones[],
-    public Traslados: Traslados[]
+    public Traslados: Traslados[],
+    //public Retenciones: Retenciones[],
+    //public TotalImpuestosRetenidos: number,
+    public TotalImpuestosTrasladados: number,
+    
   ){}
 }

@@ -9,5 +9,6 @@ export class Certificado {
     public desde: Date,
     public hasta: Date,
     public sucursales: Sucursal[],
-    public usuario:string) { }
+    public usuario:string
+    ) { }
 }

@@ -7,6 +7,7 @@ export class Sucursal {
     public direccion: string,
     public codigo_postal: string,
     public responsable: string,
-    public telefono: string
+    public telefono: string,
+    public regimen_fiscal: string
   ) {}
 }

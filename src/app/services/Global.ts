@@ -4,10 +4,12 @@ export var Global = {
     //urlSucursales: 'https://rf7ipa27na.execute-api.us-east-1.amazonaws.com/prod/sucursales',
     TIMER_OFF: 1500,
     OK: 200,
+    AGREGAR_SUCURSAL: 'Agregar Sucursal',
+    EDITAR_SUCURSAL: 'Editar Sucursal',
     Factura:{
     Moneda:'MXN',
     Version:'4.0',
-    TipoCambio:'1',
+    TipoCambio:1,
     TipoComprobante:'I',
     Exportacion:'01',
     CondicionesPago:'Un solo pago',

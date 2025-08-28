@@ -5,7 +5,7 @@ export class Receptor{
     public DomicilioFiscalReceptor:string,
     public RegimenFiscalReceptor:string,
     public UsoCFDI:string,
-    public _id?:string,
-    public email?:string
+    public email?:string,
+    public _id?:string
   ){}
 }
