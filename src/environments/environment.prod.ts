@@ -1,9 +1,9 @@
 export const environment = {
-  production: true,
+  production: false,
   aws: {
     cognito: {
-      userPoolId: 'us-east-1_XXXXXXXXX', // Reemplaza con tu User Pool ID de producción
-      userPoolClientId: 'XXXXXXXXXXXXXXXXXXXXXXXXXX' // Reemplaza con tu Client ID de producción
+      userPoolId: 'us-east-1_pfcGvfKy1', // Reemplaza con tu User Pool ID
+      userPoolClientId: 'tfts8oboht5vbs12dsoie8ecs' // Reemplaza con tu Client ID
     }
   }
 };

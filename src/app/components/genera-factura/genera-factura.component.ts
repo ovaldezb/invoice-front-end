@@ -14,7 +14,6 @@ import { Traslados } from '../../models/traslados';
 import { Concepto } from '../../models/conceptos';
 import { Emisor } from '../../models/emisor';
 import { Receptor } from '../../models/receptor';
-import { Venta } from '../../models/venta';
 import { VentaTapete } from '../../models/ventaTapete';
 import { Ticket } from '../../models/ticket';
 import { Certificado } from '../../models/certificado';
@@ -22,7 +21,6 @@ import Swal from 'sweetalert2';
 import { Folio } from '../../models/folio';
 import { FolioService } from '../../services/folio.service';
 import { Sucursal } from '../../models/sucursal';
-import { Retenciones } from '../../models/retenciones';
 
 @Component({
   selector: 'app-genera-factura',
@@ -36,9 +34,8 @@ export class GeneraFacturaComponent implements OnInit {
   public listaFormaPago: FormaPago[] = [];
   public listaUsoCfdiFiltrado:UsoCFDI[]=[];
   private timbrado       :Timbrado={} as Timbrado;
-  public receptor        :Receptor= new Receptor('VABO780711D41','','','','','');
-  public venta           :Venta=new Venta('',[],new Date(),0,0,0,0,'','',0,'','','',false,false,false,new Date(),'');
-  public ventaTapete     :VentaTapete=new VentaTapete('',new Ticket('','',0,0,0,0),[],[]);
+  public receptor        :Receptor= new Receptor('','','','','','');
+  public ventaTapete     :VentaTapete=new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
   public certificado : Certificado = {} as Certificado;
   public ticketNumber: string = '';
   public isLoading: boolean = false;
@@ -47,6 +44,7 @@ export class GeneraFacturaComponent implements OnInit {
   public showValidationErrors: boolean = false;
   public folio: Folio = new Folio('', '', 0);
   public sucursal: Sucursal = new Sucursal('', '', '', '','','','','','');
+  public isLoadingReceptor: boolean = false;
 
   constructor(private facturacionService: FacturacionService, private folioService: FolioService) { }
 
@@ -84,13 +82,20 @@ export class GeneraFacturaComponent implements OnInit {
   }
 
   obtieneReceptor(){
+    if (!this.receptor.Rfc || this.receptor.Rfc.length < 12) {
+      return;
+    }
+    
+    this.isLoadingReceptor = true;
     this.facturacionService.obtieneDatosReceptorByRfc(this.receptor.Rfc)
     .subscribe({
       next: (response) => {
         this.receptor = response.body ? response.body as Receptor : new Receptor(this.receptor.Rfc, '', '', '', '');
         this.filtraUsoCfdi(this.receptor.RegimenFiscalReceptor);
+        this.isLoadingReceptor = false;
       },
       error: (error) => {
+        this.isLoadingReceptor = false;
         //console.error('Error al obtener receptor:', error);
       }
     });
@@ -127,7 +132,6 @@ export class GeneraFacturaComponent implements OnInit {
     .subscribe({
       next: (response) => {
         this.folio = response.body;
-        console.log('Folio obtenido:', this.folio);
       },
       error: (error) => {
         console.error('Error al obtener folio:', error);
@@ -244,7 +248,7 @@ export class GeneraFacturaComponent implements OnInit {
     impuestos.TotalImpuestosTrasladados = Number(totalImpuestos.toFixed(2));
     impuestos.Traslados.push(trasladoImpuesto);
     this.timbrado.Version=Global.Factura.Version;
-    this.timbrado.FormaPago=this.venta.formaPago;
+    this.timbrado.FormaPago=this.ventaTapete.pago.formapago;
     this.timbrado.Serie=this.sucursal.serie;
     this.timbrado.Folio=this.folio.noFolio.toString();
     this.timbrado.Fecha=this.getFechaFactura();
@@ -282,6 +286,7 @@ export class GeneraFacturaComponent implements OnInit {
       this.timbrado.Conceptos,
       this.timbrado.Impuestos
     );
+    console.log('Timbrado a enviar:', timbradoEnviar);
     return timbradoEnviar;
   }
 
@@ -314,7 +319,7 @@ export class GeneraFacturaComponent implements OnInit {
   }
 
   regresarAConsulta() {
-    this.ventaTapete = new VentaTapete('',new Ticket('','',0,0,0,0),[],[]);
+    this.ventaTapete = new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
     this.receptor = new Receptor('','','','','');
     this.listaUsoCfdiFiltrado = [];
     this.showValidationErrors = false;

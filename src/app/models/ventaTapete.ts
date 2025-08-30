@@ -6,6 +6,6 @@ export class VentaTapete {
     public sucursal: string,
     public ticket: Ticket,
     public detalle: Detalle[],
-    public pago: string[]
+    public pago: {formapago: string}
   ) {}
 }

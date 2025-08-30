@@ -69,7 +69,7 @@
           </svg>
         </div>
         <div class="ml-3">
-          <h3 class="text-sm font-medium text-blue-800">Información</h3>
+          <h3 class="text-sm font-medium text-blue-800">Información V0.0.1</h3>
           <p class="text-sm text-blue-700 mt-1">
             El número de ticket debe corresponder a una venta válida en el sistema.
           </p>
@@ -87,10 +87,7 @@
         <p class="text-sm text-gray-600">
           Ticket: <span class="font-medium text-gray-800">{{ ventaTapete.ticket.noVenta }}</span>
         </p>
-        <div class="flex items-center text-sm text-gray-600">
-          <svg class="h-4 w-4 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-          </svg>
+        <div class="flex items-center text-sm text-gray-600"> Fecha Venta:
           <span class="font-medium text-gray-800">{{ ventaTapete.ticket.fecha | date:'dd/MM/yyyy hh:mm' }}</span>
         </div>
       </div>
@@ -98,24 +95,30 @@
 
     <!-- Tabla de productos -->
     <div class="overflow-x-auto mb-3">
-      <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-        <thead>
-          <tr class="bg-gray-100 text-gray-700 uppercase text-xs leading-normal">
-            <th class="py-2 px-3 text-left">Producto</th>
-            <th class="py-2 px-3 text-left">Cantidad</th>
-            <th class="py-2 px-3 text-left">Precio Unitario</th>
-            <th class="py-2 px-3 text-left">Subtotal</th>
-          </tr>
-        </thead>
-        <tbody class="text-gray-600 text-xs font-medium">
-          <tr *ngFor="let producto of ventaTapete.detalle">
-            <td class="py-2 px-3 border-b">{{ producto.descripcio }}</td>
-            <td class="py-2 px-3 border-b">{{ producto.cantidad }}</td>
-            <td class="py-2 px-3 border-b">{{ producto.precio / 1.16 | currency }}</td>
-            <td class="py-2 px-3 border-b">{{ producto.precio * producto.cantidad / 1.16| currency }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="bg-white border border-gray-200 rounded-lg">
+        <table class="min-w-full">
+          <thead>
+            <tr class="bg-gray-100 text-gray-700 uppercase text-xs leading-normal">
+              <th class="py-2 px-3 text-left">Producto</th>
+              <th class="py-2 px-3 text-left">Cantidad</th>
+              <th class="py-2 px-3 text-left">Precio Unitario</th>
+              <th class="py-2 px-3 text-left">Subtotal</th>
+            </tr>
+          </thead>
+        </table>
+        <div class="max-h-64 overflow-y-auto">
+          <table class="min-w-full">
+            <tbody class="text-gray-600 text-xs font-medium">
+              <tr *ngFor="let producto of ventaTapete.detalle">
+                <td class="py-2 px-3 border-b">{{ producto.descripcio }}</td>
+                <td class="py-2 px-3 border-b">{{ producto.cantidad }}</td>
+                <td class="py-2 px-3 border-b">{{ producto.precio / 1.16 | currency }}</td>
+                <td class="py-2 px-3 border-b">{{ producto.precio * producto.cantidad / 1.16| currency }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- Resumen de totales -->
@@ -136,22 +139,29 @@
 
     <!-- Formulario de datos para facturación -->
     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
-      <h3 class="text-md font-semibold text-blue-900 mb-3">Datos del Receptor</h3>
+      <h3 class="text-md font-semibold text-blue-900 mb-3 text-center">Datos del Receptor</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <!-- RFC -->
-        <div>
+        <div class="relative">
           <input
             type="text"
             id="rfc"
             [(ngModel)]="receptor.Rfc"
-            [disabled]="isLoadingFactura"
+            [disabled]="isLoadingFactura || isLoadingReceptor"
             (blur)="obtieneReceptor()"
             placeholder="RFC *"
-            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed uppercase text-sm"
+            class="w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed uppercase text-sm"
             [class.border-red-500]="!receptor.Rfc && showValidationErrors"
             [class.border-gray-300]="receptor.Rfc || !showValidationErrors"
             maxlength="13"
           >
+          <!-- Spinner inside RFC input -->
+          <div *ngIf="isLoadingReceptor" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
           <p *ngIf="!receptor.Rfc && showValidationErrors" class="mt-1 text-xs text-red-600">
             El RFC es obligatorio
           </p>
