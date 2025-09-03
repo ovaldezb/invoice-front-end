@@ -57,7 +57,8 @@ export class GeneraFacturaComponent implements OnInit {
     const factura = {
       timbrado: timbrado,
       sucursal: this.sucursal.codigo_sucursal,
-      ticket: this.ventaTapete.ticket.noVenta
+      ticket: this.ventaTapete.ticket.noVenta,
+      idCertificado: this.certificado._id
     }
     this.facturacionService.generaFactura(factura)
     .subscribe({
@@ -181,8 +182,6 @@ export class GeneraFacturaComponent implements OnInit {
   }
 
   buscaUsoCfdi(event:any):void{
-    console.log(this.listaRegimenFiscal[event.target["selectedIndex"]-1]);
-    console.log(this.listaUsoCfdi);
     this.listaUsoCfdiFiltrado = this.listaUsoCfdi.filter(
       (cfdi)=>cfdi.regfiscalreceptor.indexOf(this.listaRegimenFiscal[event.target["selectedIndex"]-1].regimenfiscal)>=0
     )

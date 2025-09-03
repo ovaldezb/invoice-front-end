@@ -15,8 +15,8 @@ export class CertificadosService {
     return this._http.post(Global.urlBackEnd+'certificados',certificado,{observe:'response'});
   }
 
-  getAllCertificados():Observable<any>{
-    return this._http.get(Global.urlBackEnd+'certificados',{observe:'response'});
+  getAllCertificados(usuario:string):Observable<any>{
+    return this._http.get(Global.urlBackEnd+'certificados/'+usuario,{observe:'response'});
   }
 
   updateCertificado(certificado:Certificado):Observable<any>{

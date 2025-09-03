@@ -13,6 +13,7 @@ import { FolioService } from '../../services/folio.service';
 import { Folio } from '../../models/folio';
 import { FacturacionService } from '../../services/facturacion.service';
 import { RegimenFiscal } from '../../models/regimenfiscal';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-configura-csd',
@@ -21,53 +22,60 @@ import { RegimenFiscal } from '../../models/regimenfiscal';
   templateUrl: './configura-csd.component.html',
 })
 export class ConfiguraCsdComponent implements OnInit{
-    public certificados:Certificado[] = [];
-    public mostrarFormulario: boolean = false;
-    public isLoadingCerts: boolean = false; // Variable para controlar el estado de carga
-    public isSavingSucursal: boolean = false;
-    public csdSeleccionado: Certificado | null = null;
-    public mostrarModal: boolean = false;
-    public nuevaSucursal: Sucursal = new Sucursal('','','','','','','','', '');
-    public csdActual: Certificado = new Certificado('', '', '', '', new Date(), new Date(), [], '');
-    public editandoSucursal: boolean = false;
-    public sucursalAEditar: Sucursal | null = null;
-    public btnAction: string = Global.AGREGAR_SUCURSAL; // Botón de acción para agregar o editar sucursal
-    private archivoCer: File | null = null;
-    private archivoKey: File | null = null;
-    public ctrsn: string = ''; 
-    public isUploading:boolean = false;
-    public archivoCerSeleccionado:String='';
-    public archivoKeySeleccionado:String='';
-    public sucursalExistente: boolean = false; // Variable para verificar si la sucursal ya existe
-    public codigoPostalInvalido: boolean = false;
-    public codigoPostalPristine: boolean = true;
-    public telefonoInvalido: boolean = false;
-    public regimenFiscal: RegimenFiscal[] = [];
-    public swsapienCertificado: SwsapienCertificado = new SwsapienCertificado('', '', '', false, '', new Date(), new Date(), '');
-    constructor(private certificadoService: CertificadosService, 
-        private sucursalService: SucursalService,
-        private swsapienService: SwsapienCertificadoService,
-        private datosFacturaService: FacturacionService,
-        private folioService: FolioService) {}
+  public certificados:Certificado[] = [];
+  public mostrarFormulario: boolean = false;
+  public isLoadingCerts: boolean = false; // Variable para controlar el estado de carga
+  public isSavingSucursal: boolean = false;
+  public csdSeleccionado: Certificado | null = null;
+  public mostrarModal: boolean = false;
+  public nuevaSucursal: Sucursal = new Sucursal('','','','','','','','', '');
+  public csdActual: Certificado = new Certificado('', '', '', '', new Date(), new Date(), [], '');
+  public editandoSucursal: boolean = false;
+  public sucursalAEditar: Sucursal | null = null;
+  public btnAction: string = Global.AGREGAR_SUCURSAL; // Botón de acción para agregar o editar sucursal
+  private archivoCer: File | null = null;
+  private archivoKey: File | null = null;
+  public ctrsn: string = ''; 
+  private idUsuarioCognito: string = '';
+  public isUploading:boolean = false;
+  public archivoCerSeleccionado:String='';
+  public archivoKeySeleccionado:String='';
+  public sucursalExistente: boolean = false; // Variable para verificar si la sucursal ya existe
+  public codigoPostalInvalido: boolean = false;
+  public codigoPostalPristine: boolean = true;
+  public telefonoInvalido: boolean = false;
+  public regimenFiscal: RegimenFiscal[] = [];
+  public swsapienCertificado: SwsapienCertificado = new SwsapienCertificado('', '', '', false, '', new Date(), new Date(), '');
+  constructor(private certificadoService: CertificadosService, 
+      private sucursalService: SucursalService,
+      private swsapienService: SwsapienCertificadoService,
+      private datosFacturaService: FacturacionService,
+      private authService: AuthService,
+      private folioService: FolioService) {}
 
-    ngOnInit(): void {
+  ngOnInit(): void {
+      this.obtieneDatosFacturar();
+      this.authService.getCurrentUser()
+      .then(user => {
+        this.idUsuarioCognito = user.tokens.idToken.payload.sub;
         this.loadCerts();
-        this.obtieneDatosFacturar();
-    }
+      });
+  }
     
-    loadCerts(): void {
-        this.isLoadingCerts = true; // Cambiar el estado de carga a verdadero
-        this.certificadoService.getAllCertificados()
-        .subscribe({
-            next: (res) => {
-                this.isLoadingCerts = false; // Cambiar el estado de carga a falso
-                this.certificados = res.body || [];            
-            },
-            error: (error) => {
-                console.error('Error al obtener certificados:', error);
-            }
-        });
-    }  
+  loadCerts(): void {
+    this.isLoadingCerts = true; 
+    console.log('Cargando certificados...',this.idUsuarioCognito); // Cambiar el estado de carga a verdadero
+    this.certificadoService.getAllCertificados(this.idUsuarioCognito)
+    .subscribe({
+        next: (res) => {
+            this.isLoadingCerts = false; // Cambiar el estado de carga a falso
+            this.certificados = res.body || [];            
+        },
+        error: (error) => {
+            Swal.fire('Error', 'No se pudieron cargar los certificados. Inténtalo de nuevo más tarde.', 'error');
+        }
+    });
+  }  
 
     obtieneDatosFacturar():void{
       this.datosFacturaService.getDatosParaFacturar()
@@ -81,30 +89,36 @@ export class ConfiguraCsdComponent implements OnInit{
       });
     }
 
-    toggleFormulario() {
-        this.mostrarFormulario = !this.mostrarFormulario;
-        this.csdSeleccionado = null;
-    }
+  toggleFormulario() {
+    this.mostrarFormulario = !this.mostrarFormulario;
+    this.csdSeleccionado = null;
+  }
 
-    seleccionarCSD(certificado: Certificado) {
-        if (this.csdSeleccionado?._id === certificado._id) {
-            this.csdSeleccionado = null;
-        } else {
-            this.csdSeleccionado = certificado;
-        }
+  seleccionarCSD(certificado: Certificado) {
+    if (this.csdSeleccionado?._id === certificado._id) {
+        this.csdSeleccionado = null;
+    } else {
+        this.csdSeleccionado = certificado;
     }
+  }
 
   agregarSucursal(certificado: Certificado) {
     this.csdActual = certificado;
+    this.btnAction = Global.AGREGAR_SUCURSAL; // Asegurar que esté en modo agregar
+    this.editandoSucursal = false; // Resetear modo edición
+    this.sucursalExistente = false; // Resetear validación
+    this.nuevaSucursal = new Sucursal('','','','','','','','', ''); // Limpiar formulario
     this.mostrarModal = true;
   }
 
   editarSucursal(certificado: Certificado, sucursal: Sucursal) {
     this.editandoSucursal = true;
-    this.nuevaSucursal = sucursal;
+    this.nuevaSucursal = { ...sucursal }; // Crear copia para evitar mutación directa
     this.btnAction = Global.EDITAR_SUCURSAL; // Cambiar el texto del botón a "Editar Sucursal"
     this.mostrarModal = true;
     this.csdActual = certificado; // Asignar el certificado actual para editar la sucursal
+    // Resetear validaciones para modo edición
+    this.sucursalExistente = false; // En edición no verificamos existencia
   }
 
   guardaEditarSucursal() {
@@ -183,30 +197,29 @@ export class ConfiguraCsdComponent implements OnInit{
 
   actualizarSucursal() {
     const certificado = this.csdActual; // Guardar el certificado actual antes de la llamada al servicio  
-      Swal.fire({
-        title: 'Confirmar',
-        text: '¿Estás seguro de que deseas actualizar esta sucursal?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sí',
-        cancelButtonText: 'No'
-      }).then((result) => {
-        if (result.isConfirmed) {
-            this.isSavingSucursal = true;
-            this.sucursalService.updateSucursal(this.nuevaSucursal).subscribe({
-                next: (res) => {
-                    Swal.fire('Éxito', 'La sucursal ha sido actualizada correctamente.', 'success');
-                    this.loadCerts(); // Recargar los certificados para reflejar los cambios
-                    this.cerrarModal();
-                },
-                error: (error) => {
-                    this.isSavingSucursal = false; // Asegurarse de que el estado de guardado se restablezca en caso de error
-                    console.error('Error al actualizar sucursal:', error);
-                }
-            });
-        }
-      });
-    
+    Swal.fire({
+      title: 'Confirmar',
+      text: '¿Estás seguro de que deseas actualizar esta sucursal?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí',
+      cancelButtonText: 'No'
+    }).then((result) => {
+      if (result.isConfirmed) {
+          this.isSavingSucursal = true;
+          this.sucursalService.updateSucursal(this.nuevaSucursal).subscribe({
+              next: (res) => {
+                  Swal.fire('Éxito', 'La sucursal ha sido actualizada correctamente.', 'success');
+                  this.loadCerts(); // Recargar los certificados para reflejar los cambios
+                  this.cerrarModal();
+              },
+              error: (error) => {
+                  this.isSavingSucursal = false; // Asegurarse de que el estado de guardado se restablezca en caso de error
+                  console.error('Error al actualizar sucursal:', error);
+              }
+          });
+      }
+    });
   }
 
   eliminaCSD(certificado: Certificado) {
@@ -226,10 +239,9 @@ export class ConfiguraCsdComponent implements OnInit{
                     this.loadCerts(); // Recargar los certificados para reflejar los cambios
                     Swal.fire('Eliminado', 'El CSD ha sido eliminado correctamente.', 'success');
                 }
-            }); // Eliminar también del servicio externo
+            }); 
           },
           error: (error) => {
-            console.error('Error al eliminar CSD:', error);
             Swal.fire('Error', 'No se pudo eliminar el CSD. Inténtalo de nuevo más tarde.', 'error');
           }
         });
@@ -256,7 +268,7 @@ export class ConfiguraCsdComponent implements OnInit{
           },
           error: (error) => {
             this.isSavingSucursal = false; // Asegurarse de que el estado de guardado se restablezca en caso de error
-            console.error('Error al eliminar sucursal:', error);
+            Swal.fire('Error', 'No se pudo eliminar la sucursal. Inténtalo de nuevo más tarde.', 'error');
           }
         });
       }
@@ -310,37 +322,21 @@ export class ConfiguraCsdComponent implements OnInit{
           return;
         }
         formData.append('ctrsn',this.ctrsn);
-        this.swsapienService.addCertificado(formData)
+        formData.append('usuario', this.idUsuarioCognito);
+        this.swsapienService.agregaCertificado(formData)
         .subscribe((res:any)=>{
-            
-            const certificado = new Certificado(
-              '',
-              res.body.nombre,
-              res.body.rfc,
-              res.body.no_certificado,
-              res.body.desde,
-              res.body.hasta,
-              [],
-              'ovaldez'
-            );
-            console.log(certificado);
-            this.certificadoService.insertarCertificado(certificado)
-            .subscribe({
-              next: (insertRes) => {
-                this.isUploading = false;
-                this.mostrarFormulario = false;
-                this.loadCerts();
-                this.archivoCerSeleccionado='';
-                this.archivoKeySeleccionado='';
-                this.archivoCer = null;
-                this.archivoKey = null;
-                this.ctrsn = '';
-                Swal.fire({
-                    title:'El CSD para timbrar se ha cargado exitosamente',
-                    icon:'success',
-                    timer:Global.TIMER_OFF
-                });
-              }
+            this.isUploading = false;
+            this.mostrarFormulario = false;
+            this.loadCerts();
+            this.archivoCerSeleccionado='';
+            this.archivoKeySeleccionado='';
+            this.archivoCer = null;
+            this.archivoKey = null;
+            this.ctrsn = '';
+            Swal.fire({
+                title:'El CSD para timbrar se ha cargado exitosamente',
+                icon:'success',
+                timer:Global.TIMER_OFF
             });
         })
       }
@@ -411,9 +407,10 @@ export class ConfiguraCsdComponent implements OnInit{
     this.editandoSucursal = false;
     this.isSavingSucursal = false;
     this.sucursalAEditar = null;
-    this.csdActual = {} as Certificado; // Limpiar el certificado actual};
+    this.csdActual = {} as Certificado;
     this.nuevaSucursal = new Sucursal('', '', '', '', '','', '','', '');
-    this.codigoPostalInvalido = false; // Resetear validación
+    this.sucursalExistente = false; // Resetear validación
+    this.btnAction = Global.AGREGAR_SUCURSAL; // Resetear acción
   }
 
   validarCodigoPostal(event: any): void {
@@ -432,16 +429,37 @@ export class ConfiguraCsdComponent implements OnInit{
 
   // Método para verificar si todos los campos requeridos están completos y válidos
   formularioValido(): boolean {
-    return !!(
-      this.nuevaSucursal.codigo_sucursal &&
-      this.nuevaSucursal.serie &&
-      this.nuevaSucursal.regimen_fiscal &&
-      this.nuevaSucursal.direccion &&
-      this.nuevaSucursal.codigo_postal &&
-      this.nuevaSucursal.responsable &&
-      this.nuevaSucursal.telefono &&
-      this.codigoPostalInvalido && // El código postal debe ser válido (true)
-      !this.sucursalExistente // No debe existir una sucursal con el mismo código
+    // Verificar que todos los campos básicos estén completos
+    const camposBasicosCompletos = !!(
+      this.nuevaSucursal.codigo_sucursal?.trim() &&
+      this.nuevaSucursal.serie?.trim() &&
+      this.nuevaSucursal.regimen_fiscal?.trim() &&
+      this.nuevaSucursal.direccion?.trim() &&
+      this.nuevaSucursal.codigo_postal?.trim() &&
+      this.nuevaSucursal.responsable?.trim() &&
+      this.nuevaSucursal.telefono?.trim()
     );
+
+    if (!camposBasicosCompletos) {
+      return false;
+    }
+
+    // Validar formato de código postal
+    const codigoPostalValido = /^\d{5}$/.test(this.nuevaSucursal.codigo_postal);
+    
+    // Validar formato de teléfono
+    const telefonoValido = /^\d{10}$/.test(this.nuevaSucursal.telefono);
+
+    if (!codigoPostalValido || !telefonoValido) {
+      return false;
+    }
+
+    if (this.btnAction === Global.AGREGAR_SUCURSAL) {
+      // Para agregar: todos los campos completos y válidos + no debe existir sucursal
+      return !this.sucursalExistente;
+    } else {
+      // Para editar: solo verificar que los campos estén completos y válidos (siempre true si llegamos aquí)
+      return true;
+    }
   }
 }

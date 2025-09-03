@@ -19,10 +19,6 @@ export class SucursalService {
     return this._http.get(Global.urlBackEnd + 'sucursales/' + id, { observe: 'response' });
   }
 
-  getAllSucursales(): Observable<any> {
-    return this._http.get(Global.urlBackEnd+'sucursales', { observe: 'response' });
-  }
-
   updateSucursal(sucursal: Sucursal): Observable<any> {
     return this._http.put(Global.urlBackEnd + 'sucursales/' + sucursal._id, sucursal, { observe: 'response' });
   }
