@@ -148,27 +148,30 @@ export class RegisterComponent {
               }            
             ).subscribe({
               next: (res) => {
+                this.loading = false;
                 Swal.fire({
                   title: 'Registro exitoso',
-                  text: 'Usuario registrado correctamente. Por favor, inicia sesión.',
+                  text: 'Usuario registrado correctamente. Por favor, confirma tu cuenta, revisa tu correo electrónico e introduce la clave recibida.',
                   icon: 'success',
                   timer: 1500,
                 });
-                this.router.navigate(['/login']);
+                this.router.navigate(['/verifica-usuario']);
               },
               error: (err) => {
+                console.error('Error al registrar usuario:', err);
+                this.loading = false;
                 Swal.fire({
-                  title: 'Error',
-                  text: 'No se pudo registrar el usuario. Por favor, inténtalo de nuevo más tarde.',
+                  title: err.message,
+                  text: 'No se pudo registrar el usuario. '+err.originalError.message,
                   icon: 'error',
                   confirmButtonText: 'Aceptar'
                 });
                 this.error = 'Error al registrar usuario. Por favor, inténtalo de nuevo más tarde.';
               }
             });
-      } else {
-        this.loading = false;
-      }
+      } 
+      
+      
     });
     
     

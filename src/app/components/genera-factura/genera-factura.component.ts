@@ -64,14 +64,23 @@ export class GeneraFacturaComponent implements OnInit {
     .subscribe({
       next: (response) => {
         this.isLoadingFactura = false;
+        this.isBusquedaTicket = true;
+
         this.timbrado = {} as Timbrado;
         this.incrementaFolio();
         if(this.receptor._id==undefined){
           this.guardaReceptor();
         }
+        Swal.fire({
+          icon: 'success',
+          title: 'Factura generada',
+          text: 'La factura se ha generado correctamente.',
+          timer: Global.TIMER_OFF
+        });
       },
       error: (error) => {
         this.isLoadingFactura = false;
+        this.isBusquedaTicket = true;
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -285,7 +294,6 @@ export class GeneraFacturaComponent implements OnInit {
       this.timbrado.Conceptos,
       this.timbrado.Impuestos
     );
-    console.log('Timbrado a enviar:', timbradoEnviar);
     return timbradoEnviar;
   }
 

@@ -64,7 +64,6 @@ export class ConfiguraCsdComponent implements OnInit{
     
   loadCerts(): void {
     this.isLoadingCerts = true; 
-    console.log('Cargando certificados...',this.idUsuarioCognito); // Cambiar el estado de carga a verdadero
     this.certificadoService.getAllCertificados(this.idUsuarioCognito)
     .subscribe({
         next: (res) => {
@@ -158,16 +157,19 @@ export class ConfiguraCsdComponent implements OnInit{
                     this.certificadoService.updateCertificado(certificado)
                     .subscribe({
                         next: (updateRes) => {
+                            this.isSavingSucursal = false;
                             Swal.fire('Éxito', 'La sucursal ha sido agregada correctamente.', 'success');
                             this.loadCerts(); // Recargar los certificados para reflejar los cambios
                             this.cerrarModal();
                         },
                         error: (error) => {
-                            console.error('Error al agregar sucursal:', error);
+                            this.isSavingSucursal = false;
+                            console.error('Error al actualizar el certificado:', error);
                         }
                     });
                 },
                 error: (error) => {
+                    this.isSavingSucursal = false;
                     console.error('Error al agregar sucursal:', error);
                 }
             });
