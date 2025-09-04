@@ -5,6 +5,7 @@ export class Detalle{
         public claveunidad: string,
         public cantidad: number,
         public precio: number,
-        public importe: number
+        public importe: number,
+        public unidad: string
     ) {}
 }

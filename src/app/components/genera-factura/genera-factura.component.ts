@@ -153,8 +153,6 @@ export class GeneraFacturaComponent implements OnInit {
     this.folioService.actualizaFolioBySucursal(this.sucursal.codigo_sucursal)
     .subscribe({
       next: (response) => {
-        this.folio = response.body;
-        console.log('Folio incrementado:', this.folio);
       },
       error: (error) => {
         console.error('Error al incrementar folio:', error);
@@ -233,7 +231,7 @@ export class GeneraFacturaComponent implements OnInit {
         prod.claveproducto,
         Number(prod.cantidad.toFixed(1)),
         prod.claveunidad,
-        'Pieza',
+        prod.unidad,
         prod.descripcio, 
         Number(ValorUnitario.toFixed(Global.DECIMAL_FIXED)),
         Number(base.toFixed(Global.DECIMAL_FIXED)),

@@ -197,7 +197,7 @@
         />
         <div *ngIf="touched.password && !isFieldValid('password')" class="mt-1 text-sm text-red-600">
           <span *ngIf="usuario.password.length === 0">La contraseña es obligatoria</span>
-          <span *ngIf="usuario.password.length > 0 && usuario.password.length < 8">La contraseña debe tener al menos 8 caracteres</span>
+          <span *ngIf="usuario.password.length > 0 && usuario.password.length < 8">La contraseña debe tener al menos 8 caracteres, debe incluir al menos una letra mayúscula, una letra minúscula y un número</span>
         </div>
       </div>
 

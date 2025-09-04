@@ -11,16 +11,19 @@ import Swal from 'sweetalert2';
   templateUrl: './verifica-usuario.component.html',
 })
 export class VerificaUsuarioComponent {
+  public email: string = '';
+  public codigo: string = '';
+  public isVerifying: boolean = false;
 
   constructor(private authService: AuthService,
               private router: Router) {}
 
-  email: string = '';
-  codigo: string = '';
-
   verificarUsuario(): void {
-    this.authService.confirmRegistration(this.email,this.codigo).subscribe({
+    this.isVerifying = true;
+
+    this.authService.confirmRegistration(this.email, this.codigo).subscribe({
       next: (result) => {
+        this.isVerifying = false;
         Swal.fire({
           title: 'Éxito',
           text: 'Usuario verificado correctamente',
@@ -33,6 +36,7 @@ export class VerificaUsuarioComponent {
         }, 2000);
       },
       error: (error) => {
+        this.isVerifying = false;
         console.error('Error al verificar usuario:', error);
         alert('Error al verificar usuario: ' + (error.message || 'Error desconocido'));
       }
