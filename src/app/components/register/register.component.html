@@ -121,7 +121,6 @@
           [class]="getFieldClasses('tipoUsuario')"
         >
           <option value="" disabled>Selecciona tipo de usuario</option>
-          <option value="ADMIN">Administrador</option>
           <option value="USER">Usuario</option>
         </select>
         <div *ngIf="touched.tipoUsuario && !isFieldValid('tipoUsuario')" class="mt-1 text-sm text-red-600">

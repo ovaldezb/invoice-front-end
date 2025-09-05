@@ -326,20 +326,48 @@ export class ConfiguraCsdComponent implements OnInit{
         formData.append('ctrsn',this.ctrsn);
         formData.append('usuario', this.idUsuarioCognito);
         this.swsapienService.agregaCertificado(formData)
-        .subscribe((res:any)=>{
+        .subscribe(async (res:any)=>{
             this.isUploading = false;
             this.mostrarFormulario = false;
-            this.loadCerts();
+            // Confirmar nombre/razón social antes de continuar
+            let certificadoRecibido = res.body as Certificado;
+            const nombre = res.body?.nombre || '';
+            const { value: nombreConfirmado, isConfirmed } = await Swal.fire({
+              title: 'Confirma Razón Social',
+              input: 'text',
+              inputValue: nombre,
+              inputLabel: 'El Nombre o Razón Social debe coincidir con nombre que se encuentra en la Constancia de Situación Fiscal',
+              showCancelButton: true,
+              confirmButtonText: 'Confirmar',
+              inputValidator: (value) => {
+                if (!value) {
+                  return 'Debes confirmar el nombre o razón social';
+                }
+                return null;
+              }
+            });
+            
+            certificadoRecibido.nombre = nombreConfirmado;
+            this.certificadoService.insertarCertificado(certificadoRecibido)
+            .subscribe({
+                next: (res) => {
+                  Swal.fire({
+                      title:'El CSD para timbrar se ha cargado exitosamente',
+                      icon:'success',
+                      timer:Global.TIMER_OFF
+                  });
+                  this.loadCerts(); // Recargar los certificados para reflejar los cambios
+                },
+                error: (error) => {
+                    Swal.fire('Error', 'No se pudo guardar el certificado. Inténtalo de nuevo más tarde.', 'error');
+                }
+            });
+            // ...limpiar archivos y campos...
             this.archivoCerSeleccionado='';
             this.archivoKeySeleccionado='';
             this.archivoCer = null;
             this.archivoKey = null;
-            this.ctrsn = '';
-            Swal.fire({
-                title:'El CSD para timbrar se ha cargado exitosamente',
-                icon:'success',
-                timer:Global.TIMER_OFF
-            });
+            this.ctrsn = '';  
         })
       }
     });

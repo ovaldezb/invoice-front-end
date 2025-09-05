@@ -63,11 +63,8 @@ export class GeneraFacturaComponent implements OnInit {
     this.facturacionService.generaFactura(factura)
     .subscribe({
       next: (response) => {
-        this.isLoadingFactura = false;
-        this.isBusquedaTicket = true;
-
-        this.timbrado = {} as Timbrado;
-        this.incrementaFolio();
+        this.limpiaDatosVentaFactura();
+        //this.incrementaFolio();
         if(this.receptor._id==undefined){
           this.guardaReceptor();
         }
@@ -80,22 +77,27 @@ export class GeneraFacturaComponent implements OnInit {
       },
       error: (error) => {
         this.isLoadingFactura = false;
-        this.isBusquedaTicket = true;
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: error.error.message,
-          timer: Global.TIMER_OFF
+          text: error.error.message
         });
       }
     });
+  }
+
+  limpiaDatosVentaFactura():void{
+    this.isLoadingFactura = false;
+    this.isBusquedaTicket = true;
+    this.timbrado = {} as Timbrado;
+    this.receptor = new Receptor('','','','','','');
+    this.ventaTapete = new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
   }
 
   obtieneReceptor(){
     if (!this.receptor.Rfc || this.receptor.Rfc.length < 12) {
       return;
     }
-    
     this.isLoadingReceptor = true;
     this.facturacionService.obtieneDatosReceptorByRfc(this.receptor.Rfc)
     .subscribe({
@@ -115,10 +117,10 @@ export class GeneraFacturaComponent implements OnInit {
     this.facturacionService.guardaReceptor(this.receptor)
     .subscribe({
       next: (response) => {
-        console.log('Receptor guardado:', response.body);
+        //console.log('Receptor guardado:', response.body);
       },
       error: (error) => {
-        console.error('Error al guardar receptor:', error);
+        //console.error('Error al guardar receptor:', error);
       }
     }); 
   }
@@ -137,29 +139,6 @@ export class GeneraFacturaComponent implements OnInit {
     });
   }
 
-  obtieneFolio(sucursal: string) {
-    this.folioService.obtieneFolioBySucursal(sucursal)
-    .subscribe({
-      next: (response) => {
-        this.folio = response.body;
-      },
-      error: (error) => {
-        console.error('Error al obtener folio:', error);
-      }
-    });
-  }
-
-  incrementaFolio():void{
-    this.folioService.actualizaFolioBySucursal(this.sucursal.codigo_sucursal)
-    .subscribe({
-      next: (response) => {
-      },
-      error: (error) => {
-        console.error('Error al incrementar folio:', error);
-      }
-    });
-  }
-
   consultarVenta() {
     this.isLoading = true;
     this.facturacionService.obtieneDatosVenta(this.ticketNumber)
@@ -170,7 +149,7 @@ export class GeneraFacturaComponent implements OnInit {
         this.sucursal = response.body.sucursal;
         this.ticketNumber = '';
         this.isBusquedaTicket = false;
-        this.obtieneFolio(this.ventaTapete.sucursal);
+        //this.obtieneFolio(this.ventaTapete.sucursal);
       },
       error: (error) => {
         this.isLoading = false;
@@ -256,7 +235,7 @@ export class GeneraFacturaComponent implements OnInit {
     this.timbrado.Version=Global.Factura.Version;
     this.timbrado.FormaPago=this.ventaTapete.pago.formapago;
     this.timbrado.Serie=this.sucursal.serie;
-    this.timbrado.Folio=this.folio.noFolio.toString();
+    this.timbrado.Folio='';//this.folio.noFolio.toString();
     this.timbrado.Fecha=this.getFechaFactura();
     this.timbrado.MetodoPago=Global.Factura.MetodoPago;
     this.timbrado.CondicionesDePago=Global.Factura.CondicionesPago;
