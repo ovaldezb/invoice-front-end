@@ -58,22 +58,72 @@ export class GeneraFacturaComponent implements OnInit {
       timbrado: timbrado,
       sucursal: this.sucursal.codigo_sucursal,
       ticket: this.ventaTapete.ticket.noVenta,
-      idCertificado: this.certificado._id
+      idCertificado: this.certificado._id,
+      fechaVenta:this.ventaTapete.ticket.fecha
     }
     this.facturacionService.generaFactura(factura)
     .subscribe({
       next: (response) => {
+        console.log(response);
         this.limpiaDatosVentaFactura();
-        //this.incrementaFolio();
-        if(this.receptor._id==undefined){
+        if(this.receptor._id==''){
           this.guardaReceptor();
         }
-        Swal.fire({
-          icon: 'success',
-          title: 'Factura generada',
-          text: 'La factura se ha generado correctamente.',
-          timer: Global.TIMER_OFF
-        });
+        // Descargar el archivo XML CFDI
+        const xmlContent = response.body != undefined ? (response.body as any).cfdi : null;
+        const uuid = response.body != undefined ? (response.body as any).uuid : '';
+        const pdfBase64 = response.body != undefined ? (response.body as any).pdf_cfdi_b64 : null;
+        let xmlUrl = '';
+        let pdfUrl = '';
+        if (xmlContent && uuid) {
+          const blob = new Blob([xmlContent], { type: 'application/xml' });
+          xmlUrl = window.URL.createObjectURL(blob);
+        }
+        if (pdfBase64 && uuid) {
+          const byteCharacters = atob(pdfBase64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
+          pdfUrl = window.URL.createObjectURL(pdfBlob);
+        }
+        if (uuid && (xmlUrl || pdfUrl)) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Factura generada exitosamente',
+            html: `
+              <h3>se adjuntan los archivos generados</h3>
+              <table style="width:100%;text-align:center;">
+                <tr>
+                  <th style="text-align:center;width:50%;border: 1px solid black;">XML</th>
+                  <th style="text-align:center;width:50%;border: 1px solid black;">PDF</th>
+                </tr>
+                <tr>
+                  <td style="text-align:center;width:50%;border: 1px solid black;">
+                    <a href="${xmlUrl}" download="${uuid}.xml" class="text-blue-600 font-semibold" style="display:inline-block;margin-top:10px;">
+                      <span style="display:flex;align-items:center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:24px;height:24px;margin-right:6px;">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a2 2 0 012-2h2a2 2 0 012 2v2m-6 0h6m-6 0v2a2 2 0 002 2h2a2 2 0 002-2v-2m-6 0V7a2 2 0 012-2h6a2 2 0 012 2v10" />
+                        </svg>
+                      </span>
+                    </a>
+                  </td>
+                  <td style="text-align:center;width:50%;border: 1px solid black;">
+                    <a href="${pdfUrl}" download="${uuid}.pdf" class="text-blue-600 font-semibold" style="display:inline-block;margin-top:10px;">
+                      <span style="display:flex;align-items:center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;margin-right:6px;">
+                          <path d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8.828a2 2 0 0 0-.586-1.414l-5.828-5.828A2 2 0 0 0 13.172 2H6zm7 1.414L18.586 9H15a2 2 0 0 1-2-2V3.414zM8 14h1v4H8v-4zm2 0h1v4h-1v-4zm2 0h1v4h-1v-4z"/>
+                        </svg>
+                      </span>
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            `,
+          });
+        } 
       },
       error: (error) => {
         this.isLoadingFactura = false;
@@ -99,16 +149,16 @@ export class GeneraFacturaComponent implements OnInit {
       return;
     }
     this.isLoadingReceptor = true;
-    this.facturacionService.obtieneDatosReceptorByRfc(this.receptor.Rfc)
+    this.facturacionService.obtieneDatosReceptorByRfc(this.receptor.Rfc.toUpperCase())
     .subscribe({
       next: (response) => {
         this.receptor = response.body ? response.body as Receptor : new Receptor(this.receptor.Rfc, '', '', '', '');
+        console.log(this.receptor);
         this.filtraUsoCfdi(this.receptor.RegimenFiscalReceptor);
         this.isLoadingReceptor = false;
       },
       error: (error) => {
         this.isLoadingReceptor = false;
-        //console.error('Error al obtener receptor:', error);
       }
     });
   }
