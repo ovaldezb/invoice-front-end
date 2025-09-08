@@ -33,7 +33,7 @@ export class GeneraFacturaComponent implements OnInit {
   public listaUsoCfdi: UsoCFDI[] = [];
   public listaFormaPago: FormaPago[] = [];
   public listaUsoCfdiFiltrado:UsoCFDI[]=[];
-  private timbrado       :Timbrado={} as Timbrado;
+  public timbrado       :Timbrado={} as Timbrado;
   public receptor        :Receptor= new Receptor('','','','','','');
   public ventaTapete     :VentaTapete=new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
   public certificado : Certificado = {} as Certificado;
@@ -64,7 +64,6 @@ export class GeneraFacturaComponent implements OnInit {
     this.facturacionService.generaFactura(factura)
     .subscribe({
       next: (response) => {
-        console.log(response);
         this.limpiaDatosVentaFactura();
         if(this.receptor._id==''){
           this.guardaReceptor();
@@ -130,7 +129,8 @@ export class GeneraFacturaComponent implements OnInit {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: error.error.message
+          text: error.error.message,
+          timer: Global.TIMER_OFF+500
         });
       }
     });
@@ -199,7 +199,6 @@ export class GeneraFacturaComponent implements OnInit {
         this.sucursal = response.body.sucursal;
         this.ticketNumber = '';
         this.isBusquedaTicket = false;
-        //this.obtieneFolio(this.ventaTapete.sucursal);
       },
       error: (error) => {
         this.isLoading = false;
@@ -354,7 +353,7 @@ export class GeneraFacturaComponent implements OnInit {
 
   regresarAConsulta() {
     this.ventaTapete = new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
-    this.receptor = new Receptor('','','','','');
+    this.receptor = new Receptor('','','','','','');
     this.listaUsoCfdiFiltrado = [];
     this.showValidationErrors = false;
     this.isBusquedaTicket = true;

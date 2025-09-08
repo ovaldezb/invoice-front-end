@@ -57,8 +57,7 @@
       <!-- Tab Content -->
       <div class="mt-4">
         <div *ngIf="activeTab === 'tab1'" class="p-4 bg-white rounded-lg shadow">
-          <h2 class="text-xl font-semibold">Contenido del Tab 1</h2>
-          <p class="mt-2">Este es el contenido del primer tab</p>
+          <app-lista-facturas></app-lista-facturas>
         </div>
         <div *ngIf="activeTab === 'tab2'" class="p-4 bg-white rounded-lg shadow">
           <app-configura-csd></app-configura-csd>

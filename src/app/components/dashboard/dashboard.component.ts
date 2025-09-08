@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ConfiguraCsdComponent } from '../configura-csd/configura-csd.component';
+import { ListaFacturasComponent } from "../lista-facturas/lista-facturas.component";
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ConfiguraCsdComponent],
+  imports: [CommonModule, ConfiguraCsdComponent, ListaFacturasComponent],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
