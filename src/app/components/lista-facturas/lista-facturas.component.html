@@ -1,1 +1,95 @@
-<p>lista-facturas works!</p>
+<div *ngIf="loading" style="display:flex; justify-content:center; align-items:center; height:180px;">
+  <div style="
+    border: 6px solid #e3f2fd;
+    border-top: 6px solid #1976d2;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+  "></div>
+</div>
+<style>
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+</style>
+<div *ngIf="!loading">
+  <!-- Selector de mes y año (solo una vez arriba) -->
+  <div style="margin-bottom:24px; display:flex; gap:12px; align-items:center; justify-content:space-between;">
+    <div style="display:flex; gap:12px; align-items:center;">
+      <label style="font-weight:500; color:#1976d2;">Mes:</label>
+      <select [(ngModel)]="selectedMonth" style="padding:4px 8px; border-radius:4px; border:1px solid #bbdefb;">
+        <option *ngFor="let m of visibleMonths" [value]="m.value">{{ m.name }}</option>
+      </select>
+      <label style="font-weight:500; color:#1976d2;">Año:</label>
+      <select [(ngModel)]="selectedYear" [disabled]="yearsRange==0" style="padding:4px 8px; border-radius:4px; border:1px solid #bbdefb;">
+        <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+      </select>
+      <button (click)="onMonthYearChange()" style="margin-left:12px; background:#1976d2; color:#fff; border:none; border-radius:4px; padding:6px 16px; cursor:pointer;">
+        Buscar
+      </button>
+    </div>
+    <span style="font-weight:600; color:#388e3c; min-width:220px; text-align:right;">
+      Total de Facturas Timbradas: {{ totalFacturasTimbradas }}
+    </span>
+  </div>
+  <!-- Lista de certificados -->
+  <div *ngFor="let certificado of certificados; let i = index" style="margin-bottom:12px;">
+    <div 
+      (click)="toggleCertificado(i)" 
+      style="
+        cursor:pointer; 
+        background: linear-gradient(90deg, #e3f2fd 0%, #bbdefb 100%);
+        padding: 14px 18px; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 8px rgba(33,150,243,0.08);
+        display: flex; 
+        align-items: center;
+        justify-content: space-between;
+        font-size: 1.08em;
+        font-weight: 500;
+        transition: background 0.2s;
+      "
+    >
+      <span style="color:#1976d2;">
+        <strong>RFC:</strong> {{ certificado.rfc }}
+      </span>
+      <span style="color:#388e3c; text-align:right;">
+        <strong>Total de Facturas:</strong> {{ certificado.facturas_emitidas?.length || 0 }}
+        <span style="margin-left:12px; color:#616161;">{{ expandedCertificadoIndex === i ? '▲' : '▼' }}</span>
+      </span>
+    </div>
+    <div *ngIf="expandedCertificadoIndex === i" style="padding: 16px 0 0 0;">
+      <div style="max-height:300px; overflow-y:auto; border-radius:8px;">
+        <table style="
+          width:100%; 
+          border-collapse:collapse; 
+          background:#fff; 
+          border-radius:8px; 
+          overflow:hidden; 
+          box-shadow: 0 1px 6px rgba(33,150,243,0.07);
+        ">
+          <thead style="background:#1976d2;">
+            <tr>
+              <th style="color:#fff; padding:10px; font-weight:600; border:none; text-align:center;">Fecha Timbrado</th>
+              <th style="color:#fff; padding:10px; font-weight:600; border:none; text-align:center;">No. Certificado SAT</th>
+              <th style="color:#fff; padding:10px; font-weight:600; border:none; text-align:center;">UUID</th>
+              <th style="color:#fff; padding:10px; font-weight:600; border:none; text-align:center;">Sucursal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let factura of certificado.facturas_emitidas" style="transition:background 0.2s;" 
+                [ngStyle]="{'background': facturaHover === factura ? '#e3f2fd' : '#fff'}"
+                (mouseenter)="facturaHover = factura" (mouseleave)="facturaHover = null">
+              <td style="padding:8px 10px; border-bottom:1px solid #e0e0e0; text-align:center;">{{ factura.fechaTimbrado }}</td>
+              <td style="padding:8px 10px; border-bottom:1px solid #e0e0e0; text-align:center;">{{ factura.noCertificadoSAT }}</td>
+              <td style="padding:8px 10px; border-bottom:1px solid #e0e0e0; text-align:center;">{{ factura.uuid }}</td>
+              <td style="padding:8px 10px; border-bottom:1px solid #e0e0e0; text-align:center;">{{ factura.sucursal }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

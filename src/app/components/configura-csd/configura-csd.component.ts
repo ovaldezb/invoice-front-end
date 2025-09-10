@@ -29,7 +29,7 @@ export class ConfiguraCsdComponent implements OnInit{
   public csdSeleccionado: Certificado | null = null;
   public mostrarModal: boolean = false;
   public nuevaSucursal: Sucursal = new Sucursal('','','','','','','','', '');
-  public csdActual: Certificado = new Certificado('', '', '', '', new Date(), new Date(), [], '');
+  public csdActual: Certificado = new Certificado('', '', '', '', new Date(), new Date(), [], '',[]);
   public editandoSucursal: boolean = false;
   public sucursalAEditar: Sucursal | null = null;
   public btnAction: string = Global.AGREGAR_SUCURSAL; // Botón de acción para agregar o editar sucursal
