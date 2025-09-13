@@ -7,7 +7,7 @@ import { GeneraFacturaComponent } from './components/genera-factura/genera-factu
 
 export const routes: Routes = [
   {
-    path: '', redirectTo: '/login',  pathMatch: 'full'
+    path: '', redirectTo: '/factura',  pathMatch: 'full'
   },
   { path: 'login', component: LoginComponent },
   { path: 'registro', component: RegisterComponent },
@@ -20,6 +20,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: '/login'
+    redirectTo: '/factura'
   }
 ];

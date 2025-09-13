@@ -59,7 +59,8 @@ export class GeneraFacturaComponent implements OnInit {
       sucursal: this.sucursal.codigo_sucursal,
       ticket: this.ventaTapete.ticket.noVenta,
       idCertificado: this.certificado._id,
-      fechaVenta:this.ventaTapete.ticket.fecha
+      fechaVenta:this.ventaTapete.ticket.fecha,
+      email: this.receptor.email,
     }
     this.facturacionService.generaFactura(factura)
     .subscribe({
@@ -122,6 +123,7 @@ export class GeneraFacturaComponent implements OnInit {
               </table>
             `,
           });
+          
         } 
       },
       error: (error) => {
@@ -129,8 +131,7 @@ export class GeneraFacturaComponent implements OnInit {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: error.error.message,
-          timer: Global.TIMER_OFF+500
+          text: error.error.message
         });
       }
     });
@@ -138,6 +139,7 @@ export class GeneraFacturaComponent implements OnInit {
 
   limpiaDatosVentaFactura():void{
     this.isLoadingFactura = false;
+    this.showValidationErrors = false;
     this.isBusquedaTicket = true;
     this.timbrado = {} as Timbrado;
     this.receptor = new Receptor('','','','','','');

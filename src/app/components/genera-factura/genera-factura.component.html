@@ -94,24 +94,24 @@
     <!-- Tabla de productos -->
     <div class="overflow-x-auto mb-3">
       <div class="bg-white border border-gray-200 rounded-lg">
-        <table class="min-w-full">
+        <table class="min-w-full table-fixed">
           <thead>
             <tr class="bg-gray-100 text-gray-700 uppercase text-xs leading-normal">
-              <th class="py-2 px-3 text-left">Producto</th>
-              <th class="py-2 px-3 text-left">Cantidad</th>
-              <th class="py-2 px-3 text-left">Precio Unitario</th>
-              <th class="py-2 px-3 text-left">Subtotal</th>
+              <th class="py-2 px-3 text-center" style="width:55%;">Producto</th>
+              <th class="py-2 px-3 text-center" style="width:15%;">Cantidad</th>
+              <th class="py-2 px-3 text-center" style="width:18%;">Precio Unitario</th>
+              <th class="py-2 px-3 text-center" style="width:12%;">Subtotal</th>
             </tr>
           </thead>
         </table>
         <div class="max-h-64 overflow-y-auto">
-          <table class="min-w-full">
+          <table class="min-w-full table-fixed">
             <tbody class="text-gray-600 text-xs font-medium">
               <tr *ngFor="let producto of ventaTapete.detalle">
-                <td class="py-2 px-3 border-b">{{ producto.descripcio }}</td>
-                <td class="py-2 px-3 border-b">{{ producto.cantidad }}</td>
-                <td class="py-2 px-3 border-b">{{ producto.precio / 1.16 | currency }}</td>
-                <td class="py-2 px-3 border-b">{{ producto.precio * producto.cantidad / 1.16| currency }}</td>
+                <td class="py-2 px-3 text-center border-b" style="width:55%;">{{ producto.descripcio }}</td>
+                <td class="py-2 px-3 text-center border-b" style="width:15%;">{{ producto.cantidad }}</td>
+                <td class="py-2 px-3 text-center border-b" style="width:18%;">{{ producto.precio / 1.16 | currency }}</td>
+                <td class="py-2 px-3 text-center border-b" style="width:12%;">{{ producto.precio * producto.cantidad / 1.16| currency }}</td>
               </tr>
             </tbody>
           </table>

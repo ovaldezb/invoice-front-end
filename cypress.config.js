@@ -6,7 +6,7 @@ module.exports = {
   },
   env: {
     usuario: 'omar.valdez@protonmail.com',
-    password: ''
+    password: '1q2w3e4r5T'
   }
 
 };
