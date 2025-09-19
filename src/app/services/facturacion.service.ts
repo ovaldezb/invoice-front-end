@@ -12,7 +12,7 @@ export class FacturacionService {
   constructor(private http: HttpClient) { }
 
   getDatosParaFacturar() {
-    return this.http.get(Global.urlBackEnd+'datosfactura', { observe: 'response' });
+    return this.http.get(Global.urlDatosFactura, { observe: 'response' });
   }
 
   obtieneDatosVenta(ticket:string) {

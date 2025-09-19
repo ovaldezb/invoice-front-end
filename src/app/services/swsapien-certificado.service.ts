@@ -10,16 +10,12 @@ export class SwsapienCertificadoService {
 
   constructor(private httpClient: HttpClient) { }
 
-  //Crear un metodo post que recibiba un archivo .cer, un archivo .key y una constraseña y los envie a un endpoint Global.urlCertif
-  addCertificado(certificado: FormData): Observable<any> {
-    return this.httpClient.post(Global.urlCertif, certificado, { observe: 'response' });
-  }
-
   agregaCertificado(certificado: FormData): Observable<any> {
-    return this.httpClient.post(Global.urlBackEnd + 'agrega-certificado', certificado, { observe: 'response' });
+    return this.httpClient.post(Global.urlBackEnd + 'maneja-certificado', certificado, { observe: 'response' });
   }
 
-  deleteCertificado(id: string): Observable<any> {
-    return this.httpClient.delete(`${Global.urlCertif}/${id}`, { observe: 'response' });
+  deleteCertificado(no_certificado: string): Observable<any> {
+    return this.httpClient.delete(Global.urlBackEnd + 'maneja-certificado/' + no_certificado, { observe: 'response' });
   }
+
 }

@@ -234,14 +234,10 @@ export class ConfiguraCsdComponent implements OnInit{
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.certificadoService.deleteCertificado(certificado._id).subscribe({
+        this.swsapienService.deleteCertificado(certificado._id).subscribe({
           next: () => {
-            this.swsapienService.deleteCertificado(certificado.no_certificado).subscribe({
-                next: () => {
-                    this.loadCerts(); // Recargar los certificados para reflejar los cambios
-                    Swal.fire('Eliminado', 'El CSD ha sido eliminado correctamente.', 'success');
-                }
-            }); 
+            this.loadCerts(); // Recargar los certificados para reflejar los cambios
+            Swal.fire('Eliminado', 'El CSD ha sido eliminado correctamente.', 'success');
           },
           error: (error) => {
             Swal.fire('Error', 'No se pudo eliminar el CSD. Inténtalo de nuevo más tarde.', 'error');

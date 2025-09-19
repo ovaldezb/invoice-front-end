@@ -22,7 +22,7 @@ export class CertificadosService {
   updateCertificado(certificado:Certificado):Observable<any>{
     return this._http.put(Global.urlBackEnd+'certificados/'+certificado._id,certificado,{observe:'response'});
   }
-  deleteCertificado(id:string):Observable<any>{
+  /*deleteCertificado(id:string):Observable<any>{
     return this._http.delete(Global.urlBackEnd+'certificados/'+id,{observe:'response'});
-  }
+  }*/
 }

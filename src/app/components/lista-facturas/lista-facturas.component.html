@@ -18,12 +18,12 @@
   <!-- Selector de mes y año (solo una vez arriba) -->
   <div style="margin-bottom:24px; display:flex; gap:12px; align-items:center; justify-content:space-between;">
     <div style="display:flex; gap:12px; align-items:center;">
-      <label style="font-weight:500; color:#1976d2;">Mes:</label>
-      <select [(ngModel)]="selectedMonth" style="padding:4px 8px; border-radius:4px; border:1px solid #bbdefb;">
+      <label for="month" style="font-weight:500; color:#1976d2;">Mes:</label>
+      <select [(ngModel)]="selectedMonth" name="month" style="padding:4px 8px; border-radius:4px; border:1px solid #bbdefb;">
         <option *ngFor="let m of visibleMonths" [value]="m.value">{{ m.name }}</option>
       </select>
-      <label style="font-weight:500; color:#1976d2;">Año:</label>
-      <select [(ngModel)]="selectedYear" [disabled]="yearsRange==0" style="padding:4px 8px; border-radius:4px; border:1px solid #bbdefb;">
+      <label for="year" style="font-weight:500; color:#1976d2;">Año:</label>
+      <select [(ngModel)]="selectedYear" [disabled]="yearsRange==0" name="year" style="padding:4px 8px; border-radius:4px; border:1px solid #bbdefb;">
         <option *ngFor="let y of years" [value]="y">{{ y }}</option>
       </select>
       <button (click)="onMonthYearChange()" style="margin-left:12px; background:#1976d2; color:#fff; border:none; border-radius:4px; padding:6px 16px; cursor:pointer;">
@@ -56,7 +56,7 @@
         <strong>RFC:</strong> {{ certificado.rfc }}
       </span>
       <span style="color:#388e3c; text-align:right;">
-        <strong>Total de Facturas:</strong> {{ certificado.facturas_emitidas?.length || 0 }}
+        <strong>Total de Facturas:</strong> {{ certificado.facturas_emitidas.length}}
         <span style="margin-left:12px; color:#616161;">{{ expandedCertificadoIndex === i ? '▲' : '▼' }}</span>
       </span>
     </div>
