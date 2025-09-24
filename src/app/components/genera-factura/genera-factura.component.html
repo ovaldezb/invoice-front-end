@@ -70,7 +70,7 @@
           <p class="text-sm text-blue-700 mt-1">
             El número de ticket debe corresponder a una venta válida en el sistema.
           </p>
-          <p class="text-sm text-blue-700 mt-1" style="text-align: right;">Ver 1.0.1</p>
+          <p class="text-sm text-blue-700 mt-1" style="text-align: right;">Ver {{ Global.VERSION }}</p>
         </div>
       </div>
     </div>
@@ -80,7 +80,7 @@
   <div *ngIf="!isBusquedaTicket" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4">
     <!-- Header con información del ticket -->
     <div class="border-b pb-3 mb-3">
-      <h2 class="text-lg font-bold text-gray-900 mb-2 text-center">Sistema de Facturación de Tapetes Tufan</h2>
+      <h2 class="text-lg font-bold text-gray-900 mb-2 text-center">Sistema de Facturación de Tapetes Tufan & Farzin</h2>
       <div class="flex justify-between items-center">
         <p class="text-sm text-gray-600">
           Ticket: <span class="font-medium text-gray-800">{{ ventaTapete.ticket.noVenta }}</span>

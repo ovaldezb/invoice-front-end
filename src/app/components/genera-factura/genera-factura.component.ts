@@ -29,12 +29,13 @@ import { Sucursal } from '../../models/sucursal';
   styleUrl: './genera-factura.component.css'
 })
 export class GeneraFacturaComponent implements OnInit {
+  public Global = Global;
   public listaRegimenFiscal: RegimenFiscal[] = [];
   public listaUsoCfdi: UsoCFDI[] = [];
   public listaFormaPago: FormaPago[] = [];
   public listaUsoCfdiFiltrado:UsoCFDI[]=[];
   public timbrado       :Timbrado={} as Timbrado;
-  public receptor        :Receptor= new Receptor('','','','','','');
+  public receptor        :Receptor= new Receptor('','','','','','','');
   public ventaTapete     :VentaTapete=new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
   public certificado : Certificado = {} as Certificado;
   public ticketNumber: string = '';
@@ -61,11 +62,12 @@ export class GeneraFacturaComponent implements OnInit {
       idCertificado: this.certificado._id,
       fechaVenta:this.ventaTapete.ticket.fecha,
       email: this.receptor.email,
+      direccion:this.sucursal.direccion,
+      empresa:this.certificado.nombre
     }
     this.facturacionService.generaFactura(factura)
     .subscribe({
       next: (response) => {
-        this.limpiaDatosVentaFactura();
         if(this.receptor._id==''){
           this.guardaReceptor();
         }
@@ -123,8 +125,8 @@ export class GeneraFacturaComponent implements OnInit {
               </table>
             `,
           });
-          
-        } 
+        }
+        this.limpiaDatosVentaFactura();
       },
       error: (error) => {
         this.isLoadingFactura = false;
@@ -142,7 +144,7 @@ export class GeneraFacturaComponent implements OnInit {
     this.showValidationErrors = false;
     this.isBusquedaTicket = true;
     this.timbrado = {} as Timbrado;
-    this.receptor = new Receptor('','','','','','');
+    this.receptor = new Receptor('','','','','','','');
     this.ventaTapete = new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
   }
 
@@ -154,8 +156,7 @@ export class GeneraFacturaComponent implements OnInit {
     this.facturacionService.obtieneDatosReceptorByRfc(this.receptor.Rfc.toUpperCase())
     .subscribe({
       next: (response) => {
-        this.receptor = response.body ? response.body as Receptor : new Receptor(this.receptor.Rfc, '', '', '', '');
-        console.log(this.receptor);
+        this.receptor = response.body ? response.body as Receptor : new Receptor(this.receptor.Rfc, '', '', '', '','','');
         this.filtraUsoCfdi(this.receptor.RegimenFiscalReceptor);
         this.isLoadingReceptor = false;
       },
@@ -355,7 +356,7 @@ export class GeneraFacturaComponent implements OnInit {
 
   regresarAConsulta() {
     this.ventaTapete = new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
-    this.receptor = new Receptor('','','','','','');
+    this.receptor = new Receptor('','','','','','','');
     this.listaUsoCfdiFiltrado = [];
     this.showValidationErrors = false;
     this.isBusquedaTicket = true;
