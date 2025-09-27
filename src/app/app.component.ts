@@ -60,7 +60,12 @@ export class AppComponent implements OnInit, OnDestroy {
       localStorage.clear();
       sessionStorage.clear();
     } catch (e) {}
-    this.router.navigate(['/login']);
+    const currentPath = this.router.url; // "/factura/123"
+    if(currentPath =='/dashboard' || currentPath.includes('dashboard')){
+      this.router.navigate(['/login']);
+    }else{
+      this.router.navigate(['/factura']);
+    }
   }
 }
 

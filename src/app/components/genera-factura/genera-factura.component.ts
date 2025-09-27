@@ -21,6 +21,7 @@ import Swal from 'sweetalert2';
 import { Folio } from '../../models/folio';
 import { FolioService } from '../../services/folio.service';
 import { Sucursal } from '../../models/sucursal';
+import { ParsePdfService } from '../../services/parse-pdf.service';
 
 @Component({
   selector: 'app-genera-factura',
@@ -31,6 +32,7 @@ import { Sucursal } from '../../models/sucursal';
 export class GeneraFacturaComponent implements OnInit {
   public Global = Global;
   public listaRegimenFiscal: RegimenFiscal[] = [];
+  public listaRegimenFiscalBase: RegimenFiscal[] = [];
   public listaUsoCfdi: UsoCFDI[] = [];
   public listaFormaPago: FormaPago[] = [];
   public listaUsoCfdiFiltrado:UsoCFDI[]=[];
@@ -47,7 +49,13 @@ export class GeneraFacturaComponent implements OnInit {
   public sucursal: Sucursal = new Sucursal('', '', '', '','','','','','');
   public isLoadingReceptor: boolean = false;
 
-  constructor(private facturacionService: FacturacionService, private folioService: FolioService) { }
+  
+  selectedPdf: File | null = null;
+  selectedPdfName: string = '';
+  public isUploadingPdf: boolean = false;
+  
+
+  constructor(private facturacionService: FacturacionService, private folioService: FolioService, private pdfService: ParsePdfService) { }
 
   ngOnInit(): void {
     this.obtieneDatosParaFacturar();
@@ -183,6 +191,7 @@ export class GeneraFacturaComponent implements OnInit {
     .subscribe({
       next: (response: HttpResponse<any>) => {      
           this.listaRegimenFiscal = response.body.regimen_fiscal || [];
+          this.listaRegimenFiscalBase = response.body.regimen_fiscal || [];
           this.listaUsoCfdi = response.body.uso_cfdi || [];
           this.listaFormaPago = response.body.forma_pago || [];
       },
@@ -207,8 +216,8 @@ export class GeneraFacturaComponent implements OnInit {
         this.isLoading = false;
         this.ticketNumber = '';
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
+          icon: 'warning',
+          title: 'Advertencia',
           text: error.error.message,
           timer: Global.TIMER_OFF
         });
@@ -377,4 +386,87 @@ export class GeneraFacturaComponent implements OnInit {
     this.isLoadingFactura = true;
     this.generaFactura();
   }
+
+  // Maneja la selección de archivo desde el input (solo PDF)
+  onPdfSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input || !input.files || input.files.length === 0) {
+      this.selectedPdf = null;
+      this.selectedPdfName = '';
+      return;
+    }
+    const file = input.files[0];
+    this.selectedPdf = file;
+    this.selectedPdfName = file.name;
+  }
+
+  // Sube el PDF (muestra spinner mientras dura la operación)
+  async uploadPdf() {
+    if (!this.selectedPdf) {
+      return;
+    }
+    
+    try {
+      this.isUploadingPdf = true;
+      const formData = new FormData();
+      formData.append('csf', this.selectedPdf, this.selectedPdf.name);
+      this.pdfService.parsePdf(formData).subscribe({
+        next: (response) => {
+          // Manejar la respuesta del servidor
+          this.receptor.Rfc = response.body.csf.Rfc || '';
+          this.receptor.Nombre = response.body.csf.razonSocial || '';
+          this.receptor.DomicilioFiscalReceptor = response.body.csf.codigoPostal || '';
+          const listaRegimenes = response.body.csf.regimenFiscal ? response.body.csf.regimenFiscal : [];
+          //buscar el regimen fiscal recibido del PDF en la lista de regimenes fiscales
+          let filteredRegimenes = []
+          this.listaRegimenFiscal = this.listaRegimenFiscalBase;
+          filteredRegimenes = this.listaRegimenFiscal.filter(
+            rf => {
+              return listaRegimenes.some(
+                (rffound: string) => {
+                  return rffound.includes(rf.descripcion);
+                }
+              );
+            }
+          ).sort((a, b) => a.regimenfiscal.localeCompare(b.regimenfiscal));
+          
+          this.listaRegimenFiscal = filteredRegimenes;
+          if(this.listaRegimenFiscal.length === 1) {
+            this.receptor.RegimenFiscalReceptor = filteredRegimenes[0].regimenfiscal;
+            this.filtraUsoCfdi(this.receptor.RegimenFiscalReceptor);
+          } else {
+            this.receptor.RegimenFiscalReceptor = '';
+            this.listaUsoCfdiFiltrado = [];
+          }
+          this.receptor.UsoCFDI = '';
+          Swal.fire({
+            icon: 'success',
+            title: 'PDF leído correctamente',
+            text: 'El archivo PDF ha sido procesado exitosamente.',
+            timer: Global.TIMER_OFF
+          });
+          this.selectedPdf = null;
+        },
+        error: (error) => {
+          //console.error('Error subiendo PDF:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al subir PDF',
+            text: 'Ocurrió un error al subir el PDF.'
+          });
+        }
+      });
+      this.selectedPdfName = '';
+    } catch (error) {
+      //console.error('Error subiendo PDF:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al subir PDF',
+        text: 'Ocurrió un error al subir el PDF.'
+      });
+    } finally {
+      this.isUploadingPdf = false;
+    }
+  }
+
 }
