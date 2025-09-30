@@ -169,6 +169,12 @@ export class GeneraFacturaComponent implements OnInit {
         this.isLoadingReceptor = false;
       },
       error: (error) => {
+        if(this.esPersonaFisica(this.receptor.Rfc)){
+          this.listaRegimenFiscal = this.listaRegimenFiscalBase.filter(rf=>rf.fisica===true);
+        }else{
+          this.listaRegimenFiscal = this.listaRegimenFiscalBase.filter(rf=>rf.moral===true);
+        }
+        this.receptor.RegimenFiscalReceptor = '';
         this.isLoadingReceptor = false;
       }
     });
@@ -467,6 +473,12 @@ export class GeneraFacturaComponent implements OnInit {
     } finally {
       this.isUploadingPdf = false;
     }
+  }
+
+  esPersonaFisica(rfc:string):boolean{
+    //evaluar una expresion regular para saber si el RFC es de persona fisica
+    const re = /^([A-ZÑ&]{4})(\d{6})([A-Z0-9]{3})$/;
+    return re.test(rfc);
   }
 
 }

@@ -1,7 +1,7 @@
 import { VERSION } from "@angular/core";
 
 export var Global = {
-    VERSION: '1.1.0',
+    VERSION: '1.2.0',
     urlBackEnd: 'https://8gf95lar45.execute-api.us-east-1.amazonaws.com/prod/',
     urlDatosFactura: 'https://52xqff88ne.execute-api.us-east-1.amazonaws.com/prod/datosfactura',
     //urlCertif: 'http://localhost:5000/api/cert',

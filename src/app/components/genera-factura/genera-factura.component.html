@@ -80,7 +80,7 @@
   <div *ngIf="!isBusquedaTicket" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4">
     <!-- Header con información del ticket -->
     <div class="border-b pb-3 mb-3">
-      <h2 class="text-lg font-bold text-gray-900 mb-2 text-center">Sistema de Facturación de Tapetes Tufan & Farzin</h2>
+      <h2 class="text-lg font-bold text-gray-900 mb-2 text-center">Sistema de Facturación</h2>
       <div class="flex justify-between items-center">
         <p class="text-sm text-gray-600">
           Ticket: <span class="font-medium text-gray-800">{{ ventaTapete.ticket.noVenta }}</span>
@@ -175,7 +175,7 @@
           class="bg-blue-600 hover:bg-green-700 disabled:bg-green-300 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center text-sm"
         >
           <svg
-            *ngIf="isUploadingPdf"
+            *ngIf="true"
             class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
