@@ -22,6 +22,7 @@ import { Folio } from '../../models/folio';
 import { FolioService } from '../../services/folio.service';
 import { Sucursal } from '../../models/sucursal';
 import { ParsePdfService } from '../../services/parse-pdf.service';
+import { EnvironmentService } from '../../services/environment.service';
 
 @Component({
   selector: 'app-genera-factura',
@@ -53,12 +54,27 @@ export class GeneraFacturaComponent implements OnInit {
   selectedPdf: File | null = null;
   selectedPdfName: string = '';
   public isUploadingPdf: boolean = false;
+  public backEndEnv: string = '';
   
 
-  constructor(private facturacionService: FacturacionService, private folioService: FolioService, private pdfService: ParsePdfService) { }
+  constructor(private facturacionService: FacturacionService, private folioService: FolioService, private pdfService: ParsePdfService, private environmentService: EnvironmentService) { }
 
   ngOnInit(): void {
     this.obtieneDatosParaFacturar();
+    this.getEnvironment();
+  }
+
+  getEnvironment():void{
+    this.environmentService.getEnvironment()
+    .subscribe({
+      next: (response:HttpResponse<any>) => {      
+          this.backEndEnv = response.body.environment || '';
+          console.log(response.body);
+      },
+      error: (error) => {
+        console.error(error);
+      }
+    }); 
   }
 
   generaFactura():void{
@@ -103,6 +119,7 @@ export class GeneraFacturaComponent implements OnInit {
           Swal.fire({
             icon: 'success',
             title: 'Factura generada exitosamente',
+            confirmButtonColor: '#30d635ff',
             html: `
               <h3>se adjuntan los archivos generados</h3>
               <table style="width:100%;text-align:center;">
@@ -141,7 +158,8 @@ export class GeneraFacturaComponent implements OnInit {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: error.error.message
+          text: error.error.message,
+          confirmButtonColor: '#30d635ff',
         });
       }
     });
@@ -225,7 +243,7 @@ export class GeneraFacturaComponent implements OnInit {
           icon: 'warning',
           title: 'Advertencia',
           text: error.error.message,
-          timer: Global.TIMER_OFF
+          confirmButtonColor: '#30d635ff',
         });
       },
       complete: () => {
@@ -418,6 +436,7 @@ export class GeneraFacturaComponent implements OnInit {
       formData.append('csf', this.selectedPdf, this.selectedPdf.name);
       this.pdfService.parsePdf(formData).subscribe({
         next: (response) => {
+          this.isUploadingPdf = false;
           // Manejar la respuesta del servidor
           this.receptor.Rfc = response.body.csf.Rfc || '';
           this.receptor.Nombre = response.body.csf.razonSocial || '';
@@ -449,6 +468,7 @@ export class GeneraFacturaComponent implements OnInit {
             icon: 'success',
             title: 'PDF leído correctamente',
             text: 'El archivo PDF ha sido procesado exitosamente.',
+            confirmButtonColor: '#17d61dff',
             timer: Global.TIMER_OFF
           });
           this.selectedPdf = null;
@@ -470,9 +490,7 @@ export class GeneraFacturaComponent implements OnInit {
         title: 'Error al subir PDF',
         text: 'Ocurrió un error al subir el PDF.'
       });
-    } finally {
-      this.isUploadingPdf = false;
-    }
+    } 
   }
 
   esPersonaFisica(rfc:string):boolean{

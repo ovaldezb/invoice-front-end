@@ -1,11 +1,10 @@
-import { VERSION } from "@angular/core";
+import { environment } from "../../environments/environment";
 
 export var Global = {
-    VERSION: '1.2.0',
-    urlBackEnd: 'https://8gf95lar45.execute-api.us-east-1.amazonaws.com/prod/',
-    urlDatosFactura: 'https://52xqff88ne.execute-api.us-east-1.amazonaws.com/prod/datosfactura',
-    //urlCertif: 'http://localhost:5000/api/cert',
-    //urlSucursales: 'https://rf7ipa27na.execute-api.us-east-1.amazonaws.com/prod/sucursales',
+    VERSION: '1.2.2',
+    ENV_NAME: environment.envName,
+    urlBackEnd: environment.urlBackEnd,
+    urlDatosFactura: environment.urlDatosFactura,
     TIMER_OFF: 1500,
     OK: 200,
     AGREGAR_SUCURSAL: 'Agregar Sucursal',

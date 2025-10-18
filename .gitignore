@@ -33,6 +33,8 @@ yarn-error.log
 testem.log
 /typings
 
+deploy-*.sh
+
 # System files
 .DS_Store
 Thumbs.db

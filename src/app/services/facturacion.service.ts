@@ -31,4 +31,13 @@ export class FacturacionService {
     return this.http.post(Global.urlBackEnd + 'receptor', receptor, { observe: 'response' });
   }
 
+  cancelaFactura(uuid: string, motivo: string, folioSustitucion: string) {
+    const body={
+      uuid: uuid,
+      motivo: motivo,
+      folioSustitucion: folioSustitucion
+    }
+    return this.http.put(Global.urlBackEnd + 'factura', body, { observe: 'response' });
+  }
+
 }

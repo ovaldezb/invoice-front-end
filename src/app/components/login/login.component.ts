@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Global } from '../../services/Global';
+import { EnvironmentService } from '../../services/environment.service';
+import { HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -10,16 +13,23 @@ import { AuthService } from '../../services/auth.service';
   imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   email: string = '';
   password: string = '';
   loading: boolean = false;
   error: string = '';
-
+  public Global = Global;
+  backEndEnv: string = '';
+  
   constructor(
     private authService: AuthService,
+    private environmentService: EnvironmentService,
     private router: Router
   ) {}
+
+  ngOnInit(): void {
+    this.getEnvironment();
+  }
 
   onLogin(): void {
     if (!this.email || !this.password) {
@@ -54,6 +64,19 @@ export class LoginComponent {
         console.error('Error en login:', error);
       }
     });
+  }
+
+  getEnvironment():void{
+    this.environmentService.getEnvironment()
+    .subscribe({
+      next: (response:HttpResponse<any>) => {      
+          this.backEndEnv = response.body.environment || '';
+          console.log(response.body);
+      },
+      error: (error) => {
+        console.error(error);
+      }
+    }); 
   }
 
   onLogout(): void {

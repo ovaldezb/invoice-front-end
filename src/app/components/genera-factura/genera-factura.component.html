@@ -16,7 +16,7 @@
           id="ticketNumber"
           [(ngModel)]="ticketNumber"
           [disabled]="isLoading"
-          placeholder="Número de Ticket"
+          placeholder="#Folio / Referencia"
           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
         >
       </div>
@@ -66,11 +66,11 @@
           </svg>
         </div>
         <div class="ml-3">
-          <h3 class="text-sm font-medium text-blue-800">Información</h3>
           <p class="text-sm text-blue-700 mt-1">
             El número de ticket debe corresponder a una venta válida en el sistema.
           </p>
           <p class="text-sm text-blue-700 mt-1" style="text-align: right;">Ver {{ Global.VERSION }}</p>
+          <p class="text-sm text-blue-500 mt-1" style="text-align: right;font-size: 10px;">F-{{ Global.ENV_NAME }} B-{{ backEndEnv }}</p>
         </div>
       </div>
     </div>
@@ -171,11 +171,11 @@
         <button
           type="button"
           (click)="uploadPdf()"
-          [disabled]="!selectedPdf"
-          class="bg-blue-600 hover:bg-green-700 disabled:bg-green-300 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center text-sm"
+          [disabled]="!selectedPdf || isUploadingPdf"
+          class="bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center text-sm"
         >
           <svg
-            *ngIf="true"
+            *ngIf="isUploadingPdf"
             class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

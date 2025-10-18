@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { Global } from './services/Global';
@@ -65,6 +65,17 @@ export class AppComponent implements OnInit, OnDestroy {
       this.router.navigate(['/login']);
     }else{
       this.router.navigate(['/factura']);
+    }
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  async beforeUnloadHandler(event: BeforeUnloadEvent) {
+  try {
+      await this.authService.logout();
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {
+      console.error('Error during logout on unload', e);
     }
   }
 }

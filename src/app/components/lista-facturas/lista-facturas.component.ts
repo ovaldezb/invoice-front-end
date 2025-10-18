@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import { Certificado } from '../../models/certificado';
 import { response } from 'express';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
+import { FacturacionService } from '../../services/facturacion.service';
 
 @Component({
   selector: 'app-lista-facturas',
@@ -40,7 +42,7 @@ export class ListaFacturasComponent implements OnInit {
   public yearsRange: number = 0;
   public visibleMonths: { value: number, name: string }[] = [];
 
-  constructor(private timbresService: TimbresService, private authService: AuthService) { }
+  constructor(private timbresService: TimbresService, private authService: AuthService, private facturacionService: FacturacionService) { }
 
   ngOnInit(): void {
     const now = new Date();
@@ -107,5 +109,39 @@ export class ListaFacturasComponent implements OnInit {
 
   toggleCertificado(index: number): void {
     this.expandedCertificadoIndex = this.expandedCertificadoIndex === index ? null : index;
+  }
+
+  deleteFactura(uuid:string): void {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: "Esta acción no se puede deshacer.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.facturacionService.cancelaFactura(uuid, '02', '')
+        .subscribe({
+          next: (response:any) => {
+            Swal.fire(
+              'Eliminado',
+              'La factura ha sido eliminada.',
+              'success'
+            );
+            this.loadFacturas();
+          },
+          error: (err:any) => {
+            Swal.fire(
+              'Error',
+              'Ocurrió un error al eliminar la factura.',
+              'error'
+            );
+          }
+        });
+      }
+    });
   }
 }
