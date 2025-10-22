@@ -80,14 +80,14 @@ export class GeneraFacturaComponent implements OnInit {
   generaFactura():void{
     const timbrado: Timbrado = this.llenaFactura();
     const factura = {
-      timbrado: timbrado,
-      sucursal: this.sucursal.codigo_sucursal,
-      ticket: this.ventaTapete.ticket.noVenta,
+      timbrado:      timbrado,
+      sucursal:      this.sucursal.codigo_sucursal,
+      ticket:        this.ventaTapete.ticket.noVenta,
       idCertificado: this.certificado._id,
-      fechaVenta:this.ventaTapete.ticket.fecha,
-      email: this.receptor.email,
-      direccion:this.sucursal.direccion,
-      empresa:this.certificado.nombre
+      fechaVenta:    this.ventaTapete.ticket.fecha,
+      email:         this.receptor.email,
+      direccion:     this.sucursal.direccion,
+      empresa:       this.certificado.nombre
     }
     this.facturacionService.generaFactura(factura)
     .subscribe({

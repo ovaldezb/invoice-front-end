@@ -18,4 +18,8 @@ export class SwsapienCertificadoService {
     return this.httpClient.delete(Global.urlBackEnd + 'maneja-certificado/' + no_certificado, { observe: 'response' });
   }
 
+  actualizaCertificado(certificado: FormData): Observable<any> {
+    return this.httpClient.put(Global.urlBackEnd + 'maneja-certificado', certificado, { observe: 'response' });
+  }
+
 }

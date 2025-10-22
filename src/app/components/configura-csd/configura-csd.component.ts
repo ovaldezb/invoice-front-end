@@ -14,6 +14,7 @@ import { Folio } from '../../models/folio';
 import { FacturacionService } from '../../services/facturacion.service';
 import { RegimenFiscal } from '../../models/regimenfiscal';
 import { AuthService } from '../../services/auth.service';
+import { error } from 'console';
 
 @Component({
   selector: 'app-configura-csd',
@@ -45,6 +46,9 @@ export class ConfiguraCsdComponent implements OnInit{
   public codigoPostalPristine: boolean = true;
   public telefonoInvalido: boolean = false;
   public regimenFiscal: RegimenFiscal[] = [];
+  public mensaje: string = Global.CONFIGURACION;
+  public btnAccion: string = Global.GUARDAR;
+  public msjAccion: string = Global.GUARDANDO;
   public swsapienCertificado: SwsapienCertificado = new SwsapienCertificado('', '', '', false, '', new Date(), new Date(), '');
   constructor(private certificadoService: CertificadosService, 
       private sucursalService: SucursalService,
@@ -234,6 +238,7 @@ export class ConfiguraCsdComponent implements OnInit{
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
+        this.isLoadingCerts = true;
         this.swsapienService.deleteCertificado(certificado._id).subscribe({
           next: () => {
             this.loadCerts(); // Recargar los certificados para reflejar los cambios
@@ -241,6 +246,9 @@ export class ConfiguraCsdComponent implements OnInit{
           },
           error: (error) => {
             Swal.fire('Error', 'No se pudo eliminar el CSD. Inténtalo de nuevo más tarde.', 'error');
+          },
+          complete: () => {
+            this.isLoadingCerts = false;
           }
         });
       }
@@ -273,6 +281,15 @@ export class ConfiguraCsdComponent implements OnInit{
     });
   }
 
+  renovarCSD(certificado: Certificado): void {
+    this.mostrarFormulario = true;
+    this.csdSeleccionado = certificado;
+    this.mensaje = Global.ACTUALIZACION
+    this.btnAccion = Global.ACTUALIZAR;
+    this.msjAccion = Global.ACTUALIZANDO;
+    this.mostrarFormulario = true;
+  }
+
   onArchivoCerSeleccionado(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -286,6 +303,14 @@ export class ConfiguraCsdComponent implements OnInit{
     if (input.files && input.files.length > 0) {
         this.archivoKey = input.files[0];
         this.archivoKeySeleccionado = this.archivoKey.name;
+    }
+  }
+
+  accionCSD():void{
+    if(this.btnAccion === Global.GUARDAR){
+      this.guardarCSD();
+    }else if(this.btnAccion === Global.ACTUALIZAR){
+      this.actualizarCSD();
     }
   }
 
@@ -364,6 +389,68 @@ export class ConfiguraCsdComponent implements OnInit{
             this.archivoCer = null;
             this.archivoKey = null;
             this.ctrsn = '';  
+        })
+      }
+    });
+  }
+
+  actualizarCSD():void{
+    Swal.fire({
+      title:'Desea subir estos archivos para actualizar su CSD?',
+      text:'Unicamente se puede actualizar el CSD para el mismo RFC',
+      showCancelButton:true,
+      confirmButtonText:'Si, actualizar'
+    })
+    .then(respuesta=>{
+      if(respuesta.isConfirmed){
+        this.isUploading = true;
+        const formData = new FormData();
+        if(this.archivoCer){
+          formData.append('cer',this.archivoCer);
+        }else{
+          Swal.fire({
+            text:'Debe seleccione el archivo .cer',
+            icon:'error'
+          });
+          return;
+        }
+        if(this.archivoKey){
+          formData.append('key',this.archivoKey);
+        }else{
+          Swal.fire({
+            text:'Debe seleccionar el archivo .cer',
+            icon:'error'
+          });
+          return;
+        }
+        formData.append('ctrsn',this.ctrsn);
+        formData.append('usuario', this.idUsuarioCognito);
+        formData.append('idCertificado', this.csdSeleccionado?._id || '');
+        this.swsapienService.actualizaCertificado(formData)
+        .subscribe({
+          next: () => {
+            this.isUploading = false;
+            this.mostrarFormulario = false;
+            
+            Swal.fire({
+              title: 'CSD actualizado exitosamente',
+              text: 'El CSD ha sido actualizado correctamente.',
+              icon: 'success',
+              timer: Global.TIMER_OFF
+            });
+            this.loadCerts(); // Recargar los certificados para reflejar los cambios
+            // ...limpiar archivos y campos...
+            this.archivoCerSeleccionado='';
+            this.archivoKeySeleccionado='';
+            this.archivoCer = null;
+            this.archivoKey = null;
+            this.ctrsn = '';  
+            this.csdSeleccionado = null;
+          },
+          error: (error:any) => {
+            this.isUploading = false;
+            Swal.fire('Error', error.error.message, 'error');
+          }
         })
       }
     });

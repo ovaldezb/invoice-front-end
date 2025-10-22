@@ -31,5 +31,11 @@ export var Global = {
     FACTOR_DIV:1.16
   },
     DECIMAL_FIXED:2,
-    INACTIVITY_TIMEOUT_MINUTES:15 * 60 * 1000 // 15 minutos
+    INACTIVITY_TIMEOUT_MINUTES:15 * 60 * 1000, // 15 minutos
+    CONFIGURACION:'configuración',
+    ACTUALIZACION:'actualización',
+    GUARDAR:'Guardar',
+    GUARDANDO:'Guardando...',
+    ACTUALIZAR:'Actualizar',
+    ACTUALIZANDO:'Actualizando...'
 };

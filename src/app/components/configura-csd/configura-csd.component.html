@@ -3,17 +3,15 @@
   <div *ngIf="!mostrarFormulario" class="bg-white shadow sm:rounded-lg">
     <div class="px-4 py-5 sm:p-6">
       <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center space-x-3">
-          <h3 class="text-lg leading-6 font-medium text-gray-900">
-            Certificados de Sello Digital
-          </h3>
-          <!-- Spinner -->
-          <div *ngIf="isLoadingCerts" class="flex items-center">
-            <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          </div>
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+          Certificados de Sello Digital
+        </h3>
+        <!-- Spinner centrado -->
+        <div *ngIf="isLoadingCerts" class="flex items-center">
+          <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
         </div>
         <button
           name="addCSDButton"
@@ -69,6 +67,15 @@
               </div>
             </div>
             <div class="flex space-x-2">
+              <button
+                (click)="renovarCSD(certificado)"
+                class="inline-flex items-center p-1 rounded-full text-green-600 hover:text-green-800 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                title="Renovar CSD"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
               <button
                 (click)="eliminaCSD(certificado)"
                 class="inline-flex items-center p-1 rounded-full text-red-600 hover:text-red-800 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
@@ -211,7 +218,7 @@
       <div class="md:col-span-1">
         <h3 class="text-lg font-medium leading-6 text-gray-900">Certificado de Sello Digital (CSD)</h3>
         <p class="mt-1 text-sm text-gray-500">
-          Sube los archivos necesarios para la configuración de tu CSD del SAT
+          Sube los archivos necesarios para la {{mensaje}} de tu CSD del SAT
         </p>
       </div>
       <div class="mt-5 md:mt-0 md:col-span-2">
@@ -236,13 +243,13 @@
               <div *ngIf="archivoCerSeleccionado" class="flex items-center justify-between px-4 py-3 border-2 border-green-300 border-solid rounded-md bg-green-50">
                 <div class="flex items-center">
                   <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   <span class="ml-2 text-sm text-green-800">{{archivoCerSeleccionado}}</span>
                 </div>
                 <button type="button" (click)="eliminarArchivoCer()" class="text-red-600 hover:text-red-800">
                   <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                   </svg>
                 </button>
               </div>
@@ -269,13 +276,13 @@
               <div *ngIf="archivoKeySeleccionado" class="flex items-center justify-between px-4 py-3 border-2 border-green-300 border-solid rounded-md bg-green-50">
                 <div class="flex items-center">
                   <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   <span class="ml-2 text-sm text-green-800">{{archivoKeySeleccionado}}</span>
                 </div>
                 <button type="button" (click)="eliminarArchivoKey()" class="text-red-600 hover:text-red-800">
                   <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                   </svg>
                 </button>
               </div>
@@ -303,12 +310,12 @@
             <button type="button" (click)="cerrarCSD()" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
               Cancelar
             </button>
-            <button type="button" (click)="guardarCSD()" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <button type="button" (click)="accionCSD()" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 <svg *ngIf="isUploading" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>{{isUploading ? 'Guardando...' : 'Guardar'}}</span>
+                <span>{{isUploading ? msjAccion : btnAccion}}</span>
             </button>
           </div>
         </form>

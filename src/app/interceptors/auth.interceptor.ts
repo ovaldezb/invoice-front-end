@@ -9,10 +9,10 @@ export function AuthInterceptor(
 ): Observable<HttpEvent<unknown>> {
   return from(fetchAuthSession()).pipe(
     switchMap(session => {
-      if (session.tokens?.accessToken) {
+      if (session.tokens?.idToken) {
         const authReq = request.clone({
           setHeaders: {
-            Authorization: `Bearer ${session.tokens.accessToken.toString()}`
+            Authorization: `Bearer ${session.tokens.idToken.toString()}`
           }
         });
         return next(authReq);
