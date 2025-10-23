@@ -60,6 +60,13 @@ export class GeneraFacturaComponent implements OnInit {
   constructor(private facturacionService: FacturacionService, private folioService: FolioService, private pdfService: ParsePdfService, private environmentService: EnvironmentService) { }
 
   ngOnInit(): void {
+    // Resetear listas para forzar carga fresca
+    this.listaRegimenFiscal = [];
+    this.listaRegimenFiscalBase = [];
+    this.listaUsoCfdi = [];
+    this.listaFormaPago = [];
+    this.listaUsoCfdiFiltrado = [];
+    
     this.obtieneDatosParaFacturar();
     this.getEnvironment();
   }
@@ -72,6 +79,7 @@ export class GeneraFacturaComponent implements OnInit {
           console.log(response.body);
       },
       error: (error) => {
+        this.backEndEnv = '';
         console.error(error);
       }
     }); 
@@ -187,7 +195,11 @@ export class GeneraFacturaComponent implements OnInit {
         this.isLoadingReceptor = false;
       },
       error: (error) => {
-        if(this.esPersonaFisica(this.receptor.Rfc)){
+        // Limpiar receptor si hay error para evitar datos obsoletos
+        const rfcActual = this.receptor.Rfc;
+        this.receptor = new Receptor(rfcActual, '', '', '', '','','');
+        
+        if(this.esPersonaFisica(rfcActual)){
           this.listaRegimenFiscal = this.listaRegimenFiscalBase.filter(rf=>rf.fisica===true);
         }else{
           this.listaRegimenFiscal = this.listaRegimenFiscalBase.filter(rf=>rf.moral===true);
@@ -211,6 +223,12 @@ export class GeneraFacturaComponent implements OnInit {
   }
 
   obtieneDatosParaFacturar() {
+    // Resetear listas antes de cargar para evitar datos antiguos
+    this.listaRegimenFiscal = [];
+    this.listaRegimenFiscalBase = [];
+    this.listaUsoCfdi = [];
+    this.listaFormaPago = [];
+    
     this.facturacionService.getDatosParaFacturar()
     .subscribe({
       next: (response: HttpResponse<any>) => {      
@@ -220,6 +238,10 @@ export class GeneraFacturaComponent implements OnInit {
           this.listaFormaPago = response.body.forma_pago || [];
       },
       error: (error) => {
+        this.listaRegimenFiscal = [];
+        this.listaRegimenFiscalBase = [];
+        this.listaUsoCfdi = [];
+        this.listaFormaPago = [];
         console.error(error);
       }
     });
@@ -227,6 +249,11 @@ export class GeneraFacturaComponent implements OnInit {
 
   consultarVenta() {
     this.isLoading = true;
+    // Resetear datos antes de consultar para evitar mostrar datos antiguos
+    this.ventaTapete = new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
+    this.certificado = {} as Certificado;
+    this.sucursal = new Sucursal('', '', '', '','','','','','');
+    
     this.facturacionService.obtieneDatosVenta(this.ticketNumber)
     .subscribe({
       next: (response: HttpResponse<any>) => {
