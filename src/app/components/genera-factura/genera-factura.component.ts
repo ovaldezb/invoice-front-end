@@ -1,18 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FacturacionService } from '../../services/facturacion.service';
+import { FacturaCalculatorService } from '../../services/factura-calculator.service';
 import { RegimenFiscal } from '../../models/regimenfiscal';
 import { UsoCFDI } from '../../models/usoCfdi';
 import { HttpResponse } from '@angular/common/http';
 import { FormaPago } from '../../models/formapago';
 import { Timbrado } from '../../models/timbrado';
-import { Impuestos } from '../../models/impuestos';
-import { ImpuestosConcepto } from '../../models/ImpuestosConcepto';
 import { Global } from '../../services/Global';
-import { Traslados } from '../../models/traslados';
-import { Concepto } from '../../models/conceptos';
-import { Emisor } from '../../models/emisor';
 import { Receptor } from '../../models/receptor';
 import { VentaTapete } from '../../models/ventaTapete';
 import { Ticket } from '../../models/ticket';
@@ -23,6 +19,7 @@ import { FolioService } from '../../services/folio.service';
 import { Sucursal } from '../../models/sucursal';
 import { ParsePdfService } from '../../services/parse-pdf.service';
 import { EnvironmentService } from '../../services/environment.service';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-genera-factura',
@@ -30,7 +27,7 @@ import { EnvironmentService } from '../../services/environment.service';
   templateUrl: './genera-factura.component.html',
   styleUrl: './genera-factura.component.css'
 })
-export class GeneraFacturaComponent implements OnInit {
+export class GeneraFacturaComponent implements OnInit, OnDestroy {
   public Global = Global;
   public listaRegimenFiscal: RegimenFiscal[] = [];
   public listaRegimenFiscalBase: RegimenFiscal[] = [];
@@ -56,8 +53,16 @@ export class GeneraFacturaComponent implements OnInit {
   public isUploadingPdf: boolean = false;
   public backEndEnv: string = '';
   
+  // Subject para implementar debounce en búsqueda de RFC
+  private rfcSearchSubject = new Subject<string>();
 
-  constructor(private facturacionService: FacturacionService, private folioService: FolioService, private pdfService: ParsePdfService, private environmentService: EnvironmentService) { }
+  constructor(
+    private facturacionService: FacturacionService,
+    private facturaCalculator: FacturaCalculatorService,
+    private folioService: FolioService,
+    private pdfService: ParsePdfService,
+    private environmentService: EnvironmentService
+  ) { }
 
   ngOnInit(): void {
     // Resetear listas para forzar carga fresca
@@ -69,6 +74,32 @@ export class GeneraFacturaComponent implements OnInit {
     
     this.obtieneDatosParaFacturar();
     this.getEnvironment();
+    this.setupRfcDebounce();
+  }
+
+  ngOnDestroy(): void {
+    this.rfcSearchSubject.complete();
+  }
+
+  /**
+   * Configura el debounce para la búsqueda de RFC
+   */
+  private setupRfcDebounce(): void {
+    this.rfcSearchSubject.pipe(
+      debounceTime(800), // Espera 800ms después del último cambio
+      distinctUntilChanged() // Solo emite si el valor cambió
+    ).subscribe(rfc => {
+      if (rfc && rfc.length >= 12) {
+        this.buscarReceptorPorRfc(rfc);
+      }
+    });
+  }
+
+  /**
+   * Método que se llama desde el template al cambiar el RFC
+   */
+  onRfcChange(rfc: string): void {
+    this.rfcSearchSubject.next(rfc.toUpperCase());
   }
 
   getEnvironment():void{
@@ -86,7 +117,14 @@ export class GeneraFacturaComponent implements OnInit {
   }
 
   generaFactura():void{
-    const timbrado: Timbrado = this.llenaFactura();
+    // Usar el servicio de cálculo para construir el timbrado
+    const timbrado: Timbrado = this.facturaCalculator.buildTimbrado(
+      this.ventaTapete,
+      this.receptor,
+      this.certificado,
+      this.sucursal
+    );
+    
     const factura = {
       timbrado:      timbrado,
       sucursal:      this.sucursal.codigo_sucursal,
@@ -182,24 +220,24 @@ export class GeneraFacturaComponent implements OnInit {
     this.ventaTapete = new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
   }
 
-  obtieneReceptor(){
-    if (!this.receptor.Rfc || this.receptor.Rfc.length < 12) {
-      return;
-    }
+  /**
+   * Busca los datos del receptor por RFC (método interno con lógica)
+   */
+  private buscarReceptorPorRfc(rfc: string): void {
     this.isLoadingReceptor = true;
-    this.facturacionService.obtieneDatosReceptorByRfc(this.receptor.Rfc.toUpperCase())
+    this.facturacionService.obtieneDatosReceptorByRfc(rfc)
     .subscribe({
       next: (response) => {
-        this.receptor = response.body ? response.body as Receptor : new Receptor(this.receptor.Rfc, '', '', '', '','','');
+        this.receptor = response.body ? response.body as Receptor : new Receptor(rfc, '', '', '', '','','');
         this.filtraUsoCfdi(this.receptor.RegimenFiscalReceptor);
         this.isLoadingReceptor = false;
       },
       error: (error) => {
         // Limpiar receptor si hay error para evitar datos obsoletos
-        const rfcActual = this.receptor.Rfc;
+        const rfcActual = rfc;
         this.receptor = new Receptor(rfcActual, '', '', '', '','','');
         
-        if(this.esPersonaFisica(rfcActual)){
+        if(this.facturaCalculator.esPersonaFisica(rfcActual)){
           this.listaRegimenFiscal = this.listaRegimenFiscalBase.filter(rf=>rf.fisica===true);
         }else{
           this.listaRegimenFiscal = this.listaRegimenFiscalBase.filter(rf=>rf.moral===true);
@@ -208,6 +246,17 @@ export class GeneraFacturaComponent implements OnInit {
         this.isLoadingReceptor = false;
       }
     });
+  }
+
+  /**
+   * Método público para compatibilidad con blur event (deprecated)
+   * @deprecated Usa onRfcChange en su lugar
+   */
+  obtieneReceptor(){
+    if (!this.receptor.Rfc || this.receptor.Rfc.length < 12) {
+      return;
+    }
+    this.buscarReceptorPorRfc(this.receptor.Rfc.toUpperCase());
   }
 
   guardaReceptor(){
@@ -289,129 +338,19 @@ export class GeneraFacturaComponent implements OnInit {
     this.listaUsoCfdiFiltrado = this.listaUsoCfdi.filter((cfdi)=>cfdi.regfiscalreceptor.indexOf(regimenfiscal)>=0)
   }
 
-  llenaFactura():Timbrado{
-    this.timbrado.Conceptos = [];
-    let subTotal:number = 0;
-    let total:number = 0;
-    let totalImpuestos:number=0.0;
-    let impuestoTrasladoBase:number=0.0;
-    let impuestoTrasladoImporte:number=0.0;
-    let impuestos:Impuestos= {} as Impuestos;
-    impuestos.Traslados = [];
-    this.ventaTapete.detalle.forEach(prod=>{
-      let impuestosConcepto:ImpuestosConcepto = {} as ImpuestosConcepto;
-      impuestosConcepto.Traslados = [];
-      let subTotalProd:number = prod.precio/Global.Factura.FACTOR_DIV;
-      totalImpuestos += Number((subTotalProd * Global.Factura.IVA * prod.cantidad).toFixed(Global.DECIMAL_FIXED));
-      subTotal += Number((subTotalProd * prod.cantidad).toFixed(Global.DECIMAL_FIXED));
-      total += prod.importe
-      let ValorUnitario:number = subTotalProd;
-      let base:number =  Number((subTotalProd*prod.cantidad).toFixed(Global.DECIMAL_FIXED));
-      let importeConceptoImpuestoTraslado = Number((subTotalProd*Global.Factura.IVA*prod.cantidad).toFixed(2));
-      let traslados = new Traslados(
-        Number(base.toFixed(2)),
-        Global.Factura.ImpuestoIVA,
-        Global.Factura.Tasa,
-        Global.Factura.TasaOCuotaIVA,
-        Number(importeConceptoImpuestoTraslado.toFixed(Global.DECIMAL_FIXED))
-      );
-      impuestosConcepto.Traslados.push(traslados);
-      
-      let concepto = new Concepto(
-        impuestosConcepto,
-        prod.claveproducto,
-        Number(prod.cantidad.toFixed(1)),
-        prod.claveunidad,
-        prod.unidad,
-        prod.descripcio, 
-        Number(ValorUnitario.toFixed(Global.DECIMAL_FIXED)),
-        Number(base.toFixed(Global.DECIMAL_FIXED)),
-        0.00,
-        Global.Factura.ObjectoImpuesto
-      );
-      this.timbrado.Conceptos.push(concepto);
-      impuestoTrasladoBase += base;
-      impuestoTrasladoImporte += importeConceptoImpuestoTraslado;
-    });
-    
-    let trasladoImpuesto = new Traslados(
-      Number(impuestoTrasladoBase.toFixed(Global.DECIMAL_FIXED)),
-      Global.Factura.ImpuestoIVA,
-      Global.Factura.Tasa,
-      Global.Factura.TasaOCuotaIVA,
-      Number(impuestoTrasladoImporte.toFixed(Global.DECIMAL_FIXED)),
-    )
-    
-    impuestos.TotalImpuestosTrasladados = Number(totalImpuestos.toFixed(2));
-    impuestos.Traslados.push(trasladoImpuesto);
-    this.timbrado.Version=Global.Factura.Version;
-    this.timbrado.FormaPago=this.ventaTapete.pago.formapago;
-    this.timbrado.Serie=this.sucursal.serie;
-    this.timbrado.Folio='';//this.folio.noFolio.toString();
-    this.timbrado.Fecha=this.getFechaFactura();
-    this.timbrado.MetodoPago=Global.Factura.MetodoPago;
-    this.timbrado.CondicionesDePago=Global.Factura.CondicionesPago;
-    this.timbrado.SubTotal=Number(subTotal.toFixed(Global.DECIMAL_FIXED));
-    this.timbrado.Descuento=0.00;
-    this.timbrado.Moneda=Global.Factura.Moneda;
-    this.timbrado.TipoCambio=Global.Factura.TipoCambio;
-    this.timbrado.Total=Number(total.toFixed(Global.DECIMAL_FIXED));
-    this.timbrado.TipoDeComprobante=Global.Factura.TipoComprobante;
-    this.timbrado.Exportacion=Global.Factura.Exportacion;
-    this.timbrado.LugarExpedicion=this.sucursal.codigo_postal;
-    this.timbrado.Emisor = new Emisor(this.certificado.rfc,this.certificado.nombre,this.sucursal.regimen_fiscal);
-    this.timbrado.Receptor = new Receptor(this.receptor.Rfc,this.receptor.Nombre,this.receptor.DomicilioFiscalReceptor,this.receptor.RegimenFiscalReceptor,this.receptor.UsoCFDI);
-    this.timbrado.Impuestos = new Impuestos(impuestos.Traslados, impuestos.TotalImpuestosTrasladados);
-    const timbradoEnviar = new Timbrado(
-      this.timbrado.Version,
-      this.timbrado.Serie,
-      this.timbrado.Folio,
-      this.timbrado.Fecha,
-      this.timbrado.FormaPago,
-      this.timbrado.CondicionesDePago,
-      this.timbrado.SubTotal,
-      this.timbrado.Descuento,
-      this.timbrado.Moneda,
-      this.timbrado.TipoCambio,
-      this.timbrado.Total,
-      this.timbrado.TipoDeComprobante,
-      this.timbrado.Exportacion,
-      this.timbrado.MetodoPago,
-      this.timbrado.LugarExpedicion,
-      this.timbrado.Emisor,
-      this.timbrado.Receptor,
-      this.timbrado.Conceptos,
-      this.timbrado.Impuestos
-    );
-    return timbradoEnviar;
-  }
-
-  getFechaFactura():String{
-    let hoy = new Date();
-    let dia = hoy.getDate() < 10 ? '0'+hoy.getDate() : hoy.getDate();
-    let mes = (hoy.getMonth() + 1) < 10 ? '0'+(hoy.getMonth() + 1) : (hoy.getMonth() + 1);
-    let year = hoy.getFullYear();
-    let hora = hoy.getHours() < 10 ? '0'+hoy.getHours() :hoy.getHours();
-    let minuto = hoy.getMinutes() < 10 ? '0'+hoy.getMinutes() : hoy.getMinutes();
-    let segundos = hoy.getSeconds() < 10 ? '0'+hoy.getSeconds() : hoy.getSeconds();
-    return year+'-'+mes+'-'+dia+'T'+hora+':'+minuto+':'+segundos;
-  }
-
   isFormValid(): boolean {
-    return !!(
-      this.receptor.Rfc &&
-      this.receptor.DomicilioFiscalReceptor &&
-      this.receptor.Nombre &&
-      this.receptor.email &&
-      this.isValidEmail(this.receptor.email) &&
-      this.receptor.RegimenFiscalReceptor &&
-      this.receptor.UsoCFDI
-    );
+    return this.facturaCalculator.isReceptorValid(this.receptor);
   }
 
   isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    return this.facturaCalculator.isValidEmail(email);
+  }
+
+  /**
+   * TrackBy function para optimizar el rendimiento del *ngFor
+   */
+  trackByProducto(index: number, producto: any): any {
+    return producto.claveproducto || index;
   }
 
   regresarAConsulta() {
@@ -519,11 +458,4 @@ export class GeneraFacturaComponent implements OnInit {
       });
     } 
   }
-
-  esPersonaFisica(rfc:string):boolean{
-    //evaluar una expresion regular para saber si el RFC es de persona fisica
-    const re = /^([A-ZÑ&]{4})(\d{6})([A-Z0-9]{3})$/;
-    return re.test(rfc);
-  }
-
 }
