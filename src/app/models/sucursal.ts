@@ -8,6 +8,7 @@ export class Sucursal {
     public codigo_postal: string,
     public responsable: string,
     public telefono: string,
-    public regimen_fiscal: string
+    public regimen_fiscal: string,
+    public folio? : number
   ) {}
 }
