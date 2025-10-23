@@ -340,7 +340,7 @@
         <div class="px-6 py-4">
           <div class="space-y-4">
             <!-- Primera fila: Identificador de Sucursal y Serie -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-3 gap-4">
               <div class="relative">
                 <input 
                   type="text" 
@@ -356,7 +356,7 @@
                 <label 
                   for="codigo_sucursal" 
                   class="absolute left-3 -top-2.5 bg-white px-1 text-xs font-medium text-blue-400 transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-600">
-                  Identificador de Sucursal
+                  Id de Sucursal
                 </label>
                 <div *ngIf="sucursalExistente" class="mt-1 text-sm text-red-600">
                   Este código de sucursal ya está en uso.
@@ -376,6 +376,22 @@
                   for="serie" 
                   class="absolute left-3 -top-2.5 bg-white px-1 text-xs font-medium text-blue-400 transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-600">
                   Serie
+                </label>
+              </div>
+              <div class="relative">
+                <input 
+                  type="text" 
+                  id="folio" 
+                  [(ngModel)]="nuevaSucursal.folio" 
+                  #folioInput="ngModel"
+                  [class.border-red-500]="folioInput.invalid && !folioInput.pristine"
+                  [class.border-green-500]="folioInput.valid && !folioInput.pristine"
+                  placeholder=" "
+                  class="peer mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-transparent">
+                <label 
+                  for="folio" 
+                  class="absolute left-3 -top-2.5 bg-white px-1 text-xs font-medium text-blue-400 transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-600">
+                  Folio
                 </label>
               </div>
             </div>

@@ -29,7 +29,7 @@ export class ConfiguraCsdComponent implements OnInit{
   public isSavingSucursal: boolean = false;
   public csdSeleccionado: Certificado | null = null;
   public mostrarModal: boolean = false;
-  public nuevaSucursal: Sucursal = new Sucursal('','','','','','','','', '');
+  public nuevaSucursal: Sucursal = new Sucursal('','','','','','','','', '',1);
   public csdActual: Certificado = new Certificado('', '', '', '', new Date(), new Date(), [], '',[]);
   public editandoSucursal: boolean = false;
   public sucursalAEditar: Sucursal | null = null;
@@ -110,7 +110,7 @@ export class ConfiguraCsdComponent implements OnInit{
     this.btnAction = Global.AGREGAR_SUCURSAL; // Asegurar que esté en modo agregar
     this.editandoSucursal = false; // Resetear modo edición
     this.sucursalExistente = false; // Resetear validación
-    this.nuevaSucursal = new Sucursal('','','','','','','','', ''); // Limpiar formulario
+    this.nuevaSucursal = new Sucursal('','','','','','','','', '',1); // Limpiar formulario
     this.mostrarModal = true;
   }
 
@@ -153,7 +153,7 @@ export class ConfiguraCsdComponent implements OnInit{
             this.isSavingSucursal = true;
             this.nuevaSucursal.id_certificado = this.csdActual._id; // Asignar el ID del certificado actual a la nueva sucursal
             const certificado = this.csdActual; // Guardar el certificado actual antes de la llamada al servicio
-            this.folioService.addFolio(new Folio('', this.nuevaSucursal.codigo_sucursal, 1))
+            this.folioService.addFolio(new Folio('', this.nuevaSucursal.codigo_sucursal, this.nuevaSucursal.folio||1))
             .subscribe();
             this.sucursalService.insertarSucursal(this.nuevaSucursal).subscribe({
                 next: (res) => {
@@ -474,7 +474,9 @@ export class ConfiguraCsdComponent implements OnInit{
     this.ctrsn = '';
     this.csdSeleccionado = null;
     this.csdActual = {} as Certificado; // Limpiar el certificado actual
-    this.nuevaSucursal = new Sucursal('', '', '', '', '','', '','', '');
+    this.nuevaSucursal = new Sucursal('', '', '', '', '','', '','', '',1);
+    this.archivoCerSeleccionado='';
+    this.archivoKeySeleccionado='';
   }
 
   getExpirationMessage(expirationDate: Date): string {
@@ -521,7 +523,7 @@ export class ConfiguraCsdComponent implements OnInit{
     this.isSavingSucursal = false;
     this.sucursalAEditar = null;
     this.csdActual = {} as Certificado;
-    this.nuevaSucursal = new Sucursal('', '', '', '', '','', '','', '');
+    this.nuevaSucursal = new Sucursal('', '', '', '', '','', '','', '',1);
     this.sucursalExistente = false; // Resetear validación
     this.btnAction = Global.AGREGAR_SUCURSAL; // Resetear acción
   }
