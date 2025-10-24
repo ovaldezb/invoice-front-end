@@ -1,0 +1,26 @@
+{
+  "timestamp": "2025-10-24T18:09:43.161Z",
+  "url": "http://localhost:4200/#/factura",
+  "navegacion": {
+    "tiempoTotal": "859.50ms",
+    "DNS": "0.00ms",
+    "conexion": "305.20ms",
+    "respuesta": "18.40ms",
+    "domContentLoaded": "844.20ms",
+    "domComplete": "858.80ms"
+  },
+  "recursos": {
+    "total": 7,
+    "scripts": 5,
+    "estilos": 1,
+    "imagenes": 0,
+    "masLento": "http://localhost:4200/main.js"
+  },
+  "paint": {},
+  "memoria": {
+    "usada": "72.77 MB",
+    "total": "82.52 MB",
+    "limite": "4095.75 MB",
+    "porcentaje": "1.78%"
+  }
+}
