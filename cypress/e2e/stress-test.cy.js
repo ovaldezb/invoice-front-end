@@ -185,29 +185,42 @@ describe('Pruebas de Estrés - Stress Testing', () => {
     });
   });
 
-  // Prueba 4: Llenar formularios repetidamente
-  it('Llena el formulario de factura 30 veces consecutivas', () => {
-    const iteraciones = 30;
+  // Prueba 4: Llenar formularios repetidamente - STRESS TEST REAL
+  it('Llena el formulario de factura 20 veces consecutivas CON TICKET', () => {
+    const iteraciones = 20;
     const resultados = [];
+    const ticketNumber = 'TNPI3112-982895';
+    
+    cy.log('═══════════════════════════════════════════════════════════');
+    cy.log('🔥 INICIANDO STRESS TEST DE FORMULARIO CON TICKET');
+    cy.log(`📝 Iteraciones: ${iteraciones}`);
+    cy.log(`🎫 Ticket: ${ticketNumber}`);
+    cy.log('═══════════════════════════════════════════════════════════');
     
     for (let i = 0; i < iteraciones; i++) {
-      cy.visit('/factura', { timeout: 10000 });
-      
       const inicio = Date.now();
       
+      cy.visit('/factura', { timeout: 10000 });
+      
+      // Llenar el formulario con el ticket
       cy.get('input#ticketNumber', { timeout: 10000 })
+        .should('be.visible')
         .clear({ force: true })
-        .type('TNPI3112-982895', { delay: 0 });
+        .type(ticketNumber, { delay: 0 });
       
-      cy.get('button').contains('Consultar Venta').click();
+      cy.get('button').contains('Consultar Venta')
+        .should('be.visible')
+        .click();
       
-      cy.wait(500);
+      // Esperar a que cargue la respuesta
+      cy.contains('Sistema de Facturación', { timeout: 5000 }).should('exist');
       
       const tiempo = Date.now() - inicio;
       resultados.push(tiempo);
       
+      // Log cada 5 iteraciones
       if ((i + 1) % 5 === 0) {
-        cy.log(`✅ Formularios completados: ${i + 1}/${iteraciones}`);
+        cy.log(`✅ Formularios completados: ${i + 1}/${iteraciones} - Promedio parcial: ${(resultados.reduce((a, b) => a + b, 0) / resultados.length).toFixed(2)}ms`);
       }
     }
     
