@@ -1,21 +1,33 @@
 # 🚀 Mejoras Implementadas - Sistema de Facturación
 
-## 24 de Octubre 2025 - 🔧 Fix CFDI40221: Corrección crítica de cálculo de impuestos
+## 24 de Octubre 2025 - 🔧 Fix CFDI40119 y CFDI40221: Corrección crítica de cálculos fiscales
 
-### ❌ Problema detectado
-Error de validación del SAT que impedía el timbrado:
+### ❌ Problemas detectados
+
+#### Error 1: CFDI40221
 ```
-CFDI40221 - El campo Importe correspondiente a Traslado no es igual al redondeo 
+El campo Importe correspondiente a Traslado no es igual al redondeo 
 de la suma de los importes de los impuestos trasladados registrados en los conceptos.
 ```
 
-### 🔍 Causa raíz
-Acumulación de errores de redondeo por:
-1. Redondear cada producto individualmente antes de sumar
-2. Sumar valores ya redondeados
-3. Volver a redondear el total
+#### Error 2: CFDI40119  
+```
+El campo Total no corresponde con la suma del subtotal, menos los descuentos aplicables, 
+más las contribuciones recibidas menos los impuestos retenidos.
+```
 
-Esto causaba diferencias de centavos entre la suma de traslados en conceptos vs. el total reportado.
+### 🔍 Causa raíz
+
+**Problema 1 (CFDI40221)**: Acumulación de errores de redondeo
+- Se redondeaba cada producto antes de sumar
+- Se sumaban valores ya redondeados
+- Se volvía a redondear el total
+- Resultado: Diferencias de centavos entre conceptos y totales
+
+**Problema 2 (CFDI40119)**: Cálculo inconsistente del Total
+- Se calculaban subtotal e impuestos de forma independiente
+- El total se calculaba como `round(subtotal + impuestos)` con valores sin redondear
+- SAT requiere: `Total = Subtotal(redondeado) + Impuestos(redondeados)`
 
 ### ✅ Solución implementada
 
@@ -24,21 +36,39 @@ Esto causaba diferencias de centavos entre la suma de traslados en conceptos vs.
 1. **Nuevo método `buildImpuestosFromConceptos()`**
    - Suma los importes de traslados YA calculados en cada concepto
    - Redondea UNA SOLA VEZ la suma total
-   - Garantiza: `Total = ROUND(suma de importes de conceptos)`
+   - Garantiza: `Total Traslados = ROUND(Σ traslados de conceptos)`
 
-2. **Actualizado `buildTimbrado()`**
-   - Usa `buildImpuestosFromConceptos()` para calcular totales
-   - Garantiza consistencia entre conceptos individuales y totales generales
+2. **Refactorizado `buildTimbrado()`**
+   - Calcula subtotal desde los conceptos (fuente única de verdad)
+   - Usa `impuestos.TotalImpuestosTrasladados` del objeto impuestos
+   - Calcula Total = `ROUND(Subtotal + TotalImpuestosTrasladados)`
+   - Elimina dependencia de `calculateTotales()` (inconsistente)
 
-3. **Corregido `calculateTotales()`**
-   - Elimina redondeos intermedios dentro del loop
-   - Suma sin redondear → Redondea al final
+3. **Actualizado `calculateTotales()`**
+   - Redondea subtotal e impuestos por separado primero
+   - Total = suma de valores YA redondeados
+   - Mantiene coherencia con la lógica del SAT
+
+### 📐 Fórmulas aplicadas (según SAT)
+
+```typescript
+// Conceptos individuales
+concepto.Importe = ROUND(ValorUnitario × Cantidad)
+concepto.ImpuestoTraslado = ROUND(concepto.Importe × TasaIVA)
+
+// Totales generales  
+Subtotal = ROUND(Σ concepto.Importe)
+TotalImpuestosTrasladados = ROUND(Σ concepto.ImpuestoTraslado)
+Total = ROUND(Subtotal + TotalImpuestosTrasladados)
+```
 
 ### 📊 Impacto
-- ✅ Elimina error CFDI40221 del SAT
-- ✅ Garantiza consistencia matemática
+- ✅ Elimina error CFDI40221 del SAT (traslados)
+- ✅ Elimina error CFDI40119 del SAT (total)
+- ✅ Garantiza consistencia matemática en toda la factura
 - ✅ Cumple validaciones CFDI 4.0
 - ✅ Mantiene precisión de 2 decimales
+- ✅ Una sola fuente de verdad: los conceptos calculados
 
 ### 📁 Archivos modificados
 - `src/app/services/factura-calculator.service.ts`
