@@ -167,37 +167,36 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
         if (uuid && (xmlUrl || pdfUrl)) {
           Swal.fire({
             icon: 'success',
-            title: 'Factura generada exitosamente',
-            confirmButtonColor: '#30d635ff',
+            title: '¡Factura generada!',
             html: `
-              <h3>se adjuntan los archivos generados</h3>
-              <table style="width:100%;text-align:center;">
+              <p class="mb-4 text-gray-700">Se adjuntan los archivos generados</p>
+              <table style="width:100%;text-align:center;border-collapse: collapse;">
                 <tr>
-                  <th style="text-align:center;width:50%;border: 1px solid black;">XML</th>
-                  <th style="text-align:center;width:50%;border: 1px solid black;">PDF</th>
+                  <th style="text-align:center;width:50%;border: 1px solid #e5e7eb;padding: 8px;background-color: #f9fafb;">XML</th>
+                  <th style="text-align:center;width:50%;border: 1px solid #e5e7eb;padding: 8px;background-color: #f9fafb;">PDF</th>
                 </tr>
                 <tr>
-                  <td style="text-align:center;width:50%;border: 1px solid black;">
-                    <a href="${xmlUrl}" download="${uuid}.xml" class="text-blue-600 font-semibold" style="display:inline-block;margin-top:10px;">
-                      <span style="display:flex;align-items:center;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:24px;height:24px;margin-right:6px;">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a2 2 0 012-2h2a2 2 0 012 2v2m-6 0h6m-6 0v2a2 2 0 002 2h2a2 2 0 002-2v-2m-6 0V7a2 2 0 012-2h6a2 2 0 012 2v10" />
-                        </svg>
-                      </span>
+                  <td style="text-align:center;width:50%;border: 1px solid #e5e7eb;padding: 16px;">
+                    <a href="${xmlUrl}" download="${uuid}.xml" class="text-blue-600 hover:text-blue-700 font-semibold" style="display:inline-flex;align-items:center;gap:8px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:24px;height:24px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span>Descargar XML</span>
                     </a>
                   </td>
-                  <td style="text-align:center;width:50%;border: 1px solid black;">
-                    <a href="${pdfUrl}" download="${uuid}.pdf" class="text-blue-600 font-semibold" style="display:inline-block;margin-top:10px;">
-                      <span style="display:flex;align-items:center;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;margin-right:6px;">
-                          <path d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8.828a2 2 0 0 0-.586-1.414l-5.828-5.828A2 2 0 0 0 13.172 2H6zm7 1.414L18.586 9H15a2 2 0 0 1-2-2V3.414zM8 14h1v4H8v-4zm2 0h1v4h-1v-4zm2 0h1v4h-1v-4z"/>
-                        </svg>
-                      </span>
+                  <td style="text-align:center;width:50%;border: 1px solid #e5e7eb;padding: 16px;">
+                    <a href="${pdfUrl}" download="${uuid}.pdf" class="text-blue-600 hover:text-blue-700 font-semibold" style="display:inline-flex;align-items:center;gap:8px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;">
+                        <path d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8.828a2 2 0 0 0-.586-1.414l-5.828-5.828A2 2 0 0 0 13.172 2H6zm7 1.414L18.586 9H15a2 2 0 0 1-2-2V3.414zM8 14h1v4H8v-4zm2 0h1v4h-1v-4zm2 0h1v4h-1v-4z"/>
+                      </svg>
+                      <span>Descargar PDF</span>
                     </a>
                   </td>
                 </tr>
               </table>
             `,
+            confirmButtonColor: '#3b82f6',
+            confirmButtonText: 'Cerrar'
           });
         }
         this.limpiaDatosVentaFactura();
@@ -206,9 +205,9 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
         this.isLoadingFactura = false;
         Swal.fire({
           icon: 'error',
-          title: 'Error',
+          title: 'Error al generar factura',
           text: error.error.message,
-          confirmButtonColor: '#30d635ff',
+          confirmButtonColor: '#3b82f6',
         });
       }
     });
@@ -330,9 +329,9 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
         this.ticketNumber = '';
         Swal.fire({
           icon: 'warning',
-          title: 'Advertencia',
+          title: 'Venta no encontrada',
           text: error.error.message,
-          confirmButtonColor: '#30d635ff',
+          confirmButtonColor: '#3b82f6',
         });
       },
       complete: () => {
@@ -381,7 +380,8 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
       Swal.fire({
         icon: 'warning',
         title: 'Datos incompletos',
-        text: 'Por favor, complete todos los campos obligatorios antes de generar la factura.'
+        text: 'Por favor, complete todos los campos obligatorios antes de generar la factura.',
+        confirmButtonColor: '#3b82f6'
       });
       return;
     }
@@ -445,9 +445,9 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
           this.receptor.UsoCFDI = '';
           Swal.fire({
             icon: 'success',
-            title: 'PDF leído correctamente',
+            title: '¡PDF procesado!',
             text: 'El archivo PDF ha sido procesado exitosamente.',
-            confirmButtonColor: '#17d61dff',
+            confirmButtonColor: '#3b82f6',
             timer: Global.TIMER_OFF
           });
           this.selectedPdf = null;
@@ -456,8 +456,9 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
           //console.error('Error subiendo PDF:', error);
           Swal.fire({
             icon: 'error',
-            title: 'Error al subir PDF',
-            text: 'Ocurrió un error al subir el PDF.'
+            title: 'Error al procesar PDF',
+            text: 'Ocurrió un error al procesar el archivo PDF. Verifica que sea válido.',
+            confirmButtonColor: '#3b82f6'
           });
         }
       });
@@ -467,7 +468,8 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
       Swal.fire({
         icon: 'error',
         title: 'Error al subir PDF',
-        text: 'Ocurrió un error al subir el PDF.'
+        text: 'Ocurrió un error al subir el archivo PDF.',
+        confirmButtonColor: '#3b82f6'
       });
     } 
   }

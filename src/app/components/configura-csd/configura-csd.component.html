@@ -16,7 +16,7 @@
         <button
           name="addCSDButton"
           (click)="toggleFormulario()"
-          class="inline-flex items-center p-2 border border-transparent rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+          class="inline-flex items-center p-2 border border-transparent rounded-full shadow-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:shadow-lg transform hover:scale-105 active:scale-95"
           title="Agregar nuevo CSD"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -28,17 +28,27 @@
       <!-- Lista de CSD -->
       <div class="space-y-4 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2">
         <div *ngFor="let certificado of certificados" 
-             class="border rounded-lg p-4 transition-all duration-200 hover:shadow-lg hover:border-blue-500 hover:bg-blue-50 cursor-pointer"
-             [ngClass]="{'bg-blue-50 border-blue-500': csdSeleccionado?._id === certificado._id}">
+             class="border-2 rounded-xl p-5 transition-all duration-200 hover:shadow-xl cursor-pointer bg-white"
+             [ngClass]="{'bg-blue-50 border-blue-500 shadow-lg': csdSeleccionado?._id === certificado._id, 'border-gray-200 hover:border-blue-300': csdSeleccionado?._id !== certificado._id}">
           <div class="flex justify-between items-start">
-            <div>
-              <h4 class="text-lg font-medium group-hover:text-blue-600 mb-1">{{certificado.nombre}}</h4>
-              <div class="space-y-1">
-                <p class="text-sm text-gray-700 font-medium">RFC: {{certificado.rfc}}</p>
-                <p class="text-sm text-gray-600">No. Certificado: {{certificado.no_certificado}}</p>
-                <div class="flex items-center space-x-4 text-xs text-gray-500">
-                  <span>Desde: {{certificado.desde | date}}</span>
-                  <span>Hasta: {{certificado.hasta | date}}</span>
+            <div class="flex-1">
+              <h4 class="text-lg font-semibold text-gray-900 mb-2">{{certificado.nombre}}</h4>
+              <div class="space-y-1.5">
+                <p class="text-sm text-gray-700 font-medium">RFC: <span class="text-blue-600">{{certificado.rfc}}</span></p>
+                <p class="text-sm text-gray-600">No. Certificado: <span class="font-mono">{{certificado.no_certificado}}</span></p>
+                <div class="flex items-center space-x-4 text-xs text-gray-500 pt-1">
+                  <span class="flex items-center">
+                    <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Desde: {{certificado.desde | date}}
+                  </span>
+                  <span class="flex items-center">
+                    <svg class="w-4 h-4 mr-1 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Hasta: {{certificado.hasta | date}}
+                  </span>
                 </div>
                 <!-- Barra de progreso de vigencia -->
                 <div class="mt-2">
@@ -69,7 +79,7 @@
             <div class="flex space-x-2">
               <button
                 (click)="renovarCSD(certificado)"
-                class="inline-flex items-center p-1 rounded-full text-green-600 hover:text-green-800 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                class="inline-flex items-center p-1.5 rounded-full text-green-600 hover:text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
                 title="Renovar CSD"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -78,16 +88,16 @@
               </button>
               <button
                 (click)="eliminaCSD(certificado)"
-                class="inline-flex items-center p-1 rounded-full text-red-600 hover:text-red-800 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                class="inline-flex items-center p-1.5 rounded-full text-red-600 hover:text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 shadow-sm hover:shadow-md"
                 title="Eliminar CSD"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </button>
               <button
                 (click)="seleccionarCSD(certificado)"
-                class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                class="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
               >
                 <span>Ver Sucursales</span>
                 <svg xmlns="http://www.w3.org/2000/svg" 
@@ -112,7 +122,7 @@
                 <h5 class="text-sm font-medium">Sucursales asociadas</h5>
                 <button
                   (click)="agregarSucursal(certificado)"
-                  class="p-1 rounded-full text-blue-600 hover:text-blue-800 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                  class="p-1.5 rounded-full text-blue-600 hover:text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-sm hover:shadow-md"
                   title="Agregar sucursal"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
@@ -307,11 +317,11 @@
           </div>
 
           <div class="flex justify-end">
-            <button type="button" (click)="cerrarCSD()" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <button type="button" (click)="cerrarCSD()" class="ml-3 inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-semibold rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
               Cancelar
             </button>
-            <button type="button" (click)="accionCSD()" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <svg *ngIf="isUploading" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <button type="button" (click)="accionCSD()" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-md text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed" [disabled]="isUploading">
+                <svg *ngIf="isUploading" class="animate-spin h-4 w-4 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -511,14 +521,14 @@
           </div>
         </div>
         <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-3 rounded-b-lg">
-          <button type="button" (click)="cerrarModal()" class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md">
+          <button type="button" (click)="cerrarModal()" class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-lg transition-all duration-200 shadow-sm">
             Cancelar
           </button>
           <button 
             type="button" 
             (click)="guardaEditarSucursal()" 
             [disabled]="isSavingSucursal || !formularioValido()"
-            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+            class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center space-x-2 transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <svg *ngIf="isSavingSucursal" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
