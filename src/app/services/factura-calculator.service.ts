@@ -32,7 +32,7 @@ export class FacturaCalculatorService {
     sucursal: Sucursal
   ): Timbrado {
     const conceptos = this.buildConceptos(ventaTapete);
-    const impuestos = this.buildImpuestos(ventaTapete);
+    const impuestos = this.buildImpuestosFromConceptos(conceptos);
     const totales = this.calculateTotales(ventaTapete);
 
     const timbrado = new Timbrado(
@@ -106,23 +106,59 @@ export class FacturaCalculatorService {
   }
 
   /**
+   * Construye el objeto de impuestos totales desde los conceptos
+   * IMPORTANTE: Suma los importes YA redondeados de cada concepto (CFDI40221)
+   * El SAT requiere que el total sea el redondeo de la suma de los traslados de conceptos
+   */
+  private buildImpuestosFromConceptos(conceptos: Concepto[]): Impuestos {
+    let impuestoTrasladoBase = 0;
+    let impuestoTrasladoImporte = 0;
+
+    // Sumar los valores YA redondeados de cada concepto
+    conceptos.forEach(concepto => {
+      // Sumar la base (ya redondeada en el concepto)
+      impuestoTrasladoBase += concepto.Importe;
+      
+      // Sumar los traslados (ya redondeados en el concepto)
+      concepto.Impuestos.Traslados.forEach(traslado => {
+        impuestoTrasladoImporte += traslado.Importe;
+      });
+    });
+
+    // Redondear UNA SOLA VEZ la suma de todos los conceptos (validación SAT CFDI40221)
+    const trasladoImpuesto = new Traslados(
+      this.roundDecimal(impuestoTrasladoBase),
+      Global.Factura.ImpuestoIVA,
+      Global.Factura.Tasa,
+      Global.Factura.TasaOCuotaIVA,
+      this.roundDecimal(impuestoTrasladoImporte)
+    );
+
+    return new Impuestos(
+      [trasladoImpuesto],
+      this.roundDecimal(impuestoTrasladoImporte)
+    );
+  }
+
+  /**
    * Construye el objeto de impuestos totales
+   * IMPORTANTE: NO redondear hasta el final para cumplir con CFDI40221
    */
   private buildImpuestos(ventaTapete: VentaTapete): Impuestos {
     let impuestoTrasladoBase = 0;
     let impuestoTrasladoImporte = 0;
 
+    // Sumar SIN redondear para evitar acumulación de errores
     ventaTapete.detalle.forEach(producto => {
       const subtotalProducto = producto.precio / Global.Factura.FACTOR_DIV;
-      const base = this.roundDecimal(subtotalProducto * producto.cantidad);
-      const importeImpuesto = this.roundDecimal(
-        subtotalProducto * Global.Factura.IVA * producto.cantidad
-      );
+      const base = subtotalProducto * producto.cantidad;
+      const importeImpuesto = subtotalProducto * Global.Factura.IVA * producto.cantidad;
 
       impuestoTrasladoBase += base;
       impuestoTrasladoImporte += importeImpuesto;
     });
 
+    // Redondear UNA SOLA VEZ al final (validación SAT CFDI40221)
     const trasladoImpuesto = new Traslados(
       this.roundDecimal(impuestoTrasladoBase),
       Global.Factura.ImpuestoIVA,
@@ -139,17 +175,20 @@ export class FacturaCalculatorService {
 
   /**
    * Calcula los totales de la factura
+   * IMPORTANTE: NO redondear hasta el final para cumplir con CFDI40221
    */
   calculateTotales(ventaTapete: VentaTapete): { subtotal: number; total: number; impuestos: number } {
     let subtotal = 0;
     let impuestos = 0;
 
+    // Sumar SIN redondear para evitar acumulación de errores
     ventaTapete.detalle.forEach(producto => {
       const subtotalProducto = producto.precio / Global.Factura.FACTOR_DIV;
-      subtotal += this.roundDecimal(subtotalProducto * producto.cantidad);
-      impuestos += this.roundDecimal(subtotalProducto * Global.Factura.IVA * producto.cantidad);
+      subtotal += subtotalProducto * producto.cantidad;
+      impuestos += subtotalProducto * Global.Factura.IVA * producto.cantidad;
     });
 
+    // Redondear UNA SOLA VEZ al final (validación SAT CFDI40221)
     return {
       subtotal: this.roundDecimal(subtotal),
       total: this.roundDecimal(subtotal + impuestos),

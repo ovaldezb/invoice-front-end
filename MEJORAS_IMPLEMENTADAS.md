@@ -1,5 +1,50 @@
 # 🚀 Mejoras Implementadas - Sistema de Facturación
 
+## 24 de Octubre 2025 - 🔧 Fix CFDI40221: Corrección crítica de cálculo de impuestos
+
+### ❌ Problema detectado
+Error de validación del SAT que impedía el timbrado:
+```
+CFDI40221 - El campo Importe correspondiente a Traslado no es igual al redondeo 
+de la suma de los importes de los impuestos trasladados registrados en los conceptos.
+```
+
+### 🔍 Causa raíz
+Acumulación de errores de redondeo por:
+1. Redondear cada producto individualmente antes de sumar
+2. Sumar valores ya redondeados
+3. Volver a redondear el total
+
+Esto causaba diferencias de centavos entre la suma de traslados en conceptos vs. el total reportado.
+
+### ✅ Solución implementada
+
+#### Cambios en `factura-calculator.service.ts`:
+
+1. **Nuevo método `buildImpuestosFromConceptos()`**
+   - Suma los importes de traslados YA calculados en cada concepto
+   - Redondea UNA SOLA VEZ la suma total
+   - Garantiza: `Total = ROUND(suma de importes de conceptos)`
+
+2. **Actualizado `buildTimbrado()`**
+   - Usa `buildImpuestosFromConceptos()` para calcular totales
+   - Garantiza consistencia entre conceptos individuales y totales generales
+
+3. **Corregido `calculateTotales()`**
+   - Elimina redondeos intermedios dentro del loop
+   - Suma sin redondear → Redondea al final
+
+### 📊 Impacto
+- ✅ Elimina error CFDI40221 del SAT
+- ✅ Garantiza consistencia matemática
+- ✅ Cumple validaciones CFDI 4.0
+- ✅ Mantiene precisión de 2 decimales
+
+### 📁 Archivos modificados
+- `src/app/services/factura-calculator.service.ts`
+
+---
+
 ## Fecha: 23 de Octubre, 2025
 ## Branch: cache_patch
 
