@@ -2,49 +2,49 @@
   "mediciones": [
     {
       "ciclo": 1,
-      "memoria": "95.85"
+      "memoria": "166.15"
     },
     {
       "ciclo": 2,
-      "memoria": "98.30"
+      "memoria": "168.79"
     },
     {
       "ciclo": 3,
-      "memoria": "100.79"
+      "memoria": "171.44"
     },
     {
       "ciclo": 4,
-      "memoria": "103.22"
+      "memoria": "174.07"
     },
     {
       "ciclo": 5,
-      "memoria": "105.67"
+      "memoria": "176.88"
     },
     {
       "ciclo": 6,
-      "memoria": "108.11"
+      "memoria": "179.52"
     },
     {
       "ciclo": 7,
-      "memoria": "110.54"
+      "memoria": "162.25"
     },
     {
       "ciclo": 8,
-      "memoria": "112.99"
+      "memoria": "165.02"
     },
     {
       "ciclo": 9,
-      "memoria": "91.90"
+      "memoria": "167.68"
     },
     {
       "ciclo": 10,
-      "memoria": "94.33"
+      "memoria": "170.31"
     }
   ],
   "estadisticas": {
-    "inicial": "95.85 MB",
-    "final": "94.33 MB",
-    "maxima": "112.99 MB",
-    "incremento": "-1.52 MB"
+    "inicial": "166.15 MB",
+    "final": "170.31 MB",
+    "maxima": "179.52 MB",
+    "incremento": "4.16 MB"
   }
 }

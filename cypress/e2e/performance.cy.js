@@ -201,7 +201,7 @@ describe('Pruebas de Performance', () => {
     // Medir tiempo de escritura y respuesta
     const inicio = Date.now();
     
-    cy.get('input#ticketNumber').type('MKTLV4243-1382723', { delay: 0 });
+    cy.get('input#ticketNumber').type('TNPI3112-982895', { delay: 0 });
     cy.get('button').contains('Consultar Venta').click();
     
     // Esperar la respuesta

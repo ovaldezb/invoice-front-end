@@ -197,7 +197,7 @@ describe('Pruebas de Estrés - Stress Testing', () => {
       
       cy.get('input#ticketNumber', { timeout: 10000 })
         .clear({ force: true })
-        .type('MKTLV4243-1382723', { delay: 0 });
+        .type('TNPI3112-982895', { delay: 0 });
       
       cy.get('button').contains('Consultar Venta').click();
       

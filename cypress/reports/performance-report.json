@@ -1,26 +1,26 @@
 {
-  "timestamp": "2025-10-24T18:09:43.161Z",
+  "timestamp": "2025-10-24T20:05:38.473Z",
   "url": "http://localhost:4200/#/factura",
   "navegacion": {
-    "tiempoTotal": "859.50ms",
+    "tiempoTotal": "876.80ms",
     "DNS": "0.00ms",
-    "conexion": "305.20ms",
-    "respuesta": "18.40ms",
-    "domContentLoaded": "844.20ms",
-    "domComplete": "858.80ms"
+    "conexion": "299.60ms",
+    "respuesta": "13.60ms",
+    "domContentLoaded": "765.80ms",
+    "domComplete": "876.60ms"
   },
   "recursos": {
-    "total": 7,
-    "scripts": 5,
+    "total": 11,
+    "scripts": 9,
     "estilos": 1,
     "imagenes": 0,
-    "masLento": "http://localhost:4200/main.js"
+    "masLento": "http://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=Ett-w1SeL039H9jWv3Fc9YY2IW5mg6eMr9ENEZz08pUCGD2mckpB9rHW-kJ8LMPE"
   },
   "paint": {},
   "memoria": {
-    "usada": "72.77 MB",
-    "total": "82.52 MB",
+    "usada": "72.44 MB",
+    "total": "82.32 MB",
     "limite": "4095.75 MB",
-    "porcentaje": "1.78%"
+    "porcentaje": "1.77%"
   }
 }
