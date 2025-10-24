@@ -1,0 +1,140 @@
+{
+  "prueba": "Stress Test - Formulario de Factura",
+  "ticket": "TNPI3112-982895",
+  "fecha": "2025-10-24T20:14:29.319Z",
+  "iteraciones": 20,
+  "resultados": [
+    2,
+    2,
+    2,
+    3,
+    2,
+    3,
+    2,
+    4,
+    3,
+    1,
+    1,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    2,
+    3,
+    2
+  ],
+  "estadisticas": {
+    "promedio": 2.4,
+    "maximo": 4,
+    "minimo": 1,
+    "desviacionEstandar": 0.73,
+    "promedioPrimeras5": 2.2,
+    "promedioUltimas5": 2.6,
+    "degradacionPorcentaje": 18.18,
+    "evaluacion": "⚠️ ACEPTABLE - Degradación moderada"
+  },
+  "detalleIteraciones": [
+    {
+      "iteracion": 1,
+      "tiempoMs": 2,
+      "diferenciaDesdePrimera": 0
+    },
+    {
+      "iteracion": 2,
+      "tiempoMs": 2,
+      "diferenciaDesdePrimera": 0
+    },
+    {
+      "iteracion": 3,
+      "tiempoMs": 2,
+      "diferenciaDesdePrimera": 0
+    },
+    {
+      "iteracion": 4,
+      "tiempoMs": 3,
+      "diferenciaDesdePrimera": 1
+    },
+    {
+      "iteracion": 5,
+      "tiempoMs": 2,
+      "diferenciaDesdePrimera": 0
+    },
+    {
+      "iteracion": 6,
+      "tiempoMs": 3,
+      "diferenciaDesdePrimera": 1
+    },
+    {
+      "iteracion": 7,
+      "tiempoMs": 2,
+      "diferenciaDesdePrimera": 0
+    },
+    {
+      "iteracion": 8,
+      "tiempoMs": 4,
+      "diferenciaDesdePrimera": 2
+    },
+    {
+      "iteracion": 9,
+      "tiempoMs": 3,
+      "diferenciaDesdePrimera": 1
+    },
+    {
+      "iteracion": 10,
+      "tiempoMs": 1,
+      "diferenciaDesdePrimera": -1
+    },
+    {
+      "iteracion": 11,
+      "tiempoMs": 1,
+      "diferenciaDesdePrimera": -1
+    },
+    {
+      "iteracion": 12,
+      "tiempoMs": 2,
+      "diferenciaDesdePrimera": 0
+    },
+    {
+      "iteracion": 13,
+      "tiempoMs": 2,
+      "diferenciaDesdePrimera": 0
+    },
+    {
+      "iteracion": 14,
+      "tiempoMs": 3,
+      "diferenciaDesdePrimera": 1
+    },
+    {
+      "iteracion": 15,
+      "tiempoMs": 3,
+      "diferenciaDesdePrimera": 1
+    },
+    {
+      "iteracion": 16,
+      "tiempoMs": 3,
+      "diferenciaDesdePrimera": 1
+    },
+    {
+      "iteracion": 17,
+      "tiempoMs": 3,
+      "diferenciaDesdePrimera": 1
+    },
+    {
+      "iteracion": 18,
+      "tiempoMs": 2,
+      "diferenciaDesdePrimera": 0
+    },
+    {
+      "iteracion": 19,
+      "tiempoMs": 3,
+      "diferenciaDesdePrimera": 1
+    },
+    {
+      "iteracion": 20,
+      "tiempoMs": 2,
+      "diferenciaDesdePrimera": 0
+    }
+  ]
+}
