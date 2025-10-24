@@ -1,0 +1,50 @@
+{
+  "mediciones": [
+    {
+      "ciclo": 1,
+      "memoria": "95.85"
+    },
+    {
+      "ciclo": 2,
+      "memoria": "98.30"
+    },
+    {
+      "ciclo": 3,
+      "memoria": "100.79"
+    },
+    {
+      "ciclo": 4,
+      "memoria": "103.22"
+    },
+    {
+      "ciclo": 5,
+      "memoria": "105.67"
+    },
+    {
+      "ciclo": 6,
+      "memoria": "108.11"
+    },
+    {
+      "ciclo": 7,
+      "memoria": "110.54"
+    },
+    {
+      "ciclo": 8,
+      "memoria": "112.99"
+    },
+    {
+      "ciclo": 9,
+      "memoria": "91.90"
+    },
+    {
+      "ciclo": 10,
+      "memoria": "94.33"
+    }
+  ],
+  "estadisticas": {
+    "inicial": "95.85 MB",
+    "final": "94.33 MB",
+    "maxima": "112.99 MB",
+    "incremento": "-1.52 MB"
+  }
+}

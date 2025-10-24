@@ -1,0 +1,27 @@
+{
+  "metricas": {
+    "FCP": 0,
+    "LCP": null,
+    "TTI": null,
+    "TotalLoad": 377.90000000596046
+  },
+  "estandares": {
+    "FCP": {
+      "bueno": 1800,
+      "aceptable": 3000
+    },
+    "TTI": {
+      "bueno": 3800,
+      "aceptable": 7300
+    },
+    "TotalLoad": {
+      "bueno": 2000,
+      "aceptable": 3000
+    }
+  },
+  "comparacion": {
+    "FCP": "✅ BUENO",
+    "TTI": "❌ NECESITA MEJORAS",
+    "TotalLoad": "✅ BUENO"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "elementosCreados": 1000,
+  "tiempoRenderizado": 3,
+  "memoria": {
+    "inicial": "164.99 MB",
+    "final": "165.55 MB",
+    "incremento": "0.56 MB"
+  }
+}
