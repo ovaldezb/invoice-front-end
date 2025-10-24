@@ -389,22 +389,26 @@
                 </label>
               </div>
               <div class="relative">
-                <!-- Skeleton mientras carga el folio -->
-                <div *ngIf="isLoadingFolio" class="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
-                
-                <!-- Input cuando ya cargó -->
                 <input 
-                  *ngIf="!isLoadingFolio"
                   type="text" 
                   id="folio" 
                   [(ngModel)]="nuevaSucursal.folio" 
                   #folioInput="ngModel"
+                  [disabled]="isLoadingFolio"
                   [class.border-red-500]="folioInput.invalid && !folioInput.pristine"
                   [class.border-green-500]="folioInput.valid && !folioInput.pristine"
                   placeholder=" "
-                  class="peer mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-transparent">
+                  class="peer mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pr-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-transparent disabled:bg-gray-100 disabled:cursor-not-allowed">
+                
+                <!-- Spinner dentro del input -->
+                <div *ngIf="isLoadingFolio" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+                
                 <label 
-                  *ngIf="!isLoadingFolio"
                   for="folio" 
                   class="absolute left-3 -top-2.5 bg-white px-1 text-xs font-medium text-blue-400 transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-600">
                   Folio
