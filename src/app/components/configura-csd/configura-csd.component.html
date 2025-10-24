@@ -398,7 +398,12 @@
 
             <!-- Regimen Fiscal - ancho completo -->
             <div class="relative">
+              <!-- Skeleton mientras carga -->
+              <div *ngIf="isLoadingRegimenes" class="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+              
+              <!-- Select cuando ya cargó -->
               <select 
+                *ngIf="!isLoadingRegimenes"
                 name="regimen_fiscal" 
                 id="regimen_fiscal" 
                 [(ngModel)]="nuevaSucursal.regimen_fiscal" 

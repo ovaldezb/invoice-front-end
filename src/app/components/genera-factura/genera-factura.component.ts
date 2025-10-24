@@ -117,6 +117,9 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
   }
 
   generaFactura():void{
+    // Limpiar espacios en blanco de todos los campos del receptor
+    this.trimReceptorFields();
+    
     // Usar el servicio de cálculo para construir el timbrado
     const timbrado: Timbrado = this.facturaCalculator.buildTimbrado(
       this.ventaTapete,
@@ -260,6 +263,9 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
   }
 
   guardaReceptor(){
+    // Limpiar espacios en blanco antes de guardar
+    this.trimReceptorFields();
+    
     this.facturacionService.guardaReceptor(this.receptor)
     .subscribe({
       next: (response) => {
@@ -297,6 +303,13 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
   }
 
   consultarVenta() {
+    // Limpiar espacios en blanco del número de ticket
+    this.ticketNumber = this.ticketNumber ? this.ticketNumber.trim() : '';
+    
+    if (!this.ticketNumber) {
+      return;
+    }
+    
     this.isLoading = true;
     // Resetear datos antes de consultar para evitar mostrar datos antiguos
     this.ventaTapete = new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
@@ -457,5 +470,29 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
         text: 'Ocurrió un error al subir el PDF.'
       });
     } 
+  }
+
+  /**
+   * Limpia espacios en blanco de todos los campos de texto del receptor
+   */
+  private trimReceptorFields(): void {
+    if (this.receptor.Rfc) {
+      this.receptor.Rfc = this.receptor.Rfc.trim().toUpperCase();
+    }
+    if (this.receptor.Nombre) {
+      this.receptor.Nombre = this.receptor.Nombre.trim();
+    }
+    if (this.receptor.DomicilioFiscalReceptor) {
+      this.receptor.DomicilioFiscalReceptor = this.receptor.DomicilioFiscalReceptor.trim();
+    }
+    if (this.receptor.email) {
+      this.receptor.email = this.receptor.email.trim().toLowerCase();
+    }
+    if (this.receptor.RegimenFiscalReceptor) {
+      this.receptor.RegimenFiscalReceptor = this.receptor.RegimenFiscalReceptor.trim();
+    }
+    if (this.receptor.UsoCFDI) {
+      this.receptor.UsoCFDI = this.receptor.UsoCFDI.trim();
+    }
   }
 }
