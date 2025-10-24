@@ -27,6 +27,7 @@ export class ConfiguraCsdComponent implements OnInit{
   public mostrarFormulario: boolean = false;
   public isLoadingCerts: boolean = false; // Variable para controlar el estado de carga de certificados
   public isLoadingRegimenes: boolean = false; // Variable para controlar el estado de carga de regímenes
+  public isLoadingFolio: boolean = false; // Variable para controlar el estado de carga del folio
   public isSavingSucursal: boolean = false;
   public csdSeleccionado: Certificado | null = null;
   public mostrarModal: boolean = false;
@@ -148,6 +149,7 @@ export class ConfiguraCsdComponent implements OnInit{
   }
 
   obtieneFolioBySucursal(idSucursal:string):void{
+    this.isLoadingFolio = true;
     this.folioService.getFolioBySucursal(idSucursal)
     .subscribe({
       next: (res) => {
@@ -157,9 +159,11 @@ export class ConfiguraCsdComponent implements OnInit{
         }else{
           this.nuevaSucursal.folio = 1; // Valor por defecto si no hay folio
         }
+        this.isLoadingFolio = false;
       },
       error: (error) => {
         this.nuevaSucursal.folio = 1; // Valor por defecto en caso de error
+        this.isLoadingFolio = false;
       }
     });
   }

@@ -389,7 +389,12 @@
                 </label>
               </div>
               <div class="relative">
+                <!-- Skeleton mientras carga el folio -->
+                <div *ngIf="isLoadingFolio" class="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+                
+                <!-- Input cuando ya cargó -->
                 <input 
+                  *ngIf="!isLoadingFolio"
                   type="text" 
                   id="folio" 
                   [(ngModel)]="nuevaSucursal.folio" 
@@ -399,6 +404,7 @@
                   placeholder=" "
                   class="peer mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-transparent">
                 <label 
+                  *ngIf="!isLoadingFolio"
                   for="folio" 
                   class="absolute left-3 -top-2.5 bg-white px-1 text-xs font-medium text-blue-400 transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-600">
                   Folio
@@ -442,7 +448,7 @@
                     pattern="^[a-zA-Z0-9\s,.'-]{3,50}$"
                     maxlength="50"
                     placeholder=" "
-                    [class.border-red-500]="!direccionInput.valid && !direccionInput.pristine"
+                    [class.border-red-500]="direccionInput.invalid && !direccionInput.pristine"
                     [class.border-green-500]="direccionInput.valid && !direccionInput.pristine"
                     class="peer mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-transparent">
                 <label 
@@ -460,9 +466,8 @@
                   pattern="[0-9]{5}"
                   maxlength="5"
                   placeholder=" "
-                  (blur)="validarCodigoPostal($event)"
                   class="peer mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-transparent"
-                  [class.border-red-500]="!codigoPostalInput.invalid && !codigoPostalInput.pristine"
+                  [class.border-red-500]="codigoPostalInput.invalid && !codigoPostalInput.pristine"
                   [class.border-green-500]="codigoPostalInput.valid && !codigoPostalInput.pristine"
                 >
                 <label 
@@ -471,7 +476,7 @@
                 >
                   Código Postal
                 </label>
-                <div *ngIf="!codigoPostalInput.valid && !codigoPostalInput.pristine" class="mt-1 text-sm text-red-600">
+                <div *ngIf="codigoPostalInput.invalid && !codigoPostalInput.pristine" class="mt-1 text-sm text-red-600">
                   El código postal debe contener exactamente 5 dígitos.
                 </div>
               </div>
@@ -487,7 +492,7 @@
                   #responsableInput="ngModel"
                   pattern="^[a-zA-ZÀ-ÿ\s]{3,50}$"
                   placeholder=" "
-                  [class.border-red-500]="!responsableInput.valid && !responsableInput.pristine"
+                  [class.border-red-500]="responsableInput.invalid && !responsableInput.pristine"
                   [class.border-green-500]="responsableInput.valid && !responsableInput.pristine"
                    class="peer mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-transparent">
                 <label 
@@ -504,8 +509,7 @@
                   #telefonoInput="ngModel"
                   pattern="[0-9]{10}"
                   placeholder=" "
-                  (blur)="validarTelefono($event)"
-                  [class.border-red-500]="!telefonoInput.valid && !telefonoInput.pristine"
+                  [class.border-red-500]="telefonoInput.invalid && !telefonoInput.pristine"
                   [class.border-green-500]="telefonoInput.valid && !telefonoInput.pristine"
                   class="peer mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-transparent">
                 <label 
@@ -513,7 +517,7 @@
                   class="absolute left-3 -top-2.5 bg-white px-1 text-xs font-medium text-blue-400 transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-600">
                   Teléfono
                 </label>
-                <div *ngIf="!telefonoInput.valid && !telefonoInput.pristine" class="mt-1 text-sm text-red-600">
+                <div *ngIf="telefonoInput.invalid && !telefonoInput.pristine" class="mt-1 text-sm text-red-600">
                   El Teléfono debe contener exactamente 10 dígitos.
                 </div>
               </div>
