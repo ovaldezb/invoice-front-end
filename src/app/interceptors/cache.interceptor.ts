@@ -38,24 +38,16 @@ export function CacheInterceptor(
   
   if (request.method === 'GET') {
     // Agregar timestamp único para peticiones GET
+    // El timestamp es suficiente para prevenir caché sin necesidad de headers
     const timestamp = Date.now();
     const separator = request.url.includes('?') ? '&' : '?';
     
     modifiedRequest = request.clone({
-      url: `${request.url}${separator}_t=${timestamp}`,
-      setHeaders: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache'
-      }
-    });
-  } else {
-    // Para POST, PUT, DELETE, PATCH - headers simplificados
-    modifiedRequest = request.clone({
-      setHeaders: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
-      }
+      url: `${request.url}${separator}_t=${timestamp}`
     });
   }
+  // Para otros métodos (POST, PUT, DELETE) no es necesario agregar nada
+  // ya que por naturaleza no se cachean
 
   return next(modifiedRequest);
 }
