@@ -33,7 +33,18 @@ export class FacturaCalculatorService {
   ): Timbrado {
     const conceptos = this.buildConceptos(ventaTapete);
     const impuestos = this.buildImpuestosFromConceptos(conceptos);
-    const totales = this.calculateTotales(ventaTapete);
+    
+    // Calcular subtotal desde los conceptos
+    let subtotal = 0;
+    conceptos.forEach(concepto => {
+      subtotal += concepto.Importe;
+    });
+    const subtotalRedondeado = this.roundDecimal(subtotal);
+    
+    // Total = Subtotal + Impuestos Trasladados (validación CFDI40119)
+    const totalFactura = this.roundDecimal(
+      subtotalRedondeado + impuestos.TotalImpuestosTrasladados
+    );
 
     const timbrado = new Timbrado(
       Global.Factura.Version,
@@ -42,11 +53,11 @@ export class FacturaCalculatorService {
       this.getFechaFactura(),
       ventaTapete.pago.formapago,
       Global.Factura.CondicionesPago,
-      totales.subtotal,
+      subtotalRedondeado,
       0.00, // Descuento
       Global.Factura.Moneda,
       Global.Factura.TipoCambio,
-      totales.total,
+      totalFactura,
       Global.Factura.TipoComprobante,
       Global.Factura.Exportacion,
       Global.Factura.MetodoPago,
@@ -175,24 +186,29 @@ export class FacturaCalculatorService {
 
   /**
    * Calcula los totales de la factura
-   * IMPORTANTE: NO redondear hasta el final para cumplir con CFDI40221
+   * IMPORTANTE: El total debe ser la suma de valores YA redondeados (CFDI40119)
+   * Total = Subtotal(redondeado) + Impuestos(redondeados) según el SAT
    */
   calculateTotales(ventaTapete: VentaTapete): { subtotal: number; total: number; impuestos: number } {
     let subtotal = 0;
     let impuestos = 0;
 
-    // Sumar SIN redondear para evitar acumulación de errores
+    // Sumar SIN redondear
     ventaTapete.detalle.forEach(producto => {
       const subtotalProducto = producto.precio / Global.Factura.FACTOR_DIV;
       subtotal += subtotalProducto * producto.cantidad;
       impuestos += subtotalProducto * Global.Factura.IVA * producto.cantidad;
     });
 
-    // Redondear UNA SOLA VEZ al final (validación SAT CFDI40221)
+    // Redondear subtotal e impuestos primero
+    const subtotalRedondeado = this.roundDecimal(subtotal);
+    const impuestosRedondeados = this.roundDecimal(impuestos);
+    
+    // Total = suma de valores YA redondeados (validación SAT CFDI40119)
     return {
-      subtotal: this.roundDecimal(subtotal),
-      total: this.roundDecimal(subtotal + impuestos),
-      impuestos: this.roundDecimal(impuestos)
+      subtotal: subtotalRedondeado,
+      total: this.roundDecimal(subtotalRedondeado + impuestosRedondeados),
+      impuestos: impuestosRedondeados
     };
   }
 
