@@ -25,7 +25,8 @@ import { error } from 'console';
 export class ConfiguraCsdComponent implements OnInit{
   public certificados:Certificado[] = [];
   public mostrarFormulario: boolean = false;
-  public isLoadingCerts: boolean = false; // Variable para controlar el estado de carga
+  public isLoadingCerts: boolean = false; // Variable para controlar el estado de carga de certificados
+  public isLoadingRegimenes: boolean = false; // Variable para controlar el estado de carga de regímenes
   public isSavingSucursal: boolean = false;
   public csdSeleccionado: Certificado | null = null;
   public mostrarModal: boolean = false;
@@ -90,6 +91,7 @@ export class ConfiguraCsdComponent implements OnInit{
   }  
 
     obtieneDatosFacturar():void{
+      this.isLoadingRegimenes = true;
       // Resetear régimen fiscal antes de cargar
       this.regimenFiscal = [];
       
@@ -97,9 +99,11 @@ export class ConfiguraCsdComponent implements OnInit{
       .subscribe({
         next: (res) => {
           this.regimenFiscal = res.body ? (res.body as { regimen_fiscal: RegimenFiscal[] }).regimen_fiscal : [];
+          this.isLoadingRegimenes = false;
         },
         error: (error) => {
           this.regimenFiscal = [];
+          this.isLoadingRegimenes = false;
           console.error('Error al obtener datos para facturar:', error);
         }
       });
@@ -188,6 +192,9 @@ export class ConfiguraCsdComponent implements OnInit{
   }
 
   guardarSucursal() {
+    // Limpiar espacios en blanco de todos los campos
+    this.trimSucursalFields();
+    
     if(this.sucursalExistente){
         Swal.fire({
             text: 'El código de sucursal ' + this.nuevaSucursal.codigo_sucursal + ' ya está en uso, favor de corregirlo.',
@@ -238,6 +245,11 @@ export class ConfiguraCsdComponent implements OnInit{
   }
 
   getSucursalById():void{
+    // Limpiar espacios en blanco antes de buscar
+    if (this.nuevaSucursal.codigo_sucursal) {
+      this.nuevaSucursal.codigo_sucursal = this.nuevaSucursal.codigo_sucursal.trim();
+    }
+    
     if (!this.nuevaSucursal.codigo_sucursal) {
       this.sucursalExistente = false; // Si no hay código de sucursal, no hay sucursal existente
       return;
@@ -257,6 +269,9 @@ export class ConfiguraCsdComponent implements OnInit{
   }
 
   actualizarSucursal() {
+    // Limpiar espacios en blanco de todos los campos
+    this.trimSucursalFields();
+    
     const certificado = this.csdActual; // Guardar el certificado actual antes de la llamada al servicio  
     Swal.fire({
       title: 'Confirmar',
@@ -639,6 +654,33 @@ export class ConfiguraCsdComponent implements OnInit{
     } else {
       // Para editar: solo verificar que los campos estén completos y válidos (siempre true si llegamos aquí)
       return true;
+    }
+  }
+
+  /**
+   * Limpia espacios en blanco de todos los campos de texto de la sucursal
+   */
+  private trimSucursalFields(): void {
+    if (this.nuevaSucursal.codigo_sucursal) {
+      this.nuevaSucursal.codigo_sucursal = this.nuevaSucursal.codigo_sucursal.trim();
+    }
+    if (this.nuevaSucursal.serie) {
+      this.nuevaSucursal.serie = this.nuevaSucursal.serie.trim();
+    }
+    if (this.nuevaSucursal.regimen_fiscal) {
+      this.nuevaSucursal.regimen_fiscal = this.nuevaSucursal.regimen_fiscal.trim();
+    }
+    if (this.nuevaSucursal.direccion) {
+      this.nuevaSucursal.direccion = this.nuevaSucursal.direccion.trim();
+    }
+    if (this.nuevaSucursal.codigo_postal) {
+      this.nuevaSucursal.codigo_postal = this.nuevaSucursal.codigo_postal.trim();
+    }
+    if (this.nuevaSucursal.responsable) {
+      this.nuevaSucursal.responsable = this.nuevaSucursal.responsable.trim();
+    }
+    if (this.nuevaSucursal.telefono) {
+      this.nuevaSucursal.telefono = this.nuevaSucursal.telefono.trim();
     }
   }
 }

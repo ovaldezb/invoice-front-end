@@ -1,7 +1,7 @@
 import { environment } from "../../environments/environment";
 
 export var Global = {
-    VERSION: '1.2.4',
+    VERSION: '1.2.5',
     ENV_NAME: environment.envName,
     urlBackEnd: environment.urlBackEnd,
     urlDatosFactura: environment.urlDatosFactura,
