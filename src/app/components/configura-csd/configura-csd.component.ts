@@ -50,6 +50,7 @@ export class ConfiguraCsdComponent implements OnInit{
   public btnAccion: string = Global.GUARDAR;
   public msjAccion: string = Global.GUARDANDO;
   public swsapienCertificado: SwsapienCertificado = new SwsapienCertificado('', '', '', false, '', new Date(), new Date(), '');
+  private folioOriginal: number = 0;
   constructor(private certificadoService: CertificadosService, 
       private sucursalService: SucursalService,
       private swsapienService: SwsapienCertificadoService,
@@ -134,6 +135,48 @@ export class ConfiguraCsdComponent implements OnInit{
     this.csdActual = certificado; // Asignar el certificado actual para editar la sucursal
     // Resetear validaciones para modo edición
     this.sucursalExistente = false; // En edición no verificamos existencia
+    this.obtieneFolioBySucursal(this.nuevaSucursal.codigo_sucursal);
+  }
+
+  obtieneFolioBySucursal(idSucursal:string):void{
+    this.folioService.getFolioBySucursal(idSucursal)
+    .subscribe({
+      next: (res) => {
+        if(res.status===Global.OK && res.body){
+          this.nuevaSucursal.folio = res.body.folio.noFolio;
+          this.folioOriginal = res.body.folio.noFolio;
+        }else{
+          this.nuevaSucursal.folio = 1; // Valor por defecto si no hay folio
+        }
+      },
+      error: (error) => {
+        this.nuevaSucursal.folio = 1; // Valor por defecto en caso de error
+      }
+    });
+  }
+
+  actualizaFolioSucursal():void{
+    if(this.nuevaSucursal.folio && this.nuevaSucursal.codigo_sucursal){
+      const body = {
+        codigo_sucursal: this.nuevaSucursal.codigo_sucursal,
+        folio: Number(this.nuevaSucursal.folio)
+      };
+      this.folioService.updateFolio(body)
+      .subscribe({
+        next: (res) => {
+          this.folioOriginal = 0;
+          Swal.fire({
+            title: 'Éxito',
+            text: 'La sucursal ha sido actualizada correctamente.',
+            icon: 'success',
+            timer: Global.TIMER_OFF
+          });
+        },
+        error: (error) => {
+          console.error('Error al actualizar folio:', error);
+        }
+      });
+    }
   }
 
   guardaEditarSucursal() {
@@ -227,9 +270,18 @@ export class ConfiguraCsdComponent implements OnInit{
           this.isSavingSucursal = true;
           this.sucursalService.updateSucursal(this.nuevaSucursal).subscribe({
               next: (res) => {
-                  Swal.fire('Éxito', 'La sucursal ha sido actualizada correctamente.', 'success');
-                  this.loadCerts(); // Recargar los certificados para reflejar los cambios
-                  this.cerrarModal();
+                if(this.nuevaSucursal.folio !== this.folioOriginal){
+                  this.actualizaFolioSucursal();
+                }else{
+                  Swal.fire({
+                    title: 'Éxito',
+                    text: 'La sucursal ha sido actualizada correctamente.',
+                    icon: 'success',
+                    timer: Global.TIMER_OFF
+                  });
+                }
+                this.loadCerts(); // Recargar los certificados para reflejar los cambios
+                this.cerrarModal();
               },
               error: (error) => {
                   this.isSavingSucursal = false; // Asegurarse de que el estado de guardado se restablezca en caso de error

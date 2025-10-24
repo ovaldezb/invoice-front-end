@@ -14,4 +14,12 @@ export class FolioService {
   addFolio(folio:Folio):Observable<any>{
     return this.http.post(Global.urlBackEnd+'folio', folio, { observe: 'response' });
   }
+
+  updateFolio(body:any):Observable<any>{
+    return this.http.put(Global.urlBackEnd+'folio', body, { observe: 'response' });
+  }
+
+  getFolioBySucursal(idSucursal:string):Observable<any>{
+    return this.http.get(Global.urlBackEnd+'folio/'+idSucursal, { observe: 'response' });
+  }
 }

@@ -71,7 +71,6 @@ export class LoginComponent implements OnInit {
     .subscribe({
       next: (response:HttpResponse<any>) => {      
           this.backEndEnv = response.body.environment || '';
-          console.log(response.body);
       },
       error: (error) => {
         console.error(error);
