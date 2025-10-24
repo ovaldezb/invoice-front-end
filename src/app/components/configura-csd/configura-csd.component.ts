@@ -59,6 +59,8 @@ export class ConfiguraCsdComponent implements OnInit{
 
   ngOnInit(): void {
       this.obtieneDatosFacturar();
+      // Resetear certificados para forzar carga fresca
+      this.certificados = [];
       this.authService.getCurrentUser()
       .then(user => {
         this.idUsuarioCognito = user.tokens.idToken.payload.sub;
@@ -67,27 +69,37 @@ export class ConfiguraCsdComponent implements OnInit{
   }
     
   loadCerts(): void {
-    this.isLoadingCerts = true; 
+    this.isLoadingCerts = true;
+    // Resetear certificados antes de cargar para evitar mostrar datos antiguos
+    this.certificados = [];
+    this.csdSeleccionado = null;
+    
     this.certificadoService.getAllCertificados(this.idUsuarioCognito)
     .subscribe({
         next: (res) => {
-            this.isLoadingCerts = false; // Cambiar el estado de carga a falso
             this.certificados = res.body || [];            
+            this.isLoadingCerts = false;
         },
         error: (error) => {
+            this.certificados = [];
+            this.isLoadingCerts = false;
             Swal.fire('Error', 'No se pudieron cargar los certificados. Inténtalo de nuevo más tarde.', 'error');
         }
     });
   }  
 
     obtieneDatosFacturar():void{
+      // Resetear régimen fiscal antes de cargar
+      this.regimenFiscal = [];
+      
       this.datosFacturaService.getDatosParaFacturar()
       .subscribe({
         next: (res) => {
           this.regimenFiscal = res.body ? (res.body as { regimen_fiscal: RegimenFiscal[] }).regimen_fiscal : [];
         },
         error: (error) => {
-          //console.error('Error al obtener datos para facturar:', error);
+          this.regimenFiscal = [];
+          console.error('Error al obtener datos para facturar:', error);
         }
       });
     }

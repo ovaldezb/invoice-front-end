@@ -5,6 +5,7 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { CacheInterceptor } from './interceptors/cache.interceptor';
 import './config/amplify.config';
 
 export const appConfig: ApplicationConfig = {
@@ -12,7 +13,6 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes,withHashLocation()), 
     provideClientHydration(withEventReplay()),
-    provideHttpClient(withFetch()),
-    provideHttpClient(withInterceptors([AuthInterceptor]))
+    provideHttpClient(withFetch(), withInterceptors([CacheInterceptor, AuthInterceptor]))
   ]
 };

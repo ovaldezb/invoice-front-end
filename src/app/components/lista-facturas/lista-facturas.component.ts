@@ -55,6 +55,10 @@ export class ListaFacturasComponent implements OnInit {
     }
     this.updateVisibleMonths();
 
+    // Resetear certificados para forzar carga fresca
+    this.certificados = [];
+    this.totalFacturasTimbradas = 0;
+    
     this.authService.getCurrentUser()
       .then(user => {
         this.idUsuarioCognito = user.tokens.idToken.payload.sub;
@@ -83,18 +87,29 @@ export class ListaFacturasComponent implements OnInit {
 
   loadFacturas(): void {
     this.loading = true;
+    // Resetear datos antes de cargar para evitar mostrar datos antiguos
+    this.certificados = [];
+    this.totalFacturasTimbradas = 0;
+    this.expandedCertificadoIndex = null;
+    
     const lastDay = new Date(this.selectedYear, this.selectedMonth, 0).getDate();
     const startDate = `${this.selectedYear}-${this.selectedMonth.toString().padStart(2, '0')}-01`;
     const endDate = `${this.selectedYear}-${this.selectedMonth.toString().padStart(2, '0')}-${lastDay}`;
     this.timbresService.getFacturasEmitidasByMes(this.idUsuarioCognito, startDate, endDate)
-      .subscribe(response => {
-        this.certificados = response.body;
-        this.totalFacturasTimbradas = this.certificados
-          .map(c => c.facturas_emitidas?.length || 0)
-          .reduce((a, b) => a + b, 0);
-        this.loading = false;
-      }, error => {
-        this.loading = false;
+      .subscribe({
+        next: (response) => {
+          this.certificados = response.body || [];
+          this.totalFacturasTimbradas = this.certificados
+            .map(c => c.facturas_emitidas?.length || 0)
+            .reduce((a, b) => a + b, 0);
+          this.loading = false;
+        },
+        error: (error) => {
+          this.certificados = [];
+          this.totalFacturasTimbradas = 0;
+          this.loading = false;
+          console.error('Error cargando facturas:', error);
+        }
       });
   }
 
