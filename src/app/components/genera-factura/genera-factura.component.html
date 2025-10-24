@@ -27,7 +27,7 @@
         type="button"
         (click)="consultarVenta()"
         [disabled]="isLoading || !ticketNumber"
-        class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105 disabled:hover:scale-100 flex items-center justify-center"
+        class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:hover:scale-100 active:scale-[0.98] flex items-center justify-center shadow-md hover:shadow-lg"
       >
         <!-- Spinner -->
         <svg
@@ -167,7 +167,8 @@
          <label
           for="pdfInput"
           [class.cursor-not-allowed]="isUploadingPdf"
-          class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-medium py-2 px-4 rounded-lg transition duration-200 text-sm inline-flex items-center justify-center"
+          [class.opacity-50]="isUploadingPdf"
+          class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 text-sm inline-flex items-center justify-center shadow-sm hover:shadow-md cursor-pointer"
           [attr.aria-disabled]="isUploadingPdf"
         >
           Seleccionar PDF
@@ -184,7 +185,7 @@
           type="button"
           (click)="uploadPdf()"
           [disabled]="!selectedPdf || isUploadingPdf"
-          class="bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center text-sm"
+          class="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center text-sm shadow-sm hover:shadow-md"
         >
           <svg
             *ngIf="isUploadingPdf"
@@ -343,12 +344,12 @@
     </div>
 
     <!-- Botones de acción -->
-    <div class="flex justify-between pt-3">
+    <div class="flex justify-between pt-3 gap-3">
       <button
         type="button"
         (click)="regresarAConsulta()"
         [disabled]="isLoadingFactura"
-        class="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition duration-200 text-sm"
+        class="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 text-sm shadow-sm hover:shadow-md"
       >
         Nueva Consulta
       </button>
@@ -356,7 +357,7 @@
         type="button"
         (click)="generarFactura()"
         [disabled]="isLoadingFactura || !isFormValid()"
-        class="bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105 disabled:hover:scale-100 flex items-center justify-center min-w-[120px] text-sm"
+        class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:hover:scale-100 active:scale-[0.98] flex items-center justify-center min-w-[140px] text-sm shadow-md hover:shadow-lg"
       >
         <!-- Spinner -->
         <svg

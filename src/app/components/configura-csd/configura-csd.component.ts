@@ -85,7 +85,12 @@ export class ConfiguraCsdComponent implements OnInit{
         error: (error) => {
             this.certificados = [];
             this.isLoadingCerts = false;
-            Swal.fire('Error', 'No se pudieron cargar los certificados. Inténtalo de nuevo más tarde.', 'error');
+            Swal.fire({
+              title: 'Error',
+              text: 'No se pudieron cargar los certificados. Inténtalo de nuevo más tarde.',
+              icon: 'error',
+              confirmButtonColor: '#3b82f6'
+            });
         }
     });
   }  
@@ -170,9 +175,10 @@ export class ConfiguraCsdComponent implements OnInit{
         next: (res) => {
           this.folioOriginal = 0;
           Swal.fire({
-            title: 'Éxito',
+            title: '¡Éxito!',
             text: 'La sucursal ha sido actualizada correctamente.',
             icon: 'success',
+            confirmButtonColor: '#3b82f6',
             timer: Global.TIMER_OFF
           });
         },
@@ -197,19 +203,24 @@ export class ConfiguraCsdComponent implements OnInit{
     
     if(this.sucursalExistente){
         Swal.fire({
+            title: 'Código duplicado',
             text: 'El código de sucursal ' + this.nuevaSucursal.codigo_sucursal + ' ya está en uso, favor de corregirlo.',
-            icon: 'error'
+            icon: 'error',
+            confirmButtonColor: '#3b82f6'
         });
         return; // Si la sucursal ya existe, no continuar con el guardado
     }
     if (this.csdActual && this.nuevaSucursal.codigo_sucursal) {
       Swal.fire({
-        title: 'Confirmar',
+        title: '¿Agregar sucursal?',
         text: '¿Estás seguro de que deseas agregar esta sucursal?',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Sí',
-        cancelButtonText: 'No'
+        confirmButtonText: 'Sí, agregar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true
       }).then((result) => {
         if (result.isConfirmed) {
             this.isSavingSucursal = true;
@@ -224,7 +235,13 @@ export class ConfiguraCsdComponent implements OnInit{
                     .subscribe({
                         next: (updateRes) => {
                             this.isSavingSucursal = false;
-                            Swal.fire('Éxito', 'La sucursal ha sido agregada correctamente.', 'success');
+                            Swal.fire({
+                              title: '¡Éxito!',
+                              text: 'La sucursal ha sido agregada correctamente.',
+                              icon: 'success',
+                              confirmButtonColor: '#3b82f6',
+                              timer: Global.TIMER_OFF
+                            });
                             this.loadCerts(); // Recargar los certificados para reflejar los cambios
                             this.cerrarModal();
                         },
@@ -274,12 +291,15 @@ export class ConfiguraCsdComponent implements OnInit{
     
     const certificado = this.csdActual; // Guardar el certificado actual antes de la llamada al servicio  
     Swal.fire({
-      title: 'Confirmar',
+      title: '¿Actualizar sucursal?',
       text: '¿Estás seguro de que deseas actualizar esta sucursal?',
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Sí',
-      cancelButtonText: 'No'
+      confirmButtonText: 'Sí, actualizar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
     }).then((result) => {
       if (result.isConfirmed) {
           this.isSavingSucursal = true;
@@ -289,9 +309,10 @@ export class ConfiguraCsdComponent implements OnInit{
                   this.actualizaFolioSucursal();
                 }else{
                   Swal.fire({
-                    title: 'Éxito',
+                    title: '¡Éxito!',
                     text: 'La sucursal ha sido actualizada correctamente.',
                     icon: 'success',
+                    confirmButtonColor: '#3b82f6',
                     timer: Global.TIMER_OFF
                   });
                 }
@@ -309,22 +330,37 @@ export class ConfiguraCsdComponent implements OnInit{
 
   eliminaCSD(certificado: Certificado) {
     Swal.fire({
-      title: '¿Estás seguro de que deseas eliminar este CSD?',
-      text: 'Esto eliminara todas las sucursales asociadas a este CSD.',
+      title: '¿Eliminar CSD?',
+      text: 'Esto eliminará todas las sucursales asociadas a este certificado.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
     }).then((result) => {
       if (result.isConfirmed) {
         this.isLoadingCerts = true;
         this.swsapienService.deleteCertificado(certificado._id).subscribe({
           next: () => {
             this.loadCerts(); // Recargar los certificados para reflejar los cambios
-            Swal.fire('Eliminado', 'El CSD ha sido eliminado correctamente.', 'success');
+            Swal.fire({
+              title: '¡Eliminado!',
+              text: 'El CSD ha sido eliminado correctamente.',
+              icon: 'success',
+              confirmButtonColor: '#3b82f6',
+              timer: Global.TIMER_OFF
+            });
           },
           error: (error) => {
-            Swal.fire('Error', 'No se pudo eliminar el CSD. Inténtalo de nuevo más tarde.', 'error');
+            this.isLoadingCerts = false;
+            Swal.fire({
+              title: 'Error',
+              text: 'No se pudo eliminar el CSD. Inténtalo de nuevo más tarde.',
+              icon: 'error',
+              confirmButtonColor: '#3b82f6'
+            });
           },
           complete: () => {
             this.isLoadingCerts = false;
@@ -336,12 +372,15 @@ export class ConfiguraCsdComponent implements OnInit{
 
   borrarSucursal(sucursal: Sucursal): any {
     Swal.fire({
-      title: 'Confirmar',
+      title: '¿Eliminar sucursal?',
       text: '¿Estás seguro de que deseas eliminar esta sucursal?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
     }).then((result) => {
       if (result.isConfirmed) {
         this.isSavingSucursal = true;
@@ -349,11 +388,22 @@ export class ConfiguraCsdComponent implements OnInit{
           next: () => {
             this.isSavingSucursal = false; // Restablecer el estado de guardado
             this.loadCerts(); // Recargar los certificados para reflejar los cambios
-            Swal.fire('Eliminado', 'La sucursal ha sido eliminada correctamente.', 'success');
+            Swal.fire({
+              title: '¡Eliminada!',
+              text: 'La sucursal ha sido eliminada correctamente.',
+              icon: 'success',
+              confirmButtonColor: '#3b82f6',
+              timer: Global.TIMER_OFF
+            });
           },
           error: (error) => {
             this.isSavingSucursal = false; // Asegurarse de que el estado de guardado se restablezca en caso de error
-            Swal.fire('Error', 'No se pudo eliminar la sucursal. Inténtalo de nuevo más tarde.', 'error');
+            Swal.fire({
+              title: 'Error',
+              text: 'No se pudo eliminar la sucursal. Inténtalo de nuevo más tarde.',
+              icon: 'error',
+              confirmButtonColor: '#3b82f6'
+            });
           }
         });
       }
@@ -396,10 +446,15 @@ export class ConfiguraCsdComponent implements OnInit{
   
   guardarCSD():void{
     Swal.fire({
-      title:'Desea subir estos archivos?',
-      text:'El CSD para timbrar es almacenado directametne por el PAC proveedor',
+      title:'¿Subir archivos CSD?',
+      text:'El CSD para timbrar es almacenado directamente por el PAC proveedor',
+      icon: 'question',
       showCancelButton:true,
-      confirmButtonText:'OK'
+      confirmButtonText:'Sí, subir',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
     })
     .then(respuesta=>{
       if(respuesta.isConfirmed){
@@ -409,8 +464,10 @@ export class ConfiguraCsdComponent implements OnInit{
           formData.append('cer',this.archivoCer);
         }else{
           Swal.fire({
-            text:'Debe seleccione el archivo .cer',
-            icon:'error'
+            title: 'Archivo faltante',
+            text:'Debe seleccionar el archivo .cer',
+            icon:'error',
+            confirmButtonColor: '#3b82f6'
           });
           return;
         }
@@ -418,8 +475,10 @@ export class ConfiguraCsdComponent implements OnInit{
           formData.append('key',this.archivoKey);
         }else{
           Swal.fire({
-            text:'Debe seleccionar el archivo .cer',
-            icon:'error'
+            title: 'Archivo faltante',
+            text:'Debe seleccionar el archivo .key',
+            icon:'error',
+            confirmButtonColor: '#3b82f6'
           });
           return;
         }
@@ -436,9 +495,12 @@ export class ConfiguraCsdComponent implements OnInit{
               title: 'Confirma Razón Social',
               input: 'text',
               inputValue: nombre,
-              inputLabel: 'El Nombre o Razón Social debe coincidir con nombre que se encuentra en la Constancia de Situación Fiscal',
+              inputLabel: 'El Nombre o Razón Social debe coincidir con el nombre que se encuentra en la Constancia de Situación Fiscal',
               showCancelButton: true,
               confirmButtonText: 'Confirmar',
+              cancelButtonText: 'Cancelar',
+              confirmButtonColor: '#3b82f6',
+              cancelButtonColor: '#6b7280',
               inputValidator: (value) => {
                 if (!value) {
                   return 'Debes confirmar el nombre o razón social';
@@ -452,14 +514,21 @@ export class ConfiguraCsdComponent implements OnInit{
             .subscribe({
                 next: (res) => {
                   Swal.fire({
-                      title:'El CSD para timbrar se ha cargado exitosamente',
+                      title:'¡Éxito!',
+                      text: 'El CSD para timbrar se ha cargado exitosamente',
                       icon:'success',
+                      confirmButtonColor: '#3b82f6',
                       timer:Global.TIMER_OFF
                   });
                   this.loadCerts(); // Recargar los certificados para reflejar los cambios
                 },
                 error: (error) => {
-                    Swal.fire('Error', 'No se pudo guardar el certificado. Inténtalo de nuevo más tarde.', 'error');
+                    Swal.fire({
+                      title: 'Error',
+                      text: 'No se pudo guardar el certificado. Inténtalo de nuevo más tarde.',
+                      icon: 'error',
+                      confirmButtonColor: '#3b82f6'
+                    });
                 }
             });
             // ...limpiar archivos y campos...
@@ -475,10 +544,15 @@ export class ConfiguraCsdComponent implements OnInit{
 
   actualizarCSD():void{
     Swal.fire({
-      title:'Desea subir estos archivos para actualizar su CSD?',
-      text:'Unicamente se puede actualizar el CSD para el mismo RFC',
+      title:'¿Actualizar CSD?',
+      text:'Únicamente se puede actualizar el CSD para el mismo RFC',
+      icon: 'question',
       showCancelButton:true,
-      confirmButtonText:'Si, actualizar'
+      confirmButtonText:'Sí, actualizar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true
     })
     .then(respuesta=>{
       if(respuesta.isConfirmed){
@@ -488,8 +562,10 @@ export class ConfiguraCsdComponent implements OnInit{
           formData.append('cer',this.archivoCer);
         }else{
           Swal.fire({
-            text:'Debe seleccione el archivo .cer',
-            icon:'error'
+            title: 'Archivo faltante',
+            text:'Debe seleccionar el archivo .cer',
+            icon:'error',
+            confirmButtonColor: '#3b82f6'
           });
           return;
         }
@@ -497,8 +573,10 @@ export class ConfiguraCsdComponent implements OnInit{
           formData.append('key',this.archivoKey);
         }else{
           Swal.fire({
-            text:'Debe seleccionar el archivo .cer',
-            icon:'error'
+            title: 'Archivo faltante',
+            text:'Debe seleccionar el archivo .key',
+            icon:'error',
+            confirmButtonColor: '#3b82f6'
           });
           return;
         }
@@ -512,9 +590,10 @@ export class ConfiguraCsdComponent implements OnInit{
             this.mostrarFormulario = false;
             
             Swal.fire({
-              title: 'CSD actualizado exitosamente',
+              title: '¡Actualizado!',
               text: 'El CSD ha sido actualizado correctamente.',
               icon: 'success',
+              confirmButtonColor: '#3b82f6',
               timer: Global.TIMER_OFF
             });
             this.loadCerts(); // Recargar los certificados para reflejar los cambios
@@ -528,7 +607,12 @@ export class ConfiguraCsdComponent implements OnInit{
           },
           error: (error:any) => {
             this.isUploading = false;
-            Swal.fire('Error', error.error.message, 'error');
+            Swal.fire({
+              title: 'Error',
+              text: error.error.message,
+              icon: 'error',
+              confirmButtonColor: '#3b82f6'
+            });
           }
         })
       }
