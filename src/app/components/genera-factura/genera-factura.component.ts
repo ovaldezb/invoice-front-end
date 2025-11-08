@@ -19,6 +19,8 @@ import { FolioService } from '../../services/folio.service';
 import { Sucursal } from '../../models/sucursal';
 import { ParsePdfService } from '../../services/parse-pdf.service';
 import { EnvironmentService } from '../../services/environment.service';
+import { ErrorTrackingService } from '../../services/error-tracking.service';
+import { TipoErrorFacturacion } from '../../models/errorFacturacion';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
@@ -61,7 +63,8 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
     private facturaCalculator: FacturaCalculatorService,
     private folioService: FolioService,
     private pdfService: ParsePdfService,
-    private environmentService: EnvironmentService
+    private environmentService: EnvironmentService,
+    private errorTrackingService: ErrorTrackingService
   ) { }
 
   ngOnInit(): void {
@@ -203,10 +206,17 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.isLoadingFactura = false;
+        
+        // 🆕 Registrar error en el sistema de tracking
+        this.registrarError(error);
+        
         Swal.fire({
           icon: 'error',
           title: 'Error al generar factura',
-          text: error.error.message,
+          html: `
+            <p class="mb-2">${error.error?.message || 'Error desconocido'}</p>
+            <small class="text-gray-500">Este error ha sido registrado para seguimiento del administrador</small>
+          `,
           confirmButtonColor: '#3b82f6',
         });
       }
@@ -496,5 +506,105 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
     if (this.receptor.UsoCFDI) {
       this.receptor.UsoCFDI = this.receptor.UsoCFDI.trim();
     }
+  }
+
+  /**
+   * Registra un error de facturación en el sistema de tracking
+   * Esto permite al administrador ver errores y ser proactivo con los clientes
+   */
+  private registrarError(error: any): void {
+    // Clasificar el tipo de error basado en el código o mensaje
+    const tipoError = this.clasificarTipoError(error);
+    
+    // Preparar los datos del error
+    const errorData = {
+      fecha: new Date(),
+      ticketNumber: this.ventaTapete?.ticket?.noVenta || 'N/A',
+      rfcReceptor: this.receptor?.Rfc || 'N/A',
+      nombreReceptor: this.receptor?.Nombre || 'N/A',
+      emailReceptor: this.receptor?.email || 'N/A',
+      tipoError: tipoError,
+      codigoError: error.status?.toString() || error.error?.code || 'UNKNOWN',
+      mensajeError: error.error?.message || error.message || 'Error desconocido',
+      detalleError: {
+        status: error.status,
+        statusText: error.statusText,
+        error: error.error,
+        url: error.url,
+        timestamp: new Date().toISOString()
+      },
+      sucursal: this.sucursal?.codigo_sucursal || 'N/A',
+      intentos: 1, // TODO: Incrementar si ya existe el mismo ticket/RFC
+      estado: 'pendiente' as const
+    };
+
+    // Guardar el error en el backend (o simular si el backend no está listo)
+    this.errorTrackingService.guardarError(errorData).subscribe({
+      next: (response) => {
+        console.log('✅ Error registrado exitosamente:', response.body);
+      },
+      error: (err) => {
+        console.error('❌ Error al registrar el error:', err);
+        // No mostrar mensaje al usuario para no confundir más
+      }
+    });
+  }
+
+  /**
+   * Clasifica el tipo de error basándose en el código o mensaje de error
+   */
+  private clasificarTipoError(error: any): TipoErrorFacturacion {
+    const codigo = error.error?.code || '';
+    const mensaje = (error.error?.message || '').toLowerCase();
+    
+    // Errores CFDI específicos
+    if (codigo === 'CFDI40147' || mensaje.includes('código postal') || mensaje.includes('domicilio fiscal')) {
+      return 'CFDI40147';
+    }
+    if (codigo === 'CFDI40116' || mensaje.includes('rfc') && mensaje.includes('inválido')) {
+      return 'CFDI40116';
+    }
+    if (codigo === 'CFDI40124' || mensaje.includes('uso cfdi') || mensaje.includes('régimen fiscal')) {
+      return 'CFDI40124';
+    }
+    
+    // Errores de certificado
+    if (codigo === 'CERT_EXPIRED' || mensaje.includes('certificado') && (mensaje.includes('vencido') || mensaje.includes('expirado'))) {
+      return 'CERTIFICADO_VENCIDO';
+    }
+    if (codigo === 'CERT_INVALID' || mensaje.includes('certificado') && mensaje.includes('inválido')) {
+      return 'CERTIFICADO_INVALIDO';
+    }
+    
+    // Errores de timbres
+    if (codigo === 'NO_STAMPS' || mensaje.includes('timbre') || mensaje.includes('stamp')) {
+      return 'SIN_TIMBRES';
+    }
+    
+    // Errores de red/timeout
+    if (error.status === 504 || mensaje.includes('timeout') || mensaje.includes('tiempo agotado')) {
+      return 'TIMEOUT';
+    }
+    if (error.status === 0 || mensaje.includes('network') || mensaje.includes('conexión')) {
+      return 'ERROR_RED';
+    }
+    
+    // Errores de validación
+    if (error.status === 400 || mensaje.includes('validación') || mensaje.includes('validation')) {
+      return 'ERROR_VALIDACION';
+    }
+    
+    // Errores del SAT
+    if (mensaje.includes('sat') || mensaje.includes('pac')) {
+      return 'ERROR_SAT';
+    }
+    
+    // Errores del servidor
+    if (error.status >= 500 && error.status < 600) {
+      return 'ERROR_SERVIDOR';
+    }
+    
+    // Otros errores no clasificados
+    return 'OTRO';
   }
 }
