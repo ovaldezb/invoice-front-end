@@ -52,6 +52,25 @@
           >
             Configurar CSD
           </button>
+          <button
+            name="gestionErroresTab"
+            (click)="activeTab = 'tab3'"
+            [ngClass]="{
+              'border-blue-500 text-blue-600': activeTab === 'tab3',
+              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'tab3'
+            }"
+            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm relative"
+          >
+            <span class="flex items-center gap-2">
+              Gestión de Errores
+              <span 
+                *ngIf="totalErroresPendientes > 0" 
+                class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full"
+              >
+                {{ totalErroresPendientes }}
+              </span>
+            </span>
+          </button>
         </nav>
       </div>
 
@@ -62,6 +81,9 @@
         </div>
         <div *ngIf="activeTab === 'tab2'" class="p-4 bg-white rounded-lg shadow">
           <app-configura-csd></app-configura-csd>
+        </div>
+        <div *ngIf="activeTab === 'tab3'">
+          <app-admin-errores></app-admin-errores>
         </div>
       </div>
     </div>

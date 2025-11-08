@@ -1,0 +1,309 @@
+<div class="admin-errores-container">
+  <!-- Header con pestañas -->
+  <div class="header-tabs">
+    <button 
+      [class.active]="vistaActual === 'lista'" 
+      (click)="cambiarVista('lista')"
+      class="tab-button">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+      Lista de Errores
+    </button>
+    <button 
+      [class.active]="vistaActual === 'estadisticas'" 
+      (click)="cambiarVista('estadisticas')"
+      class="tab-button">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+      Estadísticas
+    </button>
+  </div>
+
+  <!-- VISTA: Lista de Errores -->
+  <div *ngIf="vistaActual === 'lista'" class="vista-lista">
+    <!-- Barra de acciones -->
+    <div class="acciones-bar">
+      <button (click)="mostrarFiltros = !mostrarFiltros" class="btn-filtros">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        </svg>
+        {{ mostrarFiltros ? 'Ocultar' : 'Mostrar' }} Filtros
+      </button>
+      
+      <div class="acciones-derecha">
+        <button (click)="cargarErrores()" class="btn-refrescar" [disabled]="isLoading">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refrescar
+        </button>
+        <button (click)="exportarCSV()" class="btn-exportar" [disabled]="errores.length === 0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Exportar CSV
+        </button>
+      </div>
+    </div>
+
+    <!-- Panel de filtros -->
+    <div *ngIf="mostrarFiltros" class="panel-filtros">
+      <div class="filtros-grid">
+        <div class="filtro-item">
+          <label>Tipo de Error</label>
+          <select [(ngModel)]="filtros.tipoError" class="filtro-select">
+            <option [value]="undefined">Todos</option>
+            <option *ngFor="let tipo of tiposError" [value]="tipo">{{ getTipoErrorTexto(tipo) }}</option>
+          </select>
+        </div>
+
+        <div class="filtro-item">
+          <label>Estado</label>
+          <select [(ngModel)]="filtros.estado" class="filtro-select">
+            <option [value]="undefined">Todos</option>
+            <option *ngFor="let estado of estadosError" [value]="estado">{{ estado }}</option>
+          </select>
+        </div>
+
+        <div class="filtro-item">
+          <label>RFC</label>
+          <input type="text" [(ngModel)]="filtros.rfc" class="filtro-input" placeholder="Buscar por RFC">
+        </div>
+
+        <div class="filtro-item">
+          <label>Ticket</label>
+          <input type="text" [(ngModel)]="filtros.ticketNumber" class="filtro-input" placeholder="Buscar por ticket">
+        </div>
+
+        <div class="filtro-item">
+          <label>Desde</label>
+          <input type="date" [(ngModel)]="filtros.fechaDesde" class="filtro-input">
+        </div>
+
+        <div class="filtro-item">
+          <label>Hasta</label>
+          <input type="date" [(ngModel)]="filtros.fechaHasta" class="filtro-input">
+        </div>
+      </div>
+
+      <div class="filtros-acciones">
+        <button (click)="aplicarFiltros()" class="btn-aplicar">Aplicar Filtros</button>
+        <button (click)="limpiarFiltros()" class="btn-limpiar">Limpiar</button>
+      </div>
+    </div>
+
+    <!-- Loader -->
+    <div *ngIf="isLoading" class="loader-container">
+      <div class="spinner"></div>
+      <p>Cargando errores...</p>
+    </div>
+
+    <!-- Tabla de errores -->
+    <div *ngIf="!isLoading && errores.length > 0" class="tabla-container">
+      <table class="tabla-errores">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Ticket</th>
+            <th>RFC / Nombre</th>
+            <th>Tipo Error</th>
+            <th>Mensaje</th>
+            <th>Intentos</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let error of erroresPaginados" class="fila-error">
+            <td class="td-fecha">
+              <div class="fecha-container">
+                <span class="fecha-dia">{{ error.fecha | date:'dd/MM/yyyy' }}</span>
+                <span class="fecha-hora">{{ error.fecha | date:'HH:mm' }}</span>
+              </div>
+            </td>
+            <td class="td-ticket">
+              <span class="ticket-badge">{{ error.ticketNumber }}</span>
+            </td>
+            <td class="td-cliente">
+              <div class="cliente-info">
+                <span class="cliente-rfc">{{ error.rfcReceptor }}</span>
+                <span class="cliente-nombre">{{ error.nombreReceptor }}</span>
+                <span class="cliente-email">{{ error.emailReceptor }}</span>
+              </div>
+            </td>
+            <td class="td-tipo">
+              <span class="badge" [ngClass]="getTipoErrorColor(error.tipoError)">
+                {{ getTipoErrorTexto(error.tipoError) }}
+              </span>
+            </td>
+            <td class="td-mensaje">
+              <div class="mensaje-truncado" [title]="error.mensajeError">
+                {{ error.mensajeError }}
+              </div>
+            </td>
+            <td class="td-intentos text-center">
+              <span class="intentos-badge" [class.intentos-alto]="error.intentos >= 3">
+                {{ error.intentos }}
+              </span>
+            </td>
+            <td class="td-estado">
+              <select 
+                [(ngModel)]="error.estado" 
+                (change)="cambiarEstado(error, error.estado)"
+                class="estado-select"
+                [ngClass]="getEstadoColor(error.estado)">
+                <option *ngFor="let estado of estadosError" [value]="estado">{{ estado }}</option>
+              </select>
+            </td>
+            <td class="td-acciones">
+              <div class="acciones-buttons">
+                <button 
+                  (click)="verDetalle(error)" 
+                  class="btn-accion btn-ver"
+                  title="Ver detalle completo">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+                <button 
+                  (click)="agregarNotas(error)" 
+                  class="btn-accion btn-notas"
+                  title="Agregar notas">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button 
+                  (click)="contactarCliente(error)" 
+                  class="btn-accion btn-email"
+                  title="Contactar cliente">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </button>
+                <button 
+                  (click)="eliminarError(error)" 
+                  class="btn-accion btn-eliminar"
+                  title="Eliminar error">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Estado vacío -->
+    <div *ngIf="!isLoading && errores.length === 0" class="estado-vacio">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon-vacio" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <h3>No hay errores registrados</h3>
+      <p>¡Excelente! No se han encontrado errores de facturación.</p>
+    </div>
+
+    <!-- Paginación -->
+    <div *ngIf="!isLoading && errores.length > 0" class="paginacion">
+      <button 
+        (click)="cambiarPagina(paginaActual - 1)" 
+        [disabled]="paginaActual === 1"
+        class="btn-paginacion">
+        Anterior
+      </button>
+      <span class="paginacion-info">
+        Página {{ paginaActual }} de {{ totalPaginas }} ({{ errores.length }} errores)
+      </span>
+      <button 
+        (click)="cambiarPagina(paginaActual + 1)" 
+        [disabled]="paginaActual === totalPaginas"
+        class="btn-paginacion">
+        Siguiente
+      </button>
+    </div>
+  </div>
+
+  <!-- VISTA: Estadísticas -->
+  <div *ngIf="vistaActual === 'estadisticas'" class="vista-estadisticas">
+    <div *ngIf="isLoadingEstadisticas" class="loader-container">
+      <div class="spinner"></div>
+      <p>Cargando estadísticas...</p>
+    </div>
+
+    <div *ngIf="!isLoadingEstadisticas && estadisticas" class="estadisticas-grid">
+      <!-- Resumen general -->
+      <div class="estadistica-card card-total">
+        <div class="card-header">
+          <h3>Total de Errores</h3>
+          <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="card-value">{{ estadisticas.totalErrores }}</div>
+      </div>
+
+      <div class="estadistica-card card-pendiente">
+        <div class="card-header">
+          <h3>Pendientes</h3>
+          <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="card-value">{{ estadisticas.erroresPendientes }}</div>
+      </div>
+
+      <div class="estadistica-card card-revision">
+        <div class="card-header">
+          <h3>En Revisión</h3>
+          <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        </div>
+        <div class="card-value">{{ estadisticas.erroresEnRevision }}</div>
+      </div>
+
+      <div class="estadistica-card card-resuelto">
+        <div class="card-header">
+          <h3>Resueltos</h3>
+          <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="card-value">{{ estadisticas.erroresResueltos }}</div>
+      </div>
+
+      <!-- Errores por tipo -->
+      <div class="estadistica-card card-amplio">
+        <h3 class="card-titulo">Errores por Tipo</h3>
+        <div class="lista-tipos">
+          <div *ngFor="let item of estadisticas.erroresPorTipo" class="tipo-item">
+            <span class="tipo-nombre">{{ getTipoErrorTexto(item.tipo) }}</span>
+            <div class="tipo-barra-container">
+              <div class="tipo-barra" [style.width.%]="(item.cantidad / estadisticas.totalErrores) * 100"></div>
+            </div>
+            <span class="tipo-valor">{{ item.cantidad }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clientes más afectados -->
+      <div class="estadistica-card card-amplio">
+        <h3 class="card-titulo">Clientes Más Afectados</h3>
+        <div class="lista-clientes">
+          <div *ngFor="let cliente of estadisticas.clientesMasAfectados" class="cliente-item">
+            <div class="cliente-info-stat">
+              <span class="cliente-rfc-stat">{{ cliente.rfc }}</span>
+              <span class="cliente-nombre-stat">{{ cliente.nombre }}</span>
+            </div>
+            <span class="cliente-cantidad">{{ cliente.cantidad }} errores</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
