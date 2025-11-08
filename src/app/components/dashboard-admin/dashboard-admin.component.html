@@ -1,0 +1,177 @@
+<div class="dashboard-admin-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <h1 class="text-3xl font-bold text-gray-800">Dashboard Administrativo</h1>
+    <button 
+      (click)="refrescar()" 
+      class="refresh-btn"
+      [disabled]="isLoading"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      Refrescar
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p class="text-gray-600 mt-4">Cargando datos...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!isLoading" class="dashboard-content">
+    
+    <!-- Stats Cards Grid -->
+    <div class="stats-grid">
+      
+      <!-- Facturas Hoy -->
+      <div class="stat-card bg-gradient-to-br from-blue-500 to-blue-600">
+        <div class="stat-icon bg-blue-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Facturas Hoy</p>
+          <p class="stat-value">{{ stats.totalFacturasHoy }}</p>
+        </div>
+      </div>
+
+      <!-- Facturas Última Semana -->
+      <div class="stat-card bg-gradient-to-br from-green-500 to-green-600">
+        <div class="stat-icon bg-green-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Últimos 7 Días</p>
+          <p class="stat-value">{{ stats.totalFacturasSemana }}</p>
+        </div>
+      </div>
+
+      <!-- Facturas del Mes -->
+      <div class="stat-card bg-gradient-to-br from-purple-500 to-purple-600">
+        <div class="stat-icon bg-purple-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Total del Mes</p>
+          <p class="stat-value">{{ stats.totalFacturasMes }}</p>
+        </div>
+      </div>
+
+      <!-- Certificados Activos -->
+      <div class="stat-card bg-gradient-to-br from-indigo-500 to-indigo-600">
+        <div class="stat-icon bg-indigo-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Certificados Activos</p>
+          <p class="stat-value">{{ stats.certificadosActivos }}/{{ stats.totalCertificados }}</p>
+        </div>
+      </div>
+
+      <!-- Certificados Por Vencer -->
+      <div class="stat-card bg-gradient-to-br from-orange-500 to-orange-600" 
+           [class.alert-pulse]="stats.certificadosPorVencer > 0">
+        <div class="stat-icon bg-orange-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Por Vencer (30 días)</p>
+          <p class="stat-value">{{ stats.certificadosPorVencer }}</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-grid">
+      
+      <!-- Gráfico de Facturas Últimos 7 Días -->
+      <div class="chart-card">
+        <h3 class="chart-title">Facturas Últimos 7 Días</h3>
+        <div class="chart-content">
+          <div *ngIf="stats.facturasUltimos7Dias.length === 0" class="empty-state">
+            <p class="text-gray-500">No hay datos disponibles</p>
+          </div>
+          <div *ngIf="stats.facturasUltimos7Dias.length > 0" class="bar-chart">
+            <div *ngFor="let dia of stats.facturasUltimos7Dias" class="bar-item">
+              <div class="bar-container">
+                <div 
+                  class="bar-fill bg-gradient-to-t from-blue-500 to-blue-400"
+                  [style.height.%]="(dia.cantidad / getMaxFacturasDia()) * 100"
+                  [title]="dia.cantidad + ' facturas'"
+                >
+                  <span class="bar-value" *ngIf="dia.cantidad > 0">{{ dia.cantidad }}</span>
+                </div>
+              </div>
+              <span class="bar-label">{{ dia.fecha }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Certificados Más Usados -->
+      <div class="chart-card">
+        <h3 class="chart-title">Certificados Más Usados (Este Mes)</h3>
+        <div class="chart-content">
+          <div *ngIf="stats.certificadosMasUsados.length === 0" class="empty-state">
+            <p class="text-gray-500">No hay datos disponibles</p>
+          </div>
+          <div *ngIf="stats.certificadosMasUsados.length > 0" class="list-ranking">
+            <div *ngFor="let cert of stats.certificadosMasUsados; let i = index" 
+                 class="ranking-item"
+                 [class.top-1]="i === 0"
+                 [class.top-2]="i === 1"
+                 [class.top-3]="i === 2">
+              <div class="ranking-badge">
+                <span class="ranking-number">{{ i + 1 }}</span>
+              </div>
+              <div class="ranking-info">
+                <p class="ranking-name">{{ cert.nombre }}</p>
+                <p class="ranking-rfc">RFC: {{ cert.rfc }}</p>
+              </div>
+              <div class="ranking-count">
+                <span class="count-value">{{ cert.facturas }}</span>
+                <span class="count-label">facturas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Alert Section para Certificados por Vencer -->
+    <div *ngIf="stats.certificadosPorVencer > 0" class="alert-section">
+      <div class="alert-card">
+        <div class="alert-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div class="alert-content">
+          <h4 class="alert-title">Acción Requerida</h4>
+          <p class="alert-message">
+            Tienes <strong>{{ stats.certificadosPorVencer }}</strong> certificado(s) que vencerá(n) en los próximos 30 días.
+            Es importante renovarlos para evitar interrupciones en la facturación.
+          </p>
+        </div>
+        <button class="alert-button">
+          Ver Certificados
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

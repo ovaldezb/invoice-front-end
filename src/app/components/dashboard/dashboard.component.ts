@@ -5,18 +5,25 @@ import { AuthService } from '../../services/auth.service';
 import { ConfiguraCsdComponent } from '../configura-csd/configura-csd.component';
 import { ListaFacturasComponent } from "../lista-facturas/lista-facturas.component";
 import { AdminErroresComponent } from "../admin-errores/admin-errores.component";
+import { DashboardAdminComponent } from "../dashboard-admin/dashboard-admin.component";
 import { ErrorTrackingService } from '../../services/error-tracking.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ConfiguraCsdComponent, ListaFacturasComponent, AdminErroresComponent],
+  imports: [
+    CommonModule, 
+    ConfiguraCsdComponent, 
+    ListaFacturasComponent, 
+    AdminErroresComponent,
+    DashboardAdminComponent
+  ],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
   givenName: string = '';
   familyName: string = '';
-  activeTab: string = 'tab1';
+  activeTab: string = 'tab0'; // Cambiar a tab0 (Dashboard) por defecto
   totalErroresPendientes: number = 0;
 
   constructor(
