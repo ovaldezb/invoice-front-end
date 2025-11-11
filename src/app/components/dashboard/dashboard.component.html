@@ -1,20 +1,24 @@
-<div class="min-h-screen bg-gray-100">
-  <nav class="bg-white shadow-sm">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+  <!-- Header -->
+  <nav class="bg-white shadow-lg border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         <div class="flex items-center">
-          <h1 class="text-xl font-semibold text-gray-900">Dashboard</h1>
+          <svg class="h-8 w-8 text-blue-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          <h1 class="text-2xl font-bold text-gray-900">Dashboard Administrativo</h1>
         </div>
-        <div class="flex items-center">
-          <div class="flex items-center space-x-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-3 bg-gray-50 rounded-full px-4 py-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span class="text-gray-700">{{givenName}} {{familyName}}</span>
+            <span class="text-sm font-medium text-gray-700">{{givenName}} {{familyName}}</span>
           </div>
           <button
             (click)="logout()"
-            class="p-2 rounded-full text-gray-600 hover:text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-200"
+            class="p-2 rounded-full text-gray-600 hover:text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 transform hover:scale-110"
             title="Cerrar sesión"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -26,45 +30,289 @@
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto py-3 sm:px-6 lg:px-8">
-    <div class="px-4 py-2 sm:px-0">
-      <!-- Tabs Navigation -->
-      <div class="border-b border-gray-200">
-        <nav class="-mb-px flex justify-center space-x-8">
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Tabs Navigation -->
+    <div class="mb-6">
+      <div class="border-b border-gray-200 bg-white rounded-t-lg shadow-sm">
+        <nav class="-mb-px flex space-x-2 px-4">
           <button
-            (click)="activeTab = 'tab1'"
+            (click)="activeTab = 'resumen'"
             [ngClass]="{
-              'border-blue-500 text-blue-600': activeTab === 'tab1',
-              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'tab1'
+              'border-blue-500 text-blue-600 bg-blue-50': activeTab === 'resumen',
+              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50': activeTab !== 'resumen'
             }"
-            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm"
+            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-all duration-200 flex items-center space-x-2"
           >
-            Ver Facturas
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span>Resumen</span>
+          </button>
+          <button
+            (click)="activeTab = 'facturas'"
+            [ngClass]="{
+              'border-blue-500 text-blue-600 bg-blue-50': activeTab === 'facturas',
+              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50': activeTab !== 'facturas'
+            }"
+            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-all duration-200 flex items-center space-x-2"
+          >
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Ver Facturas</span>
           </button>
           <button
             name="configuraCSDTab"
-            (click)="activeTab = 'tab2'"
+            (click)="activeTab = 'configuracion'"
             [ngClass]="{
-              'border-blue-500 text-blue-600': activeTab === 'tab2',
-              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'tab2'
+              'border-blue-500 text-blue-600 bg-blue-50': activeTab === 'configuracion',
+              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50': activeTab !== 'configuracion'
             }"
-            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm"
+            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-all duration-200 flex items-center space-x-2"
           >
-            Configurar CSD
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Configurar CSD</span>
           </button>
         </nav>
       </div>
+    </div>
 
-      <!-- Tab Content -->
-      <div class="mt-4">
-        <div *ngIf="activeTab === 'tab1'" class="p-4 bg-white rounded-lg shadow">
-          <app-lista-facturas></app-lista-facturas>
+    <!-- Tab Content -->
+    <div class="px-4 sm:px-0">
+      <!-- Resumen Tab -->
+      <div *ngIf="activeTab === 'resumen'">
+        <!-- Loading State -->
+        <div *ngIf="loading" class="flex items-center justify-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
-        <div *ngIf="activeTab === 'tab2'" class="p-4 bg-white rounded-lg shadow">
-          <app-configura-csd></app-configura-csd>
+
+        <!-- Dashboard Content -->
+        <div *ngIf="!loading">
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            <!-- Facturas del Mes -->
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-200">
+              <div class="px-6 py-5">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <svg class="h-10 w-10 text-white opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div class="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt class="text-sm font-medium text-blue-100 truncate">Facturas del Mes</dt>
+                      <dd class="text-3xl font-bold text-white">{{stats.facturasDelMes}}</dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Certificados Activos -->
+            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-200">
+              <div class="px-6 py-5">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <svg class="h-10 w-10 text-white opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <div class="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt class="text-sm font-medium text-green-100 truncate">Certificados Activos</dt>
+                      <dd class="text-3xl font-bold text-white">{{stats.certificadosActivos}}</dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sucursales -->
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-200">
+              <div class="px-6 py-5">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <svg class="h-10 w-10 text-white opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <div class="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt class="text-sm font-medium text-purple-100 truncate">Sucursales</dt>
+                      <dd class="text-3xl font-bold text-white">{{stats.sucursalesActivas}}</dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Facturas Canceladas -->
+            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-200">
+              <div class="px-6 py-5">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <svg class="h-10 w-10 text-white opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div class="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt class="text-sm font-medium text-orange-100 truncate">Canceladas</dt>
+                      <dd class="text-3xl font-bold text-white">{{stats.facturasCanceladas}}</dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts and Alerts Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Gráfico de Facturación -->
+            <div class="lg:col-span-2 bg-white rounded-lg shadow-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                </svg>
+                Facturación Últimos 6 Meses
+              </h3>
+              <div *ngIf="facturacionMensual.length === 0" class="text-center py-8 text-gray-500">
+                Cargando datos...
+              </div>
+              <div *ngIf="facturacionMensual.length > 0" class="flex items-end justify-around h-64 space-x-2">
+                <div *ngFor="let mes of facturacionMensual" class="flex flex-col items-center flex-1">
+                  <div class="text-xs font-semibold text-gray-600 mb-2">{{mes.cantidad}}</div>
+                  <div 
+                    class="w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-lg transition-all duration-500 hover:from-blue-700 hover:to-blue-500 cursor-pointer"
+                    [style.height.%]="getBarHeight(mes.cantidad)"
+                    [title]="mes.cantidad + ' facturas'"
+                  ></div>
+                  <div class="text-xs font-medium text-gray-700 mt-2">{{mes.mes}}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Alertas -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="h-5 w-5 text-yellow-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Alertas
+              </h3>
+              
+              <div *ngIf="certificadosPorVencer.length === 0" class="text-center py-8">
+                <svg class="h-12 w-12 text-green-500 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-sm text-gray-600">No hay alertas</p>
+              </div>
+
+              <div *ngIf="certificadosPorVencer.length > 0" class="space-y-3">
+                <div *ngFor="let cert of certificadosPorVencer" class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+                  <div class="flex items-start">
+                    <svg class="h-5 w-5 text-yellow-600 mt-0.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div class="flex-1">
+                      <p class="text-sm font-medium text-yellow-800">Certificado por vencer</p>
+                      <p class="text-xs text-yellow-700 mt-1">{{cert.nombre}}</p>
+                      <p class="text-xs text-yellow-600">Vence en {{diasParaVencer(cert.hasta)}} días</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Certificados y Sucursales -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Certificados -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="h-5 w-5 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                Certificados
+              </h3>
+              
+              <div *ngIf="certificados.length === 0" class="text-center py-8 text-gray-500">
+                No hay certificados registrados
+              </div>
+
+              <div *ngIf="certificados.length > 0" class="space-y-3 max-h-96 overflow-y-auto">
+                <div *ngFor="let cert of certificados" class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <p class="text-sm font-semibold text-gray-900">{{cert.nombre}}</p>
+                      <p class="text-xs text-gray-600 mt-1">RFC: {{cert.rfc}}</p>
+                      <p class="text-xs text-gray-600">No. Certificado: {{cert.no_certificado}}</p>
+                      <div class="mt-2 flex items-center space-x-4 text-xs">
+                        <span class="text-gray-500">Desde: {{formatearFecha(cert.desde)}}</span>
+                        <span class="text-gray-500">Hasta: {{formatearFecha(cert.hasta)}}</span>
+                      </div>
+                    </div>
+                    <div class="ml-3">
+                      <span *ngIf="diasParaVencer(cert.hasta) > 30" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Activo
+                      </span>
+                      <span *ngIf="diasParaVencer(cert.hasta) <= 30 && diasParaVencer(cert.hasta) > 0" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Por vencer
+                      </span>
+                      <span *ngIf="diasParaVencer(cert.hasta) <= 0" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Vencido
+                      </span>
+                    </div>
+                  </div>
+                  <div *ngIf="cert.sucursales && cert.sucursales.length > 0" class="mt-3 pt-3 border-t border-gray-200">
+                    <p class="text-xs text-gray-500 mb-1">Sucursales: {{cert.sucursales.length}}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Facturas Recientes -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Últimas Facturas del Mes
+              </h3>
+              
+              <div *ngIf="facturasRecientes.length === 0" class="text-center py-8 text-gray-500">
+                No hay facturas este mes
+              </div>
+
+              <div *ngIf="facturasRecientes.length > 0" class="space-y-2 max-h-96 overflow-y-auto">
+                <div *ngFor="let factura of facturasRecientes.slice(0, 10)" class="border-l-4 border-blue-500 bg-gray-50 p-3 rounded hover:bg-gray-100 transition-colors duration-200">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <p class="text-xs font-mono text-gray-700">UUID: {{factura.uuid.substring(0, 20)}}...</p>
+                      <p class="text-xs text-gray-600 mt-1">Fecha: {{formatearFecha(factura.fechaTimbrado)}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <!-- Facturas Tab -->
+      <div *ngIf="activeTab === 'facturas'" class="bg-white rounded-lg shadow-lg p-6">
+        <app-lista-facturas></app-lista-facturas>
+      </div>
+
+      <!-- Configuración Tab -->
+      <div *ngIf="activeTab === 'configuracion'" class="bg-white rounded-lg shadow-lg p-6">
+        <app-configura-csd></app-configura-csd>
       </div>
     </div>
   </main>
 </div>
-
