@@ -19,7 +19,6 @@ import { FolioService } from '../../services/folio.service';
 import { Sucursal } from '../../models/sucursal';
 import { ParsePdfService } from '../../services/parse-pdf.service';
 import { EnvironmentService } from '../../services/environment.service';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-genera-factura',
@@ -52,9 +51,6 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
   selectedPdfName: string = '';
   public isUploadingPdf: boolean = false;
   public backEndEnv: string = '';
-  
-  // Subject para implementar debounce en búsqueda de RFC
-  private rfcSearchSubject = new Subject<string>();
 
   constructor(
     private facturacionService: FacturacionService,
@@ -74,32 +70,43 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
     
     this.obtieneDatosParaFacturar();
     this.getEnvironment();
-    this.setupRfcDebounce();
   }
 
   ngOnDestroy(): void {
-    this.rfcSearchSubject.complete();
   }
 
   /**
-   * Configura el debounce para la búsqueda de RFC
+   * Método que se llama desde el template cuando pierde el foco el campo RFC
    */
-  private setupRfcDebounce(): void {
-    this.rfcSearchSubject.pipe(
-      debounceTime(800), // Espera 800ms después del último cambio
-      distinctUntilChanged() // Solo emite si el valor cambió
-    ).subscribe(rfc => {
-      if (rfc && rfc.length >= 12) {
-        this.buscarReceptorPorRfc(rfc);
+  onRfcBlur(): void {
+    // Limpiar y convertir a mayúsculas
+    this.receptor.Rfc = this.receptor.Rfc ? this.receptor.Rfc.trim().toUpperCase() : '';
+    
+    // Buscar solo si tiene al menos 12 caracteres
+    if (this.receptor.Rfc && this.receptor.Rfc.length >= 12) {
+      this.buscarReceptorPorRfc(this.receptor.Rfc);
+    }
+  }
+
+  /**
+   * Método que se llama desde el template cuando se presiona Enter en el campo RFC
+   */
+  onRfcEnter(event: Event): void {
+    event.preventDefault(); // Prevenir el comportamiento por defecto
+    
+    // Limpiar y convertir a mayúsculas
+    this.receptor.Rfc = this.receptor.Rfc ? this.receptor.Rfc.trim().toUpperCase() : '';
+    
+    // Buscar solo si tiene al menos 12 caracteres
+    if (this.receptor.Rfc && this.receptor.Rfc.length >= 12) {
+      this.buscarReceptorPorRfc(this.receptor.Rfc);
+      
+      // Quitar el foco del campo RFC para que el usuario vea el resultado
+      const rfcInput = document.getElementById('rfc') as HTMLInputElement;
+      if (rfcInput) {
+        rfcInput.blur();
       }
-    });
-  }
-
-  /**
-   * Método que se llama desde el template al cambiar el RFC
-   */
-  onRfcChange(rfc: string): void {
-    this.rfcSearchSubject.next(rfc.toUpperCase());
+    }
   }
 
   getEnvironment():void{
