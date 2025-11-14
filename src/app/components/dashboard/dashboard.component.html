@@ -237,19 +237,80 @@
 
               <!-- Registros del grupo -->
               <div *ngIf="isRFCExpandido(grupo.key)" class="divide-y divide-gray-200">
-                <div *ngFor="let registro of grupo.registros" class="px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
-                  <div class="grid grid-cols-12 gap-4">
+                <div *ngFor="let registro of grupo.registros" class="px-4 sm:px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
+                  <!-- Mobile Layout -->
+                  <div class="lg:hidden space-y-3">
+                    <div class="flex items-center justify-between">
+                      <div class="flex-1 min-w-0">
+                        <p class="text-xs font-medium text-gray-500 mb-1">Fecha/Hora</p>
+                        <p class="text-sm text-gray-900">{{ formatearFechaHora(registro.timestamp) }}</p>
+                      </div>
+                      <span 
+                        [ngClass]="getColorTipoEvento(registro.status)"
+                        class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full whitespace-nowrap ml-2"
+                      >
+                        {{ getIconoTipoEvento(registro.status) }} {{ registro.status }}
+                      </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <p class="text-xs font-medium text-gray-500 mb-1">Email</p>
+                        <p class="text-sm text-gray-900 break-all">{{ registro.email }}</p>
+                      </div>
+                      <div>
+                        <p class="text-xs font-medium text-gray-500 mb-1">Ticket</p>
+                        <p class="text-sm font-mono text-gray-600 break-all">{{ registro.ticket }}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p class="text-xs font-medium text-gray-500 mb-1">Mensaje</p>
+                      <div 
+                        (click)="toggleMensaje(registro._id)"
+                        class="cursor-pointer hover:text-blue-600 transition-colors"
+                        [style.display]="isMensajeExpandido(registro._id) ? 'block' : '-webkit-box'"
+                        [style.-webkit-line-clamp]="isMensajeExpandido(registro._id) ? 'unset' : '2'"
+                        [style.-webkit-box-orient]="'vertical'"
+                        [style.overflow]="isMensajeExpandido(registro._id) ? 'visible' : 'hidden'"
+                      >
+                        <p class="text-sm text-gray-900">{{ registro.mensaje }}</p>
+                      </div>
+                      <div *ngIf="registro.traceback && registro.traceback !== 'NoneType: None\n'" 
+                           (click)="toggleMensaje(registro._id)"
+                           class="text-xs text-red-600 mt-2 font-mono bg-red-50 p-2 rounded cursor-pointer hover:bg-red-100 transition-colors break-all"
+                           [style.display]="isMensajeExpandido(registro._id) ? 'block' : '-webkit-box'"
+                           [style.-webkit-line-clamp]="isMensajeExpandido(registro._id) ? 'unset' : '2'"
+                           [style.-webkit-box-orient]="'vertical'"
+                           [style.overflow]="isMensajeExpandido(registro._id) ? 'visible' : 'hidden'">
+                        <strong>Traceback:</strong><br>{{ registro.traceback }}
+                      </div>
+                      <button 
+                        (click)="toggleMensaje(registro._id)"
+                        class="text-xs text-blue-600 hover:text-blue-800 mt-1 flex items-center font-semibold"
+                      >
+                        <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path *ngIf="!isMensajeExpandido(registro._id)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                          <path *ngIf="isMensajeExpandido(registro._id)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                        </svg>
+                        {{ isMensajeExpandido(registro._id) ? 'Ver menos' : 'Ver más' }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Desktop Layout -->
+                  <div class="hidden lg:grid lg:grid-cols-12 gap-4">
                     <div class="col-span-2">
                       <p class="text-xs font-medium text-gray-500 mb-1">Fecha/Hora</p>
                       <p class="text-sm text-gray-900">{{ formatearFechaHora(registro.timestamp) }}</p>
                     </div>
                     <div class="col-span-2">
                       <p class="text-xs font-medium text-gray-500 mb-1">Email</p>
-                      <p class="text-sm text-gray-900">{{ registro.email }}</p>
+                      <p class="text-sm text-gray-900 break-all">{{ registro.email }}</p>
                     </div>
                     <div class="col-span-2">
                       <p class="text-xs font-medium text-gray-500 mb-1">Ticket</p>
-                      <p class="text-sm font-mono text-gray-600">{{ registro.ticket }}</p>
+                      <p class="text-sm font-mono text-gray-600 break-all">{{ registro.ticket }}</p>
                     </div>
                     <div class="col-span-5">
                       <p class="text-xs font-medium text-gray-500 mb-1">Mensaje</p>
@@ -265,7 +326,7 @@
                       </div>
                       <div *ngIf="registro.traceback && registro.traceback !== 'NoneType: None\n'" 
                            (click)="toggleMensaje(registro._id)"
-                           class="text-xs text-red-600 mt-2 font-mono bg-red-50 p-2 rounded cursor-pointer hover:bg-red-100 transition-colors"
+                           class="text-xs text-red-600 mt-2 font-mono bg-red-50 p-2 rounded cursor-pointer hover:bg-red-100 transition-colors break-all"
                            [style.display]="isMensajeExpandido(registro._id) ? 'block' : '-webkit-box'"
                            [style.-webkit-line-clamp]="isMensajeExpandido(registro._id) ? 'unset' : '2'"
                            [style.-webkit-box-orient]="'vertical'"
