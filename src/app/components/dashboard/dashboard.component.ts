@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, DoCheck } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ConfiguraCsdComponent } from '../configura-csd/configura-csd.component';
-import { ListaFacturasComponent } from "../lista-facturas/lista-facturas.component";
 import { TimbresService } from '../../services/timbres.service';
 import { CertificadosService } from '../../services/certificados.service';
 import { BitacoraService } from '../../services/bitacora.service';
@@ -30,10 +29,10 @@ interface FacturaMensual {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfiguraCsdComponent, ListaFacturasComponent],
+  imports: [CommonModule, FormsModule, ConfiguraCsdComponent],
   templateUrl: './dashboard.component.html'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, DoCheck {
   givenName: string = '';
   familyName: string = '';
   email: string = '';
@@ -62,14 +61,24 @@ export class DashboardComponent implements OnInit {
   fechaFinBitacora: string = '';
   filtroStatus: string = '';
   filtroEmail: string = '';
+  filtroRFC: string = '';
   mensajeExpandido: string | null = null;
+  vistaAgrupada: boolean = false;
+  rfcExpandido = new Map<string, boolean>();
+  registrosAgrupadosPorRFC: { key: string; rfc: string; rfcEmisor?: string; registros: RegistroBitacora[]; totalExito: number; totalError: number; totalWarning: number; totalInfo: number }[] = [];
+  
+  // Para detectar cambios en filtros
+  private lastFiltroStatus: string = '';
+  private lastFiltroEmail: string = '';
+  private lastFiltroRFC: string = '';
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private timbresService: TimbresService,
     private certificadosService: CertificadosService,
-    private bitacoraService: BitacoraService
+    private bitacoraService: BitacoraService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -84,6 +93,19 @@ export class DashboardComponent implements OnInit {
       console.error('Error al obtener el usuario actual:', error);
       this.router.navigate(['/login']);
     });
+  }
+
+  ngDoCheck(): void {
+    // Detectar cambios en filtros y recalcular grupos si es necesario
+    if (this.vistaAgrupada && 
+        (this.lastFiltroStatus !== this.filtroStatus || 
+         this.lastFiltroEmail !== this.filtroEmail || 
+         this.lastFiltroRFC !== this.filtroRFC)) {
+      this.lastFiltroStatus = this.filtroStatus;
+      this.lastFiltroEmail = this.filtroEmail;
+      this.lastFiltroRFC = this.filtroRFC;
+      this.calcularGruposPorRFC();
+    }
   }
 
   cargarDatosDashboard(): void {
@@ -295,6 +317,7 @@ export class DashboardComponent implements OnInit {
       next: (response) => {
         if (response.status === 200 && response.body) {
           this.registrosBitacora = response.body.data || [];
+          this.calcularGruposPorRFC();
         }
         this.bitacoraLoading = false;
       },
@@ -415,8 +438,50 @@ export class DashboardComponent implements OnInit {
         registro.status?.toLowerCase().includes(this.filtroStatus.toLowerCase());
       const cumpleFiltroEmail = !this.filtroEmail || 
         registro.email?.toLowerCase().includes(this.filtroEmail.toLowerCase());
-      return cumpleFiltroStatus && cumpleFiltroEmail;
+      const cumpleFiltroRFC = !this.filtroRFC || 
+        registro.rfc?.toLowerCase().includes(this.filtroRFC.toLowerCase()) ||
+        registro.rfcEmisor?.toLowerCase().includes(this.filtroRFC.toLowerCase());
+      return cumpleFiltroStatus && cumpleFiltroEmail && cumpleFiltroRFC;
     });
+  }
+
+  calcularGruposPorRFC(): void {
+    const registrosFiltrados = this.registrosFiltrados;
+    const grupos = new Map<string, RegistroBitacora[]>();
+    
+    registrosFiltrados.forEach(registro => {
+      const key = `${registro.rfc}|${registro.rfcEmisor || 'N/A'}`;
+      if (!grupos.has(key)) {
+        grupos.set(key, []);
+      }
+      grupos.get(key)!.push(registro);
+    });
+
+    this.registrosAgrupadosPorRFC = Array.from(grupos.entries()).map(([key, registros]) => {
+      const [rfc, rfcEmisor] = key.split('|');
+      return {
+        key,
+        rfc,
+        rfcEmisor: rfcEmisor === 'N/A' ? undefined : rfcEmisor,
+        registros: registros.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
+        totalExito: registros.filter(r => r.status === 'exito').length,
+        totalError: registros.filter(r => r.status === 'error').length,
+        totalWarning: registros.filter(r => r.status === 'warning').length,
+        totalInfo: registros.filter(r => r.status === 'info').length
+      };
+    }).sort((a, b) => b.registros.length - a.registros.length);
+    
+    console.log('🔄 Grupos calculados:', this.registrosAgrupadosPorRFC.length);
+  }
+
+  toggleRFC(key: string): void {
+    const currentState = this.rfcExpandido.get(key) || false;
+    this.rfcExpandido.set(key, !currentState);
+    this.cdr.detectChanges();
+  }
+
+  isRFCExpandido(key: string): boolean {
+    return this.rfcExpandido.get(key) || false;
   }
 
   formatearFechaInput(fecha: Date): string {
