@@ -15,7 +15,7 @@ import { FacturacionService } from '../../services/facturacion.service';
   styleUrl: './lista-facturas.component.css'
 })
 export class ListaFacturasComponent implements OnInit {
-  public idUsuarioCognito: string = '';
+  public email: string = '';
   public certificados: Certificado[] = [];
   public expandedCertificadoIndex: number | null = null;
   public facturaHover: any = null;
@@ -61,8 +61,12 @@ export class ListaFacturasComponent implements OnInit {
     
     this.authService.getCurrentUser()
       .then(user => {
-        this.idUsuarioCognito = user.tokens.idToken.payload.sub;
+        this.email = user.tokens.idToken.payload.email;
         this.loadFacturas();
+      })
+      .catch(error => {
+        console.error('Error al obtener usuario:', error);
+        this.loading = false;
       });
   }
 
@@ -95,9 +99,13 @@ export class ListaFacturasComponent implements OnInit {
     const lastDay = new Date(this.selectedYear, this.selectedMonth, 0).getDate();
     const startDate = `${this.selectedYear}-${this.selectedMonth.toString().padStart(2, '0')}-01`;
     const endDate = `${this.selectedYear}-${this.selectedMonth.toString().padStart(2, '0')}-${lastDay}`;
-    this.timbresService.getFacturasEmitidasByMes(this.idUsuarioCognito, startDate, endDate)
+    
+    console.log('🔍 Cargando facturas para:', this.email, 'desde:', startDate, 'hasta:', endDate);
+    
+    this.timbresService.getFacturasEmitidasByMes(this.email, startDate, endDate)
       .subscribe({
         next: (response) => {
+          console.log('✅ Respuesta del servicio:', response);
           this.certificados = response.body || [];
           this.totalFacturasTimbradas = this.certificados
             .map(c => c.facturas_emitidas?.length || 0)
@@ -105,10 +113,10 @@ export class ListaFacturasComponent implements OnInit {
           this.loading = false;
         },
         error: (error) => {
+          console.error('❌ Error cargando facturas:', error);
           this.certificados = [];
           this.totalFacturasTimbradas = 0;
           this.loading = false;
-          console.error('Error cargando facturas:', error);
         }
       });
   }
