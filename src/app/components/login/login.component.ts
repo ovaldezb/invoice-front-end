@@ -45,17 +45,18 @@ export class LoginComponent implements OnInit {
         this.authService.getCurrentUser().then(user => {
           switch(user.tokens.accessToken.payload['cognito:groups'][0]){
             case 'ADMIN':
-              this.router.navigate(['/dashboard']);
+              this.router.navigate(['/dashboard'], { replaceUrl: true });
               break;
             case 'USER':
-              this.router.navigate(['/dashboard']);
+              this.router.navigate(['/dashboard'], { replaceUrl: true });
               break;
             default:
-              this.router.navigate(['/login']);
+              this.router.navigate(['/login'], { replaceUrl: true });
               break;
           }
         }).catch(error => {
           console.error('Error al obtener el usuario actual:', error);
+          this.loading = false;
         });
       },
       error: (error) => {
@@ -83,11 +84,13 @@ export class LoginComponent implements OnInit {
     this.authService.logout().subscribe({
       next: () => {
         this.loading = false;
-        this.router.navigate(['/login']);
+        this.router.navigate(['/login'], { replaceUrl: true });
       },
       error: (error) => {
         this.loading = false;
         console.error('Error en logout:', error);
+        // Redirigir al login incluso si hay error
+        this.router.navigate(['/login'], { replaceUrl: true });
       }
     });
   }

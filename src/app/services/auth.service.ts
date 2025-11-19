@@ -82,10 +82,16 @@ export class AuthService {
           isAuthenticated: false,
           loading: false
         });
+        // Limpiar cualquier estado en localStorage/sessionStorage si se usa
         return { success: true, message: 'Sesión cerrada exitosamente' };
       }),
       catchError((error) => {
         console.error('Error en logout:', error);
+        // Incluso si hay error, actualizar estado a no autenticado
+        this.updateAuthState({
+          isAuthenticated: false,
+          loading: false
+        });
         throw this.handleAuthError(error);
       })
     );

@@ -118,6 +118,10 @@ export class ConfiguraCsdComponent implements OnInit{
   toggleFormulario() {
     this.mostrarFormulario = !this.mostrarFormulario;
     this.csdSeleccionado = null;
+    // Asegurar que esté en modo agregar al abrir el formulario
+    this.mensaje = Global.CONFIGURACION;
+    this.btnAccion = Global.GUARDAR;
+    this.msjAccion = Global.GUARDANDO;
   }
 
   seleccionarCSD(certificado: Certificado) {
@@ -644,6 +648,10 @@ export class ConfiguraCsdComponent implements OnInit{
     this.nuevaSucursal = new Sucursal('', '', '', '', '','', '','', '',1);
     this.archivoCerSeleccionado='';
     this.archivoKeySeleccionado='';
+    // Resetear variables de acción al estado por defecto
+    this.mensaje = Global.CONFIGURACION;
+    this.btnAccion = Global.GUARDAR;
+    this.msjAccion = Global.GUARDANDO;
   }
 
   getExpirationMessage(expirationDate: Date): string {

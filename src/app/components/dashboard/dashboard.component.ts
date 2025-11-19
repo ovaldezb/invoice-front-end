@@ -91,7 +91,7 @@ export class DashboardComponent implements OnInit, DoCheck {
       this.cargarDatosDashboard(); // Cargar datos personales en segundo plano
     }).catch(error => {
       console.error('Error al obtener el usuario actual:', error);
-      this.router.navigate(['/login']);
+      this.router.navigate(['/login'], { replaceUrl: true });
     });
   }
 
@@ -274,10 +274,12 @@ export class DashboardComponent implements OnInit, DoCheck {
   logout(): void {
     this.authService.logout().subscribe({
       next: () => {
-        this.router.navigate(['/login']);
+        this.router.navigate(['/login'], { replaceUrl: true });
       },
       error: (error) => {
         console.error('Error en logout:', error);
+        // Redirigir al login incluso si hay error en el logout
+        this.router.navigate(['/login'], { replaceUrl: true });
       }
     });
   }

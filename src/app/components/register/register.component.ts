@@ -155,7 +155,7 @@ export class RegisterComponent {
                   icon: 'success',
                   timer: 1500,
                 });
-                this.router.navigate(['/verifica-usuario']);
+                this.router.navigate(['/verifica-usuario'], { replaceUrl: true });
               },
               error: (err) => {
                 console.error('Error al registrar usuario:', err);

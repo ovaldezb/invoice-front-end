@@ -30,9 +30,9 @@ export class VerificaUsuarioComponent {
           icon: 'success',
           timer: 1500,
         });
-        // Redirigir al login después de 2 segundos
+        // Redirigir al login después de 2 segundos con replaceUrl
         setTimeout(() => {
-          this.router.navigate(['/login']);
+          this.router.navigate(['/login'], { replaceUrl: true });
         }, 2000);
       },
       error: (error) => {
