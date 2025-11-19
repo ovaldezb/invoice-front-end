@@ -72,7 +72,7 @@
     <div class="px-4 sm:px-0">
       <!-- Configuración Tab -->
       <div *ngIf="activeTab === 'configuracion'" class="bg-white rounded-lg shadow-lg p-6">
-        <app-configura-csd></app-configura-csd>
+        <app-configura-csd (certificadoActualizado)="onCertificadoActualizado()"></app-configura-csd>
       </div>
 
       <!-- Bitácora Tab -->
@@ -162,17 +162,31 @@
                 <span>Agrupar por RFC</span>
               </button>
             </div>
-            <button
-              (click)="cargarBitacora()"
-              [disabled]="bitacoraLoading"
-              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2"
-            >
-              <svg *ngIf="!bitacoraLoading" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <div *ngIf="bitacoraLoading" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
-              <span>{{ bitacoraLoading ? 'Cargando...' : 'Buscar' }}</span>
-            </button>
+            <div class="flex items-center space-x-3">
+              <button
+                (click)="cargarBitacora()"
+                [disabled]="bitacoraLoading"
+                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2"
+                title="Actualizar registros"
+              >
+                <svg *ngIf="!bitacoraLoading" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <div *ngIf="bitacoraLoading" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                <span>{{ bitacoraLoading ? 'Actualizando...' : 'Actualizar' }}</span>
+              </button>
+              <button
+                (click)="cargarBitacora()"
+                [disabled]="bitacoraLoading"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2"
+              >
+                <svg *ngIf="!bitacoraLoading" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <div *ngIf="bitacoraLoading" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                <span>{{ bitacoraLoading ? 'Cargando...' : 'Buscar' }}</span>
+              </button>
+            </div>
           </div>
         </div>
 

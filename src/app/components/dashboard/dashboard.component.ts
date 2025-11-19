@@ -555,4 +555,11 @@ export class DashboardComponent implements OnInit, DoCheck {
         return 'text-blue-600 bg-blue-50';
     }
   }
+
+  onCertificadoActualizado(): void {
+    console.log('🔄 Certificado/Sucursal actualizado, refrescando bitácora...');
+    if (this.activeTab === 'bitacora') {
+      this.cargarBitacora();
+    }
+  }
 }
