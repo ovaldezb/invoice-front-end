@@ -3,23 +3,7 @@
   <div *ngIf="isBusquedaTicket" class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6">
     <!-- Header -->
     <div class="text-center mb-4">
-      <div class="flex justify-between items-center mb-2">
-        <button
-          *ngIf="isAuthenticated"
-          (click)="navigateToDashboard()"
-          class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-sm hover:shadow-md"
-          title="Ir al Dashboard"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          Dashboard
-        </button>
-        <div class="flex-1" [class.text-center]="!isAuthenticated">
-          <h1 class="text-3xl font-bold text-gray-900">Generar Factura</h1>
-        </div>
-        <div *ngIf="isAuthenticated" class="w-24"></div>
-      </div>
+      <h1 class="text-3xl font-bold text-gray-900">Generar Factura</h1>
       <p class="text-gray-600">Ingresa el número de ticket para consultar una venta</p>
     </div>
 
@@ -82,12 +66,27 @@
             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
           </svg>
         </div>
-        <div class="ml-3">
+        <div class="ml-3 flex-1">
           <p class="text-sm text-blue-700 mt-1">
             El número de ticket debe corresponder a una venta válida en el sistema.
           </p>
-          <p class="text-sm text-blue-700 mt-1" style="text-align: right;">Ver {{ Global.VERSION }}</p>
-          <p class="text-sm text-blue-500 mt-1" style="text-align: right;font-size: 10px;">F-{{ Global.ENV_NAME }} B-{{ backEndEnv }}</p>
+          <div class="flex justify-between items-end mt-3 gap-2">
+            <div>
+              <p class="text-sm text-blue-700">Ver {{ Global.VERSION }}</p>
+              <p class="text-[10px] text-blue-500">F-{{ Global.ENV_NAME }} B-{{ backEndEnv }}</p>
+            </div>
+            <button
+              *ngIf="isAuthenticated"
+              (click)="navigateToDashboard()"
+              class="inline-flex items-center px-2.5 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-md text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap"
+              title="Panel de Administración"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <span>Admin</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
