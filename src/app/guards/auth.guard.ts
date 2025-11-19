@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { Observable, from } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map, filter, take } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
-import { getCurrentUser } from 'aws-amplify/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -15,10 +14,12 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   canActivate(): Observable<boolean> {
-    // Revalidar la sesión en cada activación del guard
-    return from(getCurrentUser()).pipe(
-      map(user => {
-        if (user) {
+    // Esperar a que termine la verificación inicial del estado de autenticación
+    return this.authService.authState$.pipe(
+      filter(state => !state.loading), // Esperar a que loading sea false
+      take(1), // Tomar solo el primer valor después de que loading sea false
+      map(state => {
+        if (state.isAuthenticated) {
           // Usuario autenticado, permitir acceso
           return true;
         } else {
@@ -26,11 +27,6 @@ export class AuthGuard implements CanActivate {
           this.router.navigate(['/login'], { replaceUrl: true });
           return false;
         }
-      }),
-      catchError(() => {
-        // Error al verificar sesión, redirigir al login
-        this.router.navigate(['/login'], { replaceUrl: true });
-        return from([false]);
       })
     );
   }
