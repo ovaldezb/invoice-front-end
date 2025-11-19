@@ -356,8 +356,14 @@
 
       <!-- Modal panel -->
       <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 z-50">
-        <div class="px-6 py-4">
+        <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-medium text-gray-900">{{btnAction}}</h3>
+          <p class="mt-1 text-sm text-gray-600">
+            <span class="font-semibold">Empresa:</span> {{csdActual.nombre || 'N/A'}}
+          </p>
+          <p class="text-xs text-gray-500">
+            <span class="font-semibold">RFC:</span> {{csdActual.rfc || 'N/A'}}
+          </p>
         </div>
         <div class="px-6 py-4">
           <div class="space-y-4">
