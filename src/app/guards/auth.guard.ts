@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, filter, take } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
@@ -13,18 +13,21 @@ export class AuthGuard implements CanActivate {
     private router: Router
   ) {}
 
-  canActivate(): Observable<boolean> {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     // Esperar a que termine la verificación inicial del estado de autenticación
     return this.authService.authState$.pipe(
-      filter(state => !state.loading), // Esperar a que loading sea false
+      filter(authState => !authState.loading), // Esperar a que loading sea false
       take(1), // Tomar solo el primer valor después de que loading sea false
-      map(state => {
-        if (state.isAuthenticated) {
+      map(authState => {
+        if (authState.isAuthenticated) {
           // Usuario autenticado, permitir acceso
           return true;
         } else {
-          // No autenticado, redirigir con replaceUrl para evitar historial
-          this.router.navigate(['/login'], { replaceUrl: true });
+          // No autenticado, guardar la URL actual y redirigir al login
+          this.router.navigate(['/login'], { 
+            queryParams: { returnUrl: state.url },
+            replaceUrl: true 
+          });
           return false;
         }
       })

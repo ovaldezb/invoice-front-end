@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Global } from '../../services/Global';
 import { EnvironmentService } from '../../services/environment.service';
@@ -20,14 +20,18 @@ export class LoginComponent implements OnInit {
   error: string = '';
   public Global = Global;
   backEndEnv: string = '';
+  private returnUrl: string = '/dashboard';
   
   constructor(
     private authService: AuthService,
     private environmentService: EnvironmentService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    // Obtener la URL de retorno si existe
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
     this.getEnvironment();
   }
 
@@ -43,20 +47,13 @@ export class LoginComponent implements OnInit {
     this.authService.login(this.email, this.password).subscribe({
       next: () => {
         this.authService.getCurrentUser().then(user => {
-          switch(user.tokens.accessToken.payload['cognito:groups'][0]){
-            case 'ADMIN':
-              this.router.navigate(['/dashboard'], { replaceUrl: true });
-              break;
-            case 'USER':
-              this.router.navigate(['/dashboard'], { replaceUrl: true });
-              break;
-            default:
-              this.router.navigate(['/login'], { replaceUrl: true });
-              break;
-          }
+          // Redirigir a la URL guardada o al dashboard por defecto
+          this.router.navigate([this.returnUrl], { replaceUrl: true });
         }).catch(error => {
           console.error('Error al obtener el usuario actual:', error);
           this.loading = false;
+          // Aunque haya error, si el login fue exitoso, redirigir
+          this.router.navigate([this.returnUrl], { replaceUrl: true });
         });
       },
       error: (error) => {
