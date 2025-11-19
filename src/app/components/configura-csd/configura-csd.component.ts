@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Sucursal } from '../../models/sucursal';
@@ -23,6 +23,8 @@ import { error } from 'console';
   templateUrl: './configura-csd.component.html',
 })
 export class ConfiguraCsdComponent implements OnInit{
+  @Output() certificadoActualizado = new EventEmitter<void>();
+  
   public certificados:Certificado[] = [];
   public mostrarFormulario: boolean = false;
   public isLoadingCerts: boolean = false; // Variable para controlar el estado de carga de certificados
@@ -252,6 +254,7 @@ export class ConfiguraCsdComponent implements OnInit{
                             });
                             this.loadCerts(); // Recargar los certificados para reflejar los cambios
                             this.cerrarModal();
+                            this.certificadoActualizado.emit(); // Notificar al componente padre
                         },
                         error: (error) => {
                             this.isSavingSucursal = false;
@@ -326,6 +329,7 @@ export class ConfiguraCsdComponent implements OnInit{
                 }
                 this.loadCerts(); // Recargar los certificados para reflejar los cambios
                 this.cerrarModal();
+                this.certificadoActualizado.emit(); // Notificar al componente padre
               },
               error: (error) => {
                   this.isSavingSucursal = false; // Asegurarse de que el estado de guardado se restablezca en caso de error
