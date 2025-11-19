@@ -1,8 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { FacturacionService } from '../../services/facturacion.service';
 import { FacturaCalculatorService } from '../../services/factura-calculator.service';
+import { AuthService } from '../../services/auth.service';
 import { RegimenFiscal } from '../../models/regimenfiscal';
 import { UsoCFDI } from '../../models/usoCfdi';
 import { HttpResponse } from '@angular/common/http';
@@ -51,13 +53,16 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
   selectedPdfName: string = '';
   public isUploadingPdf: boolean = false;
   public backEndEnv: string = '';
+  public isAuthenticated: boolean = false;
 
   constructor(
     private facturacionService: FacturacionService,
     private facturaCalculator: FacturaCalculatorService,
     private folioService: FolioService,
     private pdfService: ParsePdfService,
-    private environmentService: EnvironmentService
+    private environmentService: EnvironmentService,
+    private authService: AuthService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -68,11 +73,25 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
     this.listaFormaPago = [];
     this.listaUsoCfdiFiltrado = [];
     
+    // Verificar si el usuario está autenticado
+    this.authService.isAuthenticated().subscribe({
+      next: (authenticated) => {
+        this.isAuthenticated = authenticated;
+      },
+      error: () => {
+        this.isAuthenticated = false;
+      }
+    });
+    
     this.obtieneDatosParaFacturar();
     this.getEnvironment();
   }
 
   ngOnDestroy(): void {
+  }
+
+  navigateToDashboard(): void {
+    this.router.navigate(['/dashboard']);
   }
 
   /**

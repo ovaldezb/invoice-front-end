@@ -226,6 +226,18 @@
   <div *ngIf="mostrarFormulario" class="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
     <div class="md:grid md:grid-cols-3 md:gap-6">
       <div class="md:col-span-1">
+        <div class="flex items-center space-x-3 mb-3">
+          <button
+            (click)="toggleFormulario()"
+            class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-sm hover:shadow-md"
+            title="Volver a la lista"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Volver
+          </button>
+        </div>
         <h3 class="text-lg font-medium leading-6 text-gray-900">Certificado de Sello Digital (CSD)</h3>
         <p class="mt-1 text-sm text-gray-500">
           Sube los archivos necesarios para la {{mensaje}} de tu CSD del SAT
@@ -344,8 +356,14 @@
 
       <!-- Modal panel -->
       <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 z-50">
-        <div class="px-6 py-4">
+        <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-medium text-gray-900">{{btnAction}}</h3>
+          <p class="mt-1 text-sm text-gray-600">
+            <span class="font-semibold">Empresa:</span> {{csdActual.nombre || 'N/A'}}
+          </p>
+          <p class="text-xs text-gray-500">
+            <span class="font-semibold">RFC:</span> {{csdActual.rfc || 'N/A'}}
+          </p>
         </div>
         <div class="px-6 py-4">
           <div class="space-y-4">
