@@ -73,13 +73,16 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
     this.listaFormaPago = [];
     this.listaUsoCfdiFiltrado = [];
     
-    // Verificar si el usuario está autenticado
+    // Verificar si el usuario está autenticado (pero no bloquear si no lo está)
     this.authService.isAuthenticated().subscribe({
       next: (authenticated) => {
         this.isAuthenticated = authenticated;
       },
-      error: () => {
+      error: (error) => {
+        // En caso de error, simplemente marcar como no autenticado
+        // NO redirigir, ya que esta página es pública
         this.isAuthenticated = false;
+        console.log('Usuario no autenticado, modo público');
       }
     });
     
