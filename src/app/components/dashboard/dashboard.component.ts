@@ -271,6 +271,10 @@ export class DashboardComponent implements OnInit, DoCheck {
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   }
 
+  navigateToHome(): void {
+    this.router.navigate(['/factura']);
+  }
+
   logout(): void {
     this.authService.logout().subscribe({
       next: () => {
