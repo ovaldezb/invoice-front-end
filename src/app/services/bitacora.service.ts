@@ -8,9 +8,9 @@ import { Global } from './Global';
   providedIn: 'root'
 })
 export class BitacoraService {
-  private readonly BASE_URL = 'https://v6z1l22kw7.execute-api.us-west-1.amazonaws.com/prod';
+  private readonly BASE_URL = Global.urlBackEnd;
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) { }
 
   /**
    * Obtiene los registros de bitácora en un rango de fechas
