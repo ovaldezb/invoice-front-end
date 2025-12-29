@@ -261,9 +261,10 @@ export class FacturaCalculatorService {
    * Valida que todos los campos obligatorios del receptor estén completos
    */
   isReceptorValid(receptor: Receptor): boolean {
+    const codigoPostalValido = !!receptor.DomicilioFiscalReceptor && /^\d{5}$/.test(receptor.DomicilioFiscalReceptor);
     return !!(
       receptor.Rfc &&
-      receptor.DomicilioFiscalReceptor &&
+      codigoPostalValido &&
       receptor.Nombre &&
       receptor.email &&
       this.isValidEmail(receptor.email) &&
