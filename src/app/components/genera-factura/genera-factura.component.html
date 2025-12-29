@@ -287,13 +287,9 @@
             type="text"
             id="domicilioFiscal"
             [(ngModel)]="receptor.DomicilioFiscalReceptor"
-            (ngModelChange)="onCpChange($event)"
             (blur)="receptor.DomicilioFiscalReceptor = receptor.DomicilioFiscalReceptor ? receptor.DomicilioFiscalReceptor.trim() : ''"
             [disabled]="isLoadingFactura"
             placeholder="Domicilio Fiscal (CP) *"
-            inputmode="numeric"
-            pattern="[0-9]{5}"
-            title="Sólo números. 5 dígitos."
             class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
             [class.border-red-500]="!receptor.DomicilioFiscalReceptor && showValidationErrors"
             [class.border-gray-300]="receptor.DomicilioFiscalReceptor || !showValidationErrors"
@@ -301,9 +297,6 @@
           >
           <p *ngIf="!receptor.DomicilioFiscalReceptor && showValidationErrors && !isLoadingReceptor" class="mt-1 text-xs text-red-600">
             El código postal es obligatorio
-          </p>
-          <p *ngIf="receptor.DomicilioFiscalReceptor && !(/^[0-9]{5}$/.test(receptor.DomicilioFiscalReceptor)) && showValidationErrors && !isLoadingReceptor" class="mt-1 text-xs text-red-600">
-            El código postal debe contener exactamente 5 dígitos
           </p>
         </div>
 

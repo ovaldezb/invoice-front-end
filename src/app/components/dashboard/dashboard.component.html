@@ -281,22 +281,26 @@
                     <div>
                       <p class="text-xs font-medium text-gray-500 mb-1">Mensaje</p>
                       <div 
-                        (click)="toggleMensaje(registro._id)"
-                        class="cursor-pointer hover:text-blue-600 transition-colors"
-                        [style.display]="isMensajeExpandido(registro._id) ? 'block' : '-webkit-box'"
-                        [style.-webkit-line-clamp]="isMensajeExpandido(registro._id) ? 'unset' : '2'"
-                        [style.-webkit-box-orient]="'vertical'"
-                        [style.overflow]="isMensajeExpandido(registro._id) ? 'visible' : 'hidden'"
-                      >
+                          (click)="toggleMensaje(registro._id)"
+                          class="cursor-pointer hover:text-blue-600 transition-colors"
+                          [ngStyle]="{
+                            display: isMensajeExpandido(registro._id) ? 'block' : '-webkit-box',
+                            '-webkit-line-clamp': isMensajeExpandido(registro._id) ? 'unset' : '2',
+                            '-webkit-box-orient': 'vertical',
+                            overflow: isMensajeExpandido(registro._id) ? 'visible' : 'hidden'
+                          }"
+                        >
                         <p class="text-sm text-gray-900">{{ registro.mensaje }}</p>
                       </div>
-                      <div *ngIf="registro.traceback && registro.traceback !== 'NoneType: None\n'" 
-                           (click)="toggleMensaje(registro._id)"
-                           class="text-xs text-red-600 mt-2 font-mono bg-red-50 p-2 rounded cursor-pointer hover:bg-red-100 transition-colors break-all"
-                           [style.display]="isMensajeExpandido(registro._id) ? 'block' : '-webkit-box'"
-                           [style.-webkit-line-clamp]="isMensajeExpandido(registro._id) ? 'unset' : '2'"
-                           [style.-webkit-box-orient]="'vertical'"
-                           [style.overflow]="isMensajeExpandido(registro._id) ? 'visible' : 'hidden'">
+                        <div *ngIf="registro.traceback && registro.traceback !== 'NoneType: None\n'" 
+                          (click)="toggleMensaje(registro._id)"
+                          class="text-xs text-red-600 mt-2 font-mono bg-red-50 p-2 rounded cursor-pointer hover:bg-red-100 transition-colors break-all"
+                          [ngStyle]="{
+                            display: isMensajeExpandido(registro._id) ? 'block' : '-webkit-box',
+                            '-webkit-line-clamp': isMensajeExpandido(registro._id) ? 'unset' : '2',
+                            '-webkit-box-orient': 'vertical',
+                            overflow: isMensajeExpandido(registro._id) ? 'visible' : 'hidden'
+                          }">
                         <strong>Traceback:</strong><br>{{ registro.traceback }}
                       </div>
                       <button 
@@ -331,20 +335,24 @@
                       <div 
                         (click)="toggleMensaje(registro._id)"
                         class="cursor-pointer hover:text-blue-600 transition-colors"
-                        [style.display]="isMensajeExpandido(registro._id) ? 'block' : '-webkit-box'"
-                        [style.-webkit-line-clamp]="isMensajeExpandido(registro._id) ? 'unset' : '2'"
-                        [style.-webkit-box-orient]="'vertical'"
-                        [style.overflow]="isMensajeExpandido(registro._id) ? 'visible' : 'hidden'"
+                        [ngStyle]="{
+                          display: isMensajeExpandido(registro._id) ? 'block' : '-webkit-box',
+                          '-webkit-line-clamp': isMensajeExpandido(registro._id) ? 'unset' : '2',
+                          '-webkit-box-orient': 'vertical',
+                          overflow: isMensajeExpandido(registro._id) ? 'visible' : 'hidden'
+                        }"
                       >
                         <p class="text-sm text-gray-900">{{ registro.mensaje }}</p>
                       </div>
-                      <div *ngIf="registro.traceback && registro.traceback !== 'NoneType: None\n'" 
-                           (click)="toggleMensaje(registro._id)"
-                           class="text-xs text-red-600 mt-2 font-mono bg-red-50 p-2 rounded cursor-pointer hover:bg-red-100 transition-colors break-all"
-                           [style.display]="isMensajeExpandido(registro._id) ? 'block' : '-webkit-box'"
-                           [style.-webkit-line-clamp]="isMensajeExpandido(registro._id) ? 'unset' : '2'"
-                           [style.-webkit-box-orient]="'vertical'"
-                           [style.overflow]="isMensajeExpandido(registro._id) ? 'visible' : 'hidden'">
+                        <div *ngIf="registro.traceback && registro.traceback !== 'NoneType: None\n'" 
+                          (click)="toggleMensaje(registro._id)"
+                          class="text-xs text-red-600 mt-2 font-mono bg-red-50 p-2 rounded cursor-pointer hover:bg-red-100 transition-colors break-all"
+                          [ngStyle]="{
+                            display: isMensajeExpandido(registro._id) ? 'block' : '-webkit-box',
+                            '-webkit-line-clamp': isMensajeExpandido(registro._id) ? 'unset' : '2',
+                            '-webkit-box-orient': 'vertical',
+                            overflow: isMensajeExpandido(registro._id) ? 'visible' : 'hidden'
+                          }">
                         <strong>Traceback:</strong><br>{{ registro.traceback }}
                       </div>
                       <button 
@@ -382,11 +390,19 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RFC Emisor</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mensaje</th>
-                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <!-- Columna Status eliminada -->
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr *ngFor="let registro of registrosFiltrados" class="hover:bg-gray-50 transition-colors duration-150">
+              <tr *ngFor="let registro of registrosFiltrados"
+                  [ngClass]="{
+                    'bg-green-100': registro.status === 'exito',
+                    'bg-red-100': registro.status === 'error',
+                    'bg-yellow-100': registro.status === 'warning',
+                    'hover:bg-gray-50': true,
+                    'transition-colors': true,
+                    'duration-150': true
+                  }">
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {{ formatearFechaHora(registro.timestamp) }}
                 </td>
@@ -412,20 +428,24 @@
                     <div 
                       (click)="toggleMensaje(registro._id)"
                       class="cursor-pointer hover:text-blue-600 transition-colors"
-                      [style.display]="isMensajeExpandido(registro._id) ? 'block' : '-webkit-box'"
-                      [style.-webkit-line-clamp]="isMensajeExpandido(registro._id) ? 'unset' : '2'"
-                      [style.-webkit-box-orient]="'vertical'"
-                      [style.overflow]="isMensajeExpandido(registro._id) ? 'visible' : 'hidden'"
+                      [ngStyle]="{
+                        display: isMensajeExpandido(registro._id) ? 'block' : '-webkit-box',
+                        '-webkit-line-clamp': isMensajeExpandido(registro._id) ? 'unset' : '2',
+                        '-webkit-box-orient': 'vertical',
+                        overflow: isMensajeExpandido(registro._id) ? 'visible' : 'hidden'
+                      }"
                     >
                       <div class="font-medium">{{ registro.mensaje }}</div>
                     </div>
                     <div *ngIf="registro.traceback && registro.traceback !== 'NoneType: None\n'" 
-                         (click)="toggleMensaje(registro._id)"
-                         class="text-xs text-red-600 mt-2 font-mono bg-red-50 p-2 rounded cursor-pointer hover:bg-red-100 transition-colors"
-                         [style.display]="isMensajeExpandido(registro._id) ? 'block' : '-webkit-box'"
-                         [style.-webkit-line-clamp]="isMensajeExpandido(registro._id) ? 'unset' : '2'"
-                         [style.-webkit-box-orient]="'vertical'"
-                         [style.overflow]="isMensajeExpandido(registro._id) ? 'visible' : 'hidden'">
+                      (click)="toggleMensaje(registro._id)"
+                      class="text-xs text-red-600 mt-2 font-mono bg-red-50 p-2 rounded cursor-pointer hover:bg-red-100 transition-colors"
+                      [ngStyle]="{
+                        display: isMensajeExpandido(registro._id) ? 'block' : '-webkit-box',
+                        '-webkit-line-clamp': isMensajeExpandido(registro._id) ? 'unset' : '2',
+                        '-webkit-box-orient': 'vertical',
+                        overflow: isMensajeExpandido(registro._id) ? 'visible' : 'hidden'
+                      }">
                       <strong>Traceback:</strong><br>{{ registro.traceback }}
                     </div>
                     <button 
@@ -440,14 +460,7 @@
                     </button>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">
-                  <span 
-                    [ngClass]="getColorTipoEvento(registro.status)"
-                    class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full"
-                  >
-                    {{ getIconoTipoEvento(registro.status) }} {{ registro.status }}
-                  </span>
-                </td>
+                <!-- Celda Status eliminada, el color se aplica a la fila -->
               </tr>
             </tbody>
           </table>
