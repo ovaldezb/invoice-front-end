@@ -354,7 +354,7 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
         this.ticketNumber = '';
         Swal.fire({
           icon: 'warning',
-          title: 'Venta no encontrada',
+          title: 'Problema al facturar',
           text: error.error.message,
           confirmButtonColor: '#3b82f6',
         });
