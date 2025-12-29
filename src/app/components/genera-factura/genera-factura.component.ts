@@ -354,7 +354,7 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
         this.ticketNumber = '';
         Swal.fire({
           icon: 'warning',
-          title: 'Venta no encontrada',
+          title: 'Problema al facturar',
           text: error.error.message,
           confirmButtonColor: '#3b82f6',
         });
@@ -369,6 +369,21 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
     this.listaUsoCfdiFiltrado = this.listaUsoCfdi.filter(
       (cfdi)=>cfdi.regfiscalreceptor.indexOf(this.listaRegimenFiscal[event.target["selectedIndex"]-1].regimenfiscal)>=0
     )
+  }
+
+  /**
+   * Normaliza la entrada del Código Postal: deja solo dígitos y limita a 5.
+   */
+  onCpChange(value: string): void {
+    if (!value) {
+      this.receptor.DomicilioFiscalReceptor = '';
+      return;
+    }
+    // Eliminar cualquier carácter no numérico y recortar a 5 caracteres
+    const cleaned = value.replace(/\D/g, '').slice(0, 5);
+    if (this.receptor.DomicilioFiscalReceptor !== cleaned) {
+      this.receptor.DomicilioFiscalReceptor = cleaned;
+    }
   }
 
   filtraUsoCfdi(regimenfiscal:string):void{
