@@ -38,3 +38,4 @@ deploy-*.sh
 # System files
 .DS_Store
 Thumbs.db
+cypress.config.js

@@ -37,6 +37,7 @@ export class DashboardComponent implements OnInit, DoCheck {
   familyName: string = '';
   email: string = '';
   activeTab: string = 'bitacora'; // Cambiado a bitacora como vista predeterminada
+  profile: string = '';
   loading: boolean = true;
 
   // Estadísticas
@@ -83,6 +84,7 @@ export class DashboardComponent implements OnInit, DoCheck {
 
   ngOnInit(): void {
     this.authService.getCurrentUser().then(user => {
+      this.profile = user.tokens.idToken.payload["cognito:groups"][0];
       this.givenName = user.tokens.idToken.payload.given_name;
       this.familyName = user.tokens.idToken.payload.family_name;
       this.email = user.tokens.idToken.payload.email;
