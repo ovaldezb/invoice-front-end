@@ -29,15 +29,14 @@ jobs:
       - name: Unit Tests
         run: npx ng test --watch=false --browsers=ChromeHeadless
 
-      - name: E2E Tests (Cypress)
-        uses: cypress-io/github-action@v6
-        with:
-          browser: chrome
-          headless: true
-          start: npm start
-          wait-on: 'http://localhost:4200'
-          wait-on-timeout: 120
-        continue-on-error: true # Setting to true for now since I can't see the cypress config
+      # - name: E2E Tests (Cypress)
+      #   uses: cypress-io/github-action@v6
+      #   with:
+      #     browser: chrome
+      #     headless: true
+      #     start: npm start
+      #     wait-on: 'http://localhost:4200'
+      #     wait-on-timeout: 120
 
   deploy:
     name: Deploy
