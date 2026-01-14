@@ -4,7 +4,7 @@ import { Emisor } from '../models/emisor';
 import { Receptor } from '../models/receptor';
 import { Concepto } from '../models/conceptos';
 import { Impuestos } from '../models/impuestos';
-import { ImpuestosConcepto } from '../models/ImpuestosConcepto';
+import { ImpuestosConcepto } from '../models/impuestosConcepto';
 import { Traslados } from '../models/traslados';
 import { VentaTapete } from '../models/ventaTapete';
 import { Certificado } from '../models/certificado';
@@ -33,14 +33,14 @@ export class FacturaCalculatorService {
   ): Timbrado {
     const conceptos = this.buildConceptos(ventaTapete);
     const impuestos = this.buildImpuestosFromConceptos(conceptos);
-    
+
     // Calcular subtotal desde los conceptos
     let subtotal = 0;
     conceptos.forEach(concepto => {
       subtotal += concepto.Importe;
     });
     const subtotalRedondeado = this.roundDecimal(subtotal);
-    
+
     // Total = Subtotal + Impuestos Trasladados (validación CFDI40119)
     const totalFactura = this.roundDecimal(
       subtotalRedondeado + impuestos.TotalImpuestosTrasladados
@@ -129,9 +129,9 @@ export class FacturaCalculatorService {
     conceptos.forEach(concepto => {
       // Sumar la base (ya redondeada en el concepto)
       impuestoTrasladoBase += concepto.Importe;
-      
+
       // Sumar los traslados (ya redondeados en el concepto)
-      concepto.Impuestos.Traslados.forEach(traslado => {
+      concepto.Impuestos.Traslados.forEach((traslado: Traslados) => {
         impuestoTrasladoImporte += traslado.Importe;
       });
     });
@@ -203,7 +203,7 @@ export class FacturaCalculatorService {
     // Redondear subtotal e impuestos primero
     const subtotalRedondeado = this.roundDecimal(subtotal);
     const impuestosRedondeados = this.roundDecimal(impuestos);
-    
+
     // Total = suma de valores YA redondeados (validación SAT CFDI40119)
     return {
       subtotal: subtotalRedondeado,
@@ -223,7 +223,7 @@ export class FacturaCalculatorService {
     const hora = this.padZero(hoy.getHours());
     const minuto = this.padZero(hoy.getMinutes());
     const segundos = this.padZero(hoy.getSeconds());
-    
+
     return `${year}-${mes}-${dia}T${hora}:${minuto}:${segundos}`;
   }
 
