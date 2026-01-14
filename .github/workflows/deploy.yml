@@ -34,6 +34,9 @@ jobs:
         with:
           browser: chrome
           headless: true
+          start: npm start
+          wait-on: 'http://localhost:4200'
+          wait-on-timeout: 120
         continue-on-error: true # Setting to true for now since I can't see the cypress config
 
   deploy:
