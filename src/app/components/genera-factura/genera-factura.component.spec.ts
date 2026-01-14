@@ -210,6 +210,9 @@ describe('GeneraFacturaComponent', () => {
     component.sucursal = { serie: 'A', codigo_postal: '12345', codigo_sucursal: '01', regimen_fiscal: '601' } as any;
     component.certificado = { rfc: 'RFCEMISOR', nombre: 'EMPRESA', _id: 'CERT123' } as any;
 
+    // Simula el retorno del servicio para evitar error de 'subscribe'
+    facturacionServiceSpy.generaFactura.and.returnValue(of(new HttpResponse({ body: { uuid: 'UUID123' }, status: 200 })));
+
     // Ejecuta el método que llama internamente al servicio
     component.generaFactura();
 
