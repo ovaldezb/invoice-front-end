@@ -16,7 +16,13 @@ describe('GeneraFacturaComponent', () => {
   let facturacionServiceSpy: jasmine.SpyObj<FacturacionService>;
 
   beforeEach(async () => {
-    facturacionServiceSpy = jasmine.createSpyObj('FacturacionService', ['obtieneDatosReceptorByRfc', 'obtieneDatosVenta', 'getDatosParaFacturar']);
+    facturacionServiceSpy = jasmine.createSpyObj('FacturacionService', [
+      'obtieneDatosReceptorByRfc',
+      'obtieneDatosVenta',
+      'getDatosParaFacturar',
+      'generaFactura',
+      'guardaReceptor'
+    ]);
     await TestBed.configureTestingModule({
       imports: [GeneraFacturaComponent, HttpClientModule],
       providers: [
@@ -29,7 +35,7 @@ describe('GeneraFacturaComponent', () => {
   });
 
   it('debe llamar al servicio y actualizar el receptor si el RFC es válido', () => {
-    const mockReceptor = new Receptor('VABO780711D41', 'Juan Pérez', '12345', '601', 'G03', 'juan@email.com');
+    const mockReceptor = new Receptor('VABO780711D41', 'Juan Pérez', '12345', '601', 'G03', 'juan@email.com', 'ID123');
     facturacionServiceSpy.obtieneDatosReceptorByRfc.and.returnValue(of(new HttpResponse({
       body: mockReceptor,
       status: 200,
@@ -49,7 +55,7 @@ describe('GeneraFacturaComponent', () => {
     component.isLoadingFactura = true;
     component.isBusquedaTicket = false;
     component.timbrado = { Version: '4.0' } as any;
-    component.receptor = new Receptor('RFC', 'Nombre', 'Domicilio', '601', 'G03', 'email@email.com');
+    component.receptor = new Receptor('RFC', 'Nombre', 'Domicilio', '601', 'G03', 'email@email.com', 'ID123');
     component.ventaTapete = new VentaTapete('venta', new Ticket('1', '2023-01-01', 1, 1, 1, 1), [], { formapago: '01' });
     // Ejecuta el método
     component.limpiaDatosVentaFactura();
@@ -57,7 +63,7 @@ describe('GeneraFacturaComponent', () => {
     expect(component.isLoadingFactura).toBeFalse();
     expect(component.isBusquedaTicket).toBeTrue();
     expect(component.timbrado).toEqual({} as any);
-    expect(component.receptor).toEqual(new Receptor('', '', '', '', '', ''));
+    expect(component.receptor).toEqual(new Receptor('', '', '', '', '', '', ''));
     expect(component.ventaTapete.ticket.noVenta).toBe('');
   });
 
@@ -65,11 +71,14 @@ describe('GeneraFacturaComponent', () => {
   // Se elimina este test del componente ya que la lógica está centralizada en el servicio
 
   it('debe llamar al servicio de facturación y establecer isLoadingFactura en true al generar la factura', () => {
-    // Simula el método del servicio
-    facturacionServiceSpy.generaFactura = jasmine.createSpy().and.returnValue(of({ folio: 'F123' }));
+    // Simula el método del servicio con una respuesta de tipo HttpResponse
+    facturacionServiceSpy.generaFactura.and.returnValue(of(new HttpResponse({
+      body: { uuid: 'UUID123' },
+      status: 200
+    })));
 
     // Prepara datos mínimos requeridos
-    component.receptor = new Receptor('VABO780711D41', 'Juan Pérez', '12345', '601', 'G03', 'juan@email.com');
+    component.receptor = new Receptor('VABO780711D41', 'Juan Pérez', '12345', '601', 'G03', 'juan@email.com', 'ID123');
     component.ventaTapete = new VentaTapete('venta', new Ticket('1', '2023-01-01', 1, 1, 1, 1), [], { formapago: '01' });
 
     // Ejecuta el método
@@ -81,8 +90,11 @@ describe('GeneraFacturaComponent', () => {
   });
 
   it('debe llamar al servicio para guardar el receptor y actualizar isLoadingReceptor', () => {
-    facturacionServiceSpy.guardaReceptor = jasmine.createSpy().and.returnValue(of({ success: true }));
-    component.receptor = new Receptor('VABO780711D41', 'Juan Pérez', '12345', '601', 'G03', 'juan@email.com');
+    facturacionServiceSpy.guardaReceptor.and.returnValue(of(new HttpResponse({
+      body: { success: true },
+      status: 200
+    })));
+    component.receptor = new Receptor('VABO780711D41', 'Juan Pérez', '12345', '601', 'G03', 'juan@email.com', 'ID123');
     component.isLoadingReceptor = false;
     component.guardaReceptor();
     expect(facturacionServiceSpy.guardaReceptor).toHaveBeenCalledWith(component.receptor);
@@ -134,13 +146,13 @@ describe('GeneraFacturaComponent', () => {
   it('debe reiniciar los datos y mostrar la pantalla de consulta al llamar regresarAConsulta()', () => {
     // Prepara datos simulados
     component.ventaTapete = new VentaTapete('venta', new Ticket('1', '2023-01-01', 1, 1, 1, 1), [], { formapago: '01' });
-    component.receptor = new Receptor('RFC', 'Nombre', 'Domicilio', '601', 'G03', 'email@email.com');
+    component.receptor = new Receptor('RFC', 'Nombre', 'Domicilio', '601', 'G03', 'email@email.com', 'ID123');
     component.listaUsoCfdiFiltrado = [{ id: '1', usoCfdi: 'G03', descripcion: 'Gastos en general', regfiscalreceptor: '601' }];
     component.showValidationErrors = true;
     component.isBusquedaTicket = false;
     component.regresarAConsulta();
     expect(component.ventaTapete).toEqual(new VentaTapete('', new Ticket('', '', 0, 0, 0, 0), [], { formapago: '' }));
-    expect(component.receptor).toEqual(new Receptor('', '', '', '', '', ''));
+    expect(component.receptor).toEqual(new Receptor('', '', '', '', '', '', ''));
     expect(component.listaUsoCfdiFiltrado).toEqual([]);
     expect(component.showValidationErrors).toBeFalse();
     expect(component.isBusquedaTicket).toBeTrue();
@@ -194,7 +206,7 @@ describe('GeneraFacturaComponent', () => {
       importe: 200
     };
     component.ventaTapete = new VentaTapete('venta', new Ticket('123', '2023-01-01', 1, 1, 1, 1), [prod], { formapago: '01' });
-    component.receptor = new Receptor('RFC', 'Nombre', '12345', '601', 'G03', 'email@email.com');
+    component.receptor = new Receptor('RFC', 'Nombre', '12345', '601', 'G03', 'email@email.com', 'ID123');
     component.sucursal = { serie: 'A', codigo_postal: '12345', codigo_sucursal: '01', regimen_fiscal: '601' } as any;
     component.certificado = { rfc: 'RFCEMISOR', nombre: 'EMPRESA', _id: 'CERT123' } as any;
 

@@ -83,6 +83,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION_DEV }}
 
+      - name: S3 Cleanup (Test)
+        if: github.ref == 'refs/heads/develop'
+        run: aws s3 rm s3://${{ secrets.AWS_S3_BUCKET_TEST }} --recursive
+
       - name: S3 Sync
         if: github.ref == 'refs/heads/develop'
         run: aws s3 sync dist/invoice-front-end s3://${{ secrets.AWS_S3_BUCKET_TEST }} --delete
