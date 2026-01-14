@@ -5,6 +5,7 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -40,6 +41,8 @@ jobs:
     needs: test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -60,6 +63,17 @@ jobs:
             npx ng build --configuration development
           fi
 
+      - name: Deployment Summary
+        run: |
+          echo "### 🚀 Deployment Info" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "- **Target:** SFTP Server (${{ secrets.SFTP_SERVER }})" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Target:** S3 Bucket (${{ secrets.AWS_S3_BUCKET_TEST }})" >> $GITHUB_STEP_SUMMARY
+            echo "- **Region:** ${{ secrets.AWS_REGION_DEV }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
       # Deployment to S3 (Develop)
       - name: Deploy to S3 (Develop)
         if: github.ref == 'refs/heads/develop'
@@ -67,20 +81,21 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-      # - name: S3 Sync
-      #   if: github.ref == 'refs/heads/develop'
-      #   run: aws s3 sync dist/invoice-front-end s3://${{ secrets.AWS_S3_BUCKET_TEST }} --delete
+          aws-region: ${{ secrets.AWS_REGION_DEV }}
+
+      - name: S3 Sync
+        if: github.ref == 'refs/heads/develop'
+        run: aws s3 sync dist/invoice-front-end s3://${{ secrets.AWS_S3_BUCKET_TEST }} --delete
 
       # Deployment via SFTP (Main/Production)
-      # - name: Deploy via SFTP (Production)
-      #   if: github.ref == 'refs/heads/main'
-      #   uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      #   with:
-      #     server: ${{ secrets.SFTP_SERVER }}
-      #     username: ${{ secrets.SFTP_USERNAME }}
-      #     password: ${{ secrets.SFTP_PASSWORD }}
-      #     local-dir: dist/invoice-front-end/
-      #     server-dir: ${{ secrets.SFTP_REMOTE_DIR }}
-      #     protocol: sftp
-      #     port: ${{ secrets.SFTP_PORT || 22 }}
+      - name: Deploy via SFTP (Production)
+        if: github.ref == 'refs/heads/main'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.SFTP_SERVER }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          local-dir: dist/invoice-front-end/
+          server-dir: ${{ secrets.SFTP_REMOTE_DIR }}
+          protocol: sftp
+          port: ${{ secrets.SFTP_PORT || 22 }}
