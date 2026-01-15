@@ -96,12 +96,12 @@ jobs:
       # Deployment via SFTP (Main/Production)
       - name: Deploy via SFTP (Production)
         if: github.ref == 'refs/heads/main'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          server: ${{ secrets.SFTP_SERVER }}
           username: ${{ secrets.SFTP_USERNAME }}
+          server: ${{ secrets.SFTP_SERVER }}
           password: ${{ secrets.SFTP_PASSWORD }}
-          local-dir: dist/invoice-front-end/
-          server-dir: ${{ secrets.SFTP_REMOTE_DIR }}
-          protocol: sftp
           port: ${{ secrets.SFTP_PORT || 22 }}
+          local_path: 'dist/invoice-front-end/*'
+          remote_path: ${{ secrets.SFTP_REMOTE_DIR }}
+          delete_remote_files: true
