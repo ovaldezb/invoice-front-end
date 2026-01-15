@@ -355,6 +355,7 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
           Swal.fire({
             icon: 'warning',
             title: error.error.message,
+            text: 'Existe una solicitud en proceso para este ticket, por favor intente más tarde',
             confirmButtonColor: '#3b82f6',
           });
         },
