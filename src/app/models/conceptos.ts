@@ -1,6 +1,6 @@
-import { ImpuestosConcepto } from "./ImpuestosConcepto"
+import { ImpuestosConcepto } from "./impuestosConcepto"
 
-export class Concepto{
+export class Concepto {
   constructor(
     public Impuestos: ImpuestosConcepto,
     public ClaveProdServ: string,
@@ -12,5 +12,5 @@ export class Concepto{
     public Importe: number,
     public Descuento: number,
     public ObjetoImp: string,
-  ){}
+  ) { }
 }

@@ -11,6 +11,7 @@ import { Certificado } from '../../models/certificado';
 import { FacturaEmitida } from '../../models/facturasEmitidas';
 import { RegistroBitacora } from '../../models/bitacora';
 import Swal from 'sweetalert2';
+import { EmitirFacturaComponent } from "../emitir-factura/emitir-factura.component";
 
 interface DashboardStats {
   facturasDelMes: number;
@@ -29,7 +30,7 @@ interface FacturaMensual {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfiguraCsdComponent],
+  imports: [CommonModule, FormsModule, ConfiguraCsdComponent, EmitirFacturaComponent],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit, DoCheck {
@@ -37,6 +38,7 @@ export class DashboardComponent implements OnInit, DoCheck {
   familyName: string = '';
   email: string = '';
   activeTab: string = 'bitacora'; // Cambiado a bitacora como vista predeterminada
+  profile: string = '';
   loading: boolean = true;
 
   // Estadísticas
@@ -66,7 +68,7 @@ export class DashboardComponent implements OnInit, DoCheck {
   vistaAgrupada: boolean = false;
   rfcExpandido = new Map<string, boolean>();
   registrosAgrupadosPorRFC: { key: string; rfc: string; rfcEmisor?: string; registros: RegistroBitacora[]; totalExito: number; totalError: number; totalWarning: number; totalInfo: number }[] = [];
-  
+
   // Para detectar cambios en filtros
   private lastFiltroStatus: string = '';
   private lastFiltroEmail: string = '';
@@ -79,10 +81,11 @@ export class DashboardComponent implements OnInit, DoCheck {
     private certificadosService: CertificadosService,
     private bitacoraService: BitacoraService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.authService.getCurrentUser().then(user => {
+      this.profile = user.tokens.idToken.payload["cognito:groups"][0];
       this.givenName = user.tokens.idToken.payload.given_name;
       this.familyName = user.tokens.idToken.payload.family_name;
       this.email = user.tokens.idToken.payload.email;
@@ -97,10 +100,10 @@ export class DashboardComponent implements OnInit, DoCheck {
 
   ngDoCheck(): void {
     // Detectar cambios en filtros y recalcular grupos si es necesario
-    if (this.vistaAgrupada && 
-        (this.lastFiltroStatus !== this.filtroStatus || 
-         this.lastFiltroEmail !== this.filtroEmail || 
-         this.lastFiltroRFC !== this.filtroRFC)) {
+    if (this.vistaAgrupada &&
+      (this.lastFiltroStatus !== this.filtroStatus ||
+        this.lastFiltroEmail !== this.filtroEmail ||
+        this.lastFiltroRFC !== this.filtroRFC)) {
       this.lastFiltroStatus = this.filtroStatus;
       this.lastFiltroEmail = this.filtroEmail;
       this.lastFiltroRFC = this.filtroRFC;
@@ -110,12 +113,12 @@ export class DashboardComponent implements OnInit, DoCheck {
 
   cargarDatosDashboard(): void {
     this.loading = true;
-    
+
     // Obtener fechas del mes actual
     const hoy = new Date();
     const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
     const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
-    
+
     const desde = primerDiaMes.toISOString().split('T')[0];
     const hasta = ultimoDiaMes.toISOString().split('T')[0];
 
@@ -125,7 +128,7 @@ export class DashboardComponent implements OnInit, DoCheck {
         if (response.status === 200 && response.body) {
           // El endpoint devuelve un array de Certificados con facturas_emitidas anidadas
           const certificados: Certificado[] = response.body;
-          
+
           // Extraer todas las facturas de todos los certificados
           this.facturasRecientes = [];
           certificados.forEach(cert => {
@@ -133,7 +136,7 @@ export class DashboardComponent implements OnInit, DoCheck {
               this.facturasRecientes.push(...cert.facturas_emitidas);
             }
           });
-          
+
           console.log('📊 Facturas cargadas:', this.facturasRecientes.length);
           this.calcularEstadisticas();
         }
@@ -166,11 +169,11 @@ export class DashboardComponent implements OnInit, DoCheck {
 
   calcularEstadisticas(): void {
     this.stats.facturasDelMes = this.facturasRecientes.length;
-    
+
     // Calcular total facturado (esto requeriría más información del backend)
     // Por ahora lo dejamos en 0 o podrías calcularlo si tienes los montos en las facturas
     this.stats.totalFacturado = 0;
-    
+
     // Contar facturas canceladas (si tienen algún indicador)
     this.stats.facturasCanceladas = 0;
   }
@@ -204,13 +207,13 @@ export class DashboardComponent implements OnInit, DoCheck {
   cargarFacturacionHistorica(): void {
     const hoy = new Date();
     const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    
+
     // Obtener los últimos 6 meses
     for (let i = 5; i >= 0; i--) {
       const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
       const primerDia = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
       const ultimoDia = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
-      
+
       const desde = primerDia.toISOString().split('T')[0];
       const hasta = ultimoDia.toISOString().split('T')[0];
 
@@ -219,7 +222,7 @@ export class DashboardComponent implements OnInit, DoCheck {
           if (response.status === 200 && response.body) {
             // El endpoint devuelve Certificado[] con facturas_emitidas anidadas
             const certificados: Certificado[] = response.body;
-            
+
             // Contar todas las facturas de todos los certificados
             let totalFacturas = 0;
             certificados.forEach(cert => {
@@ -227,7 +230,7 @@ export class DashboardComponent implements OnInit, DoCheck {
                 totalFacturas += cert.facturas_emitidas.length;
               }
             });
-            
+
             this.facturacionMensual.push({
               mes: meses[fecha.getMonth()],
               cantidad: totalFacturas,
@@ -330,7 +333,7 @@ export class DashboardComponent implements OnInit, DoCheck {
       error: (error) => {
         console.error('Error al cargar bitácora:', error);
         this.bitacoraLoading = false;
-        
+
         let icono: 'error' | 'warning' | 'info' = 'error';
         let titulo = '¡Oops! Algo salió mal';
         let mensaje = '';
@@ -440,11 +443,11 @@ export class DashboardComponent implements OnInit, DoCheck {
 
   get registrosFiltrados(): RegistroBitacora[] {
     return this.registrosBitacora.filter(registro => {
-      const cumpleFiltroStatus = !this.filtroStatus || 
+      const cumpleFiltroStatus = !this.filtroStatus ||
         registro.status?.toLowerCase().includes(this.filtroStatus.toLowerCase());
-      const cumpleFiltroEmail = !this.filtroEmail || 
+      const cumpleFiltroEmail = !this.filtroEmail ||
         registro.email?.toLowerCase().includes(this.filtroEmail.toLowerCase());
-      const cumpleFiltroRFC = !this.filtroRFC || 
+      const cumpleFiltroRFC = !this.filtroRFC ||
         registro.rfc?.toLowerCase().includes(this.filtroRFC.toLowerCase()) ||
         registro.rfcEmisor?.toLowerCase().includes(this.filtroRFC.toLowerCase());
       return cumpleFiltroStatus && cumpleFiltroEmail && cumpleFiltroRFC;
@@ -454,7 +457,7 @@ export class DashboardComponent implements OnInit, DoCheck {
   calcularGruposPorRFC(): void {
     const registrosFiltrados = this.registrosFiltrados;
     const grupos = new Map<string, RegistroBitacora[]>();
-    
+
     registrosFiltrados.forEach(registro => {
       const key = `${registro.rfc}|${registro.rfcEmisor || 'N/A'}`;
       if (!grupos.has(key)) {
@@ -476,7 +479,7 @@ export class DashboardComponent implements OnInit, DoCheck {
         totalInfo: registros.filter(r => r.status === 'info').length
       };
     }).sort((a, b) => b.registros.length - a.registros.length);
-    
+
     console.log('🔄 Grupos calculados:', this.registrosAgrupadosPorRFC.length);
   }
 
@@ -503,10 +506,10 @@ export class DashboardComponent implements OnInit, DoCheck {
       if (isNaN(fecha.getTime())) {
         return fechaHora;
       }
-      
+
       // MongoDB guarda en UTC, agregar 6 horas para zona horaria de México (CST)
       fecha.setHours(fecha.getHours() + 6);
-      
+
       return fecha.toLocaleString('es-MX', {
         year: 'numeric',
         month: '2-digit',
@@ -529,7 +532,7 @@ export class DashboardComponent implements OnInit, DoCheck {
   }
 
   getIconoTipoEvento(tipo?: string): string {
-    switch(tipo) {
+    switch (tipo) {
       case 'exito':
         return '✓';
       case 'error':
@@ -543,7 +546,7 @@ export class DashboardComponent implements OnInit, DoCheck {
   }
 
   getColorTipoEvento(tipo?: string): string {
-    switch(tipo) {
+    switch (tipo) {
       case 'exito':
         return 'text-green-600 bg-green-50';
       case 'error':

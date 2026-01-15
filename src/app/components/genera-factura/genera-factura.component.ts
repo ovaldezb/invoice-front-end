@@ -24,7 +24,7 @@ import { EnvironmentService } from '../../services/environment.service';
 
 @Component({
   selector: 'app-genera-factura',
-  imports: [FormsModule,CommonModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './genera-factura.component.html',
   styleUrl: './genera-factura.component.css'
 })
@@ -34,21 +34,21 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
   public listaRegimenFiscalBase: RegimenFiscal[] = [];
   public listaUsoCfdi: UsoCFDI[] = [];
   public listaFormaPago: FormaPago[] = [];
-  public listaUsoCfdiFiltrado:UsoCFDI[]=[];
-  public timbrado       :Timbrado={} as Timbrado;
-  public receptor        :Receptor= new Receptor('','','','','','','');
-  public ventaTapete     :VentaTapete=new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
-  public certificado : Certificado = {} as Certificado;
+  public listaUsoCfdiFiltrado: UsoCFDI[] = [];
+  public timbrado: Timbrado = {} as Timbrado;
+  public receptor: Receptor = new Receptor('', '', '', '', '', '', '');
+  public ventaTapete: VentaTapete = new VentaTapete('', new Ticket('', '', 0, 0, 0, 0), [], { formapago: '' });
+  public certificado: Certificado = {} as Certificado;
   public ticketNumber: string = '';
   public isLoading: boolean = false;
   public isLoadingFactura: boolean = false;
   public isBusquedaTicket: boolean = true;
   public showValidationErrors: boolean = false;
   public folio: Folio = new Folio('', '', 0);
-  public sucursal: Sucursal = new Sucursal('', '', '', '','','','','','');
+  public sucursal: Sucursal = new Sucursal('', '', '', '', '', '', '', '', '');
   public isLoadingReceptor: boolean = false;
 
-  
+
   selectedPdf: File | null = null;
   selectedPdfName: string = '';
   public isUploadingPdf: boolean = false;
@@ -72,7 +72,7 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
     this.listaUsoCfdi = [];
     this.listaFormaPago = [];
     this.listaUsoCfdiFiltrado = [];
-    
+
     // Verificar si el usuario está autenticado (pero no bloquear si no lo está)
     // Esperar a que termine de cargar el estado de autenticación
     this.authService.authState$.subscribe(state => {
@@ -81,7 +81,7 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
         console.log('Estado de autenticación en factura:', this.isAuthenticated);
       }
     });
-    
+
     this.obtieneDatosParaFacturar();
     this.getEnvironment();
   }
@@ -99,7 +99,7 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
   onRfcBlur(): void {
     // Limpiar y convertir a mayúsculas
     this.receptor.Rfc = this.receptor.Rfc ? this.receptor.Rfc.trim().toUpperCase() : '';
-    
+
     // Buscar solo si tiene al menos 12 caracteres
     if (this.receptor.Rfc && this.receptor.Rfc.length >= 12) {
       this.buscarReceptorPorRfc(this.receptor.Rfc);
@@ -111,14 +111,14 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
    */
   onRfcEnter(event: Event): void {
     event.preventDefault(); // Prevenir el comportamiento por defecto
-    
+
     // Limpiar y convertir a mayúsculas
     this.receptor.Rfc = this.receptor.Rfc ? this.receptor.Rfc.trim().toUpperCase() : '';
-    
+
     // Buscar solo si tiene al menos 12 caracteres
     if (this.receptor.Rfc && this.receptor.Rfc.length >= 12) {
       this.buscarReceptorPorRfc(this.receptor.Rfc);
-      
+
       // Quitar el foco del campo RFC para que el usuario vea el resultado
       const rfcInput = document.getElementById('rfc') as HTMLInputElement;
       if (rfcInput) {
@@ -127,24 +127,24 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
     }
   }
 
-  getEnvironment():void{
+  getEnvironment(): void {
     this.environmentService.getEnvironment()
-    .subscribe({
-      next: (response:HttpResponse<any>) => {      
+      .subscribe({
+        next: (response: HttpResponse<any>) => {
           this.backEndEnv = response.body.environment || '';
           console.log(response.body);
-      },
-      error: (error) => {
-        this.backEndEnv = '';
-        console.error(error);
-      }
-    }); 
+        },
+        error: (error) => {
+          this.backEndEnv = '';
+          console.error(error);
+        }
+      });
   }
 
-  generaFactura():void{
+  generaFactura(): void {
     // Limpiar espacios en blanco de todos los campos del receptor
     this.trimReceptorFields();
-    
+
     // Usar el servicio de cálculo para construir el timbrado
     const timbrado: Timbrado = this.facturaCalculator.buildTimbrado(
       this.ventaTapete,
@@ -152,48 +152,48 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
       this.certificado,
       this.sucursal
     );
-    
+
     const factura = {
-      timbrado:      timbrado,
-      sucursal:      this.sucursal.codigo_sucursal,
-      ticket:        this.ventaTapete.ticket.noVenta,
+      timbrado: timbrado,
+      sucursal: this.sucursal.codigo_sucursal,
+      ticket: this.ventaTapete.ticket.noVenta,
       idCertificado: this.certificado._id,
-      fechaVenta:    this.ventaTapete.ticket.fecha,
-      email:         this.receptor.email,
-      direccion:     this.sucursal.direccion,
-      empresa:       this.certificado.nombre
+      fechaVenta: this.ventaTapete.ticket.fecha,
+      email: this.receptor.email,
+      direccion: this.sucursal.direccion,
+      empresa: this.certificado.nombre
     }
     this.facturacionService.generaFactura(factura)
-    .subscribe({
-      next: (response) => {
-        if(this.receptor._id==''){
-          this.guardaReceptor();
-        }
-        // Descargar el archivo XML CFDI
-        const xmlContent = response.body != undefined ? (response.body as any).cfdi : null;
-        const uuid = response.body != undefined ? (response.body as any).uuid : '';
-        const pdfBase64 = response.body != undefined ? (response.body as any).pdf_cfdi_b64 : null;
-        let xmlUrl = '';
-        let pdfUrl = '';
-        if (xmlContent && uuid) {
-          const blob = new Blob([xmlContent], { type: 'application/xml' });
-          xmlUrl = window.URL.createObjectURL(blob);
-        }
-        if (pdfBase64 && uuid) {
-          const byteCharacters = atob(pdfBase64);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
+      .subscribe({
+        next: (response) => {
+          if (this.receptor._id == '') {
+            this.guardaReceptor();
           }
-          const byteArray = new Uint8Array(byteNumbers);
-          const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
-          pdfUrl = window.URL.createObjectURL(pdfBlob);
-        }
-        if (uuid && (xmlUrl || pdfUrl)) {
-          Swal.fire({
-            icon: 'success',
-            title: '¡Factura generada!',
-            html: `
+          // Descargar el archivo XML CFDI
+          const xmlContent = response.body != undefined ? (response.body as any).cfdi : null;
+          const uuid = response.body != undefined ? (response.body as any).uuid : '';
+          const pdfBase64 = response.body != undefined ? (response.body as any).pdf_cfdi_b64 : null;
+          let xmlUrl = '';
+          let pdfUrl = '';
+          if (xmlContent && uuid) {
+            const blob = new Blob([xmlContent], { type: 'application/xml' });
+            xmlUrl = window.URL.createObjectURL(blob);
+          }
+          if (pdfBase64 && uuid) {
+            const byteCharacters = atob(pdfBase64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
+            pdfUrl = window.URL.createObjectURL(pdfBlob);
+          }
+          if (uuid && (xmlUrl || pdfUrl)) {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Factura generada!',
+              html: `
               <p class="mb-4 text-gray-700">Se adjuntan los archivos generados</p>
               <table style="width:100%;text-align:center;border-collapse: collapse;">
                 <tr>
@@ -220,31 +220,31 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
                 </tr>
               </table>
             `,
+              confirmButtonColor: '#3b82f6',
+              confirmButtonText: 'Cerrar'
+            });
+          }
+          this.limpiaDatosVentaFactura();
+        },
+        error: (error) => {
+          this.isLoadingFactura = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al generar factura',
+            text: error.error.message,
             confirmButtonColor: '#3b82f6',
-            confirmButtonText: 'Cerrar'
           });
         }
-        this.limpiaDatosVentaFactura();
-      },
-      error: (error) => {
-        this.isLoadingFactura = false;
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al generar factura',
-          text: error.error.message,
-          confirmButtonColor: '#3b82f6',
-        });
-      }
-    });
+      });
   }
 
-  limpiaDatosVentaFactura():void{
+  limpiaDatosVentaFactura(): void {
     this.isLoadingFactura = false;
     this.showValidationErrors = false;
     this.isBusquedaTicket = true;
     this.timbrado = {} as Timbrado;
-    this.receptor = new Receptor('','','','','','','');
-    this.ventaTapete = new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
+    this.receptor = new Receptor('', '', '', '', '', '', '');
+    this.ventaTapete = new VentaTapete('', new Ticket('', '', 0, 0, 0, 0), [], { formapago: '' });
   }
 
   /**
@@ -253,52 +253,52 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
   private buscarReceptorPorRfc(rfc: string): void {
     this.isLoadingReceptor = true;
     this.facturacionService.obtieneDatosReceptorByRfc(rfc)
-    .subscribe({
-      next: (response) => {
-        this.receptor = response.body ? response.body as Receptor : new Receptor(rfc, '', '', '', '','','');
-        this.filtraUsoCfdi(this.receptor.RegimenFiscalReceptor);
-        this.isLoadingReceptor = false;
-      },
-      error: (error) => {
-        // Limpiar receptor si hay error para evitar datos obsoletos
-        const rfcActual = rfc;
-        this.receptor = new Receptor(rfcActual, '', '', '', '','','');
-        
-        if(this.facturaCalculator.esPersonaFisica(rfcActual)){
-          this.listaRegimenFiscal = this.listaRegimenFiscalBase.filter(rf=>rf.fisica===true);
-        }else{
-          this.listaRegimenFiscal = this.listaRegimenFiscalBase.filter(rf=>rf.moral===true);
+      .subscribe({
+        next: (response) => {
+          this.receptor = response.body ? response.body as Receptor : new Receptor(rfc, '', '', '', '', '', '');
+          this.filtraUsoCfdi(this.receptor.RegimenFiscalReceptor);
+          this.isLoadingReceptor = false;
+        },
+        error: (error) => {
+          // Limpiar receptor si hay error para evitar datos obsoletos
+          const rfcActual = rfc;
+          this.receptor = new Receptor(rfcActual, '', '', '', '', '', '');
+
+          if (this.facturaCalculator.esPersonaFisica(rfcActual)) {
+            this.listaRegimenFiscal = this.listaRegimenFiscalBase.filter(rf => rf.fisica === true);
+          } else {
+            this.listaRegimenFiscal = this.listaRegimenFiscalBase.filter(rf => rf.moral === true);
+          }
+          this.receptor.RegimenFiscalReceptor = '';
+          this.isLoadingReceptor = false;
         }
-        this.receptor.RegimenFiscalReceptor = '';
-        this.isLoadingReceptor = false;
-      }
-    });
+      });
   }
 
   /**
    * Método público para compatibilidad con blur event (deprecated)
    * @deprecated Usa onRfcChange en su lugar
    */
-  obtieneReceptor(){
+  obtieneReceptor() {
     if (!this.receptor.Rfc || this.receptor.Rfc.length < 12) {
       return;
     }
     this.buscarReceptorPorRfc(this.receptor.Rfc.toUpperCase());
   }
 
-  guardaReceptor(){
+  guardaReceptor() {
     // Limpiar espacios en blanco antes de guardar
     this.trimReceptorFields();
-    
+
     this.facturacionService.guardaReceptor(this.receptor)
-    .subscribe({
-      next: (response) => {
-        //console.log('Receptor guardado:', response.body);
-      },
-      error: (error) => {
-        //console.error('Error al guardar receptor:', error);
-      }
-    }); 
+      .subscribe({
+        next: (response) => {
+          //console.log('Receptor guardado:', response.body);
+        },
+        error: (error) => {
+          //console.error('Error al guardar receptor:', error);
+        }
+      });
   }
 
   obtieneDatosParaFacturar() {
@@ -307,67 +307,67 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
     this.listaRegimenFiscalBase = [];
     this.listaUsoCfdi = [];
     this.listaFormaPago = [];
-    
+
     this.facturacionService.getDatosParaFacturar()
-    .subscribe({
-      next: (response: HttpResponse<any>) => {      
+      .subscribe({
+        next: (response: HttpResponse<any>) => {
           this.listaRegimenFiscal = response.body.regimen_fiscal || [];
           this.listaRegimenFiscalBase = response.body.regimen_fiscal || [];
           this.listaUsoCfdi = response.body.uso_cfdi || [];
           this.listaFormaPago = response.body.forma_pago || [];
-      },
-      error: (error) => {
-        this.listaRegimenFiscal = [];
-        this.listaRegimenFiscalBase = [];
-        this.listaUsoCfdi = [];
-        this.listaFormaPago = [];
-        console.error(error);
-      }
-    });
+        },
+        error: (error) => {
+          this.listaRegimenFiscal = [];
+          this.listaRegimenFiscalBase = [];
+          this.listaUsoCfdi = [];
+          this.listaFormaPago = [];
+          console.error(error);
+        }
+      });
   }
 
   consultarVenta() {
     // Limpiar espacios en blanco del número de ticket
     this.ticketNumber = this.ticketNumber ? this.ticketNumber.trim() : '';
-    
+
     if (!this.ticketNumber) {
       return;
     }
-    
+
     this.isLoading = true;
     // Resetear datos antes de consultar para evitar mostrar datos antiguos
-    this.ventaTapete = new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
+    this.ventaTapete = new VentaTapete('', new Ticket('', '', 0, 0, 0, 0), [], { formapago: '' });
     this.certificado = {} as Certificado;
-    this.sucursal = new Sucursal('', '', '', '','','','','','');
-    
+    this.sucursal = new Sucursal('', '', '', '', '', '', '', '', '');
+
     this.facturacionService.obtieneDatosVenta(this.ticketNumber)
-    .subscribe({
-      next: (response: HttpResponse<any>) => {
-        this.ventaTapete = response.body.venta;
-        this.certificado = response.body.certificado;
-        this.sucursal = response.body.sucursal;
-        this.ticketNumber = '';
-        this.isBusquedaTicket = false;
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.ticketNumber = '';
-        Swal.fire({
-          icon: 'warning',
-          title: 'Problema al facturar',
-          text: error.error.message,
-          confirmButtonColor: '#3b82f6',
-        });
-      },
-      complete: () => {
-        this.isLoading = false;
-      } 
-    });
+      .subscribe({
+        next: (response: HttpResponse<any>) => {
+          this.ventaTapete = response.body.venta;
+          this.certificado = response.body.certificado;
+          this.sucursal = response.body.sucursal;
+          this.ticketNumber = '';
+          this.isBusquedaTicket = false;
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.ticketNumber = '';
+          Swal.fire({
+            icon: 'warning',
+            title: error.error.message,
+            text: 'Existe una solicitud en proceso para este ticket, por favor intente más tarde',
+            confirmButtonColor: '#3b82f6',
+          });
+        },
+        complete: () => {
+          this.isLoading = false;
+        }
+      });
   }
 
-  buscaUsoCfdi(event:any):void{
+  buscaUsoCfdi(event: any): void {
     this.listaUsoCfdiFiltrado = this.listaUsoCfdi.filter(
-      (cfdi)=>cfdi.regfiscalreceptor.indexOf(this.listaRegimenFiscal[event.target["selectedIndex"]-1].regimenfiscal)>=0
+      (cfdi) => cfdi.regfiscalreceptor.indexOf(this.listaRegimenFiscal[event.target["selectedIndex"] - 1].regimenfiscal) >= 0
     )
   }
 
@@ -386,8 +386,8 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
     }
   }
 
-  filtraUsoCfdi(regimenfiscal:string):void{
-    this.listaUsoCfdiFiltrado = this.listaUsoCfdi.filter((cfdi)=>cfdi.regfiscalreceptor.indexOf(regimenfiscal)>=0)
+  filtraUsoCfdi(regimenfiscal: string): void {
+    this.listaUsoCfdiFiltrado = this.listaUsoCfdi.filter((cfdi) => cfdi.regfiscalreceptor.indexOf(regimenfiscal) >= 0)
   }
 
   isFormValid(): boolean {
@@ -406,8 +406,8 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
   }
 
   regresarAConsulta() {
-    this.ventaTapete = new VentaTapete('',new Ticket('','',0,0,0,0),[],{formapago:''});
-    this.receptor = new Receptor('','','','','','','');
+    this.ventaTapete = new VentaTapete('', new Ticket('', '', 0, 0, 0, 0), [], { formapago: '' });
+    this.receptor = new Receptor('', '', '', '', '', '', '');
     this.listaUsoCfdiFiltrado = [];
     this.showValidationErrors = false;
     this.isBusquedaTicket = true;
@@ -415,7 +415,7 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
 
   generarFactura() {
     this.showValidationErrors = true;
-    
+
     if (!this.isFormValid()) {
       Swal.fire({
         icon: 'warning',
@@ -448,7 +448,7 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
     if (!this.selectedPdf) {
       return;
     }
-    
+
     try {
       this.isUploadingPdf = true;
       const formData = new FormData();
@@ -473,9 +473,9 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
               );
             }
           ).sort((a, b) => a.regimenfiscal.localeCompare(b.regimenfiscal));
-          
+
           this.listaRegimenFiscal = filteredRegimenes;
-          if(this.listaRegimenFiscal.length === 1) {
+          if (this.listaRegimenFiscal.length === 1) {
             this.receptor.RegimenFiscalReceptor = filteredRegimenes[0].regimenfiscal;
             this.filtraUsoCfdi(this.receptor.RegimenFiscalReceptor);
           } else {
@@ -511,7 +511,7 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
         text: 'Ocurrió un error al subir el archivo PDF.',
         confirmButtonColor: '#3b82f6'
       });
-    } 
+    }
   }
 
   /**
