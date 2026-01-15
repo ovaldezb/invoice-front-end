@@ -93,15 +93,15 @@ jobs:
         if: github.ref == 'refs/heads/develop'
         run: aws s3 sync dist/invoice-front-end s3://${{ secrets.AWS_S3_BUCKET_TEST }} --delete
 
-      # Deployment via SFTP (Main/Production)
-      - name: Deploy via SFTP (Production)
+      # Deployment via FTP (Main/Production)
+      - name: Deploy via FTP (Production)
         if: github.ref == 'refs/heads/main'
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          username: ${{ secrets.SFTP_USERNAME }}
           server: ${{ secrets.SFTP_SERVER }}
+          username: ${{ secrets.SFTP_USERNAME }}
           password: ${{ secrets.SFTP_PASSWORD }}
-          port: ${{ secrets.SFTP_PORT || 22 }}
-          local_path: 'dist/invoice-front-end/*'
-          remote_path: ${{ secrets.SFTP_REMOTE_DIR }}
-          delete_remote_files: true
+          local-dir: dist/invoice-front-end/
+          server-dir: ${{ secrets.SFTP_REMOTE_DIR }}
+          protocol: ftp
+          port: 21
