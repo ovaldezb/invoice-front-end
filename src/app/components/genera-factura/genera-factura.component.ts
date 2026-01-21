@@ -354,8 +354,7 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
           this.ticketNumber = '';
           Swal.fire({
             icon: 'warning',
-            title: error.error.message,
-            text: 'Existe una solicitud en proceso para este ticket, por favor intente más tarde',
+            title: error.status!=500 ? error.error.message : 'Ticket no encontrado',
             confirmButtonColor: '#3b82f6',
           });
         },
