@@ -1,7 +1,7 @@
 import { environment } from "../../environments/environment";
 
 export const Global = {
-  VERSION: '1.2.9',
+  VERSION: '1.2.10',
   ENV_NAME: environment.envName,
   urlBackEnd: environment.urlBackEnd,
   urlDatosFactura: environment.urlDatosFactura,
