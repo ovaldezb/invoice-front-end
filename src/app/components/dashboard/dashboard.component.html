@@ -74,6 +74,17 @@
             </svg>
             <span>Emitir Factura</span>
           </button>
+          <button name="pagoTab" (click)="activeTab = 'pago'" [ngClass]="{
+              'border-blue-500 text-blue-600 bg-blue-50': activeTab === 'pago',
+              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50': activeTab !== 'pago'
+            }"
+            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-all duration-200 flex items-center space-x-2">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            <span>Pagos</span>
+          </button>
 
         </nav>
       </div>
@@ -97,6 +108,121 @@
             Emitir Factura
           </h3>
           <app-emitir-factura></app-emitir-factura>
+        </div>
+      </div>
+
+      <!-- Pago Tab -->
+      <div *ngIf="activeTab === 'pago'" class="bg-white rounded-lg shadow-lg p-6">
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <svg class="h-6 w-6 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            Pagos y Suscripción
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Tarjeta de Resumen de Pago -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-100">
+              <h4 class="text-lg font-medium text-gray-800 mb-2">Resumen de Cuenta</h4>
+              <p class="text-gray-500 mb-6">Detalles de tu plan actual y saldo pendiente.</p>
+
+              <div class="space-y-4">
+                <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
+                  <span class="text-gray-600">Plan Actual</span>
+                  <span class="font-semibold text-blue-700">Premium</span>
+                </div>
+
+                <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
+                  <span class="text-gray-600">Periodo</span>
+                  <span class="font-medium text-gray-800">Mensual</span>
+                </div>
+
+                <div
+                  class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+                  <span class="text-gray-600">Estado</span>
+                  <span class="font-bold text-green-600">Activo</span>
+                </div>
+              </div>
+
+              <div class="mt-8 pt-6 border-t border-blue-200">
+                <div class="flex justify-between items-end mb-2">
+                  <span class="text-gray-600 font-medium">Total a Pagar</span>
+                  <span class="text-3xl font-bold text-gray-900">{{ montoAPagar | currency:'MXN' }}</span>
+                </div>
+                <p class="text-sm text-gray-500 text-right mb-6">Próximo cargo: 01 de {{ 'Febrero' }}</p>
+
+                <button (click)="iniciarPago()"
+                  class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transform transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex justify-center items-center">
+                  <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Pagar con Mercado Pago
+                </button>
+                <div class="mt-4 flex justify-center">
+                  <img src="https://img.icons8.com/color/48/mercado-pago.png" alt="Mercado Pago"
+                    class="h-8 opacity-80" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Historial Breve o Info Adicional -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h4 class="text-lg font-medium text-gray-800 mb-4">Historial de Pagos Recientes</h4>
+
+              <div class="space-y-4">
+                <!-- Item Historial Mock -->
+                <div
+                  class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors border-b border-gray-100 last:border-0">
+                  <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-green-100 rounded-full text-green-600">
+                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-900">Pago de Suscripción</p>
+                      <p class="text-xs text-gray-500">01 Ene 2026</p>
+                    </div>
+                  </div>
+                  <span class="text-sm font-semibold text-gray-900">$299.00</span>
+                </div>
+
+                <!-- Item Historial Mock -->
+                <div
+                  class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors border-b border-gray-100 last:border-0">
+                  <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-green-100 rounded-full text-green-600">
+                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-900">Pago de Suscripción</p>
+                      <p class="text-xs text-gray-500">01 Dic 2025</p>
+                    </div>
+                  </div>
+                  <span class="text-sm font-semibold text-gray-900">$299.00</span>
+                </div>
+              </div>
+
+              <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <h5 class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                  <svg class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Información Importante
+                </h5>
+                <p class="text-xs text-gray-500 leading-relaxed">
+                  Los pagos se procesan de forma segura a través de Mercado Pago. Si tienes algún problema con tu
+                  facturación, por favor contacta a soporte.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

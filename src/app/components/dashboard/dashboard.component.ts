@@ -12,6 +12,7 @@ import { FacturaEmitida } from '../../models/facturasEmitidas';
 import { RegistroBitacora } from '../../models/bitacora';
 import Swal from 'sweetalert2';
 import { EmitirFacturaComponent } from "../emitir-factura/emitir-factura.component";
+import { MercadoPagoService } from '../../services/mercado-pago.service';
 
 interface DashboardStats {
   facturasDelMes: number;
@@ -74,12 +75,17 @@ export class DashboardComponent implements OnInit, DoCheck {
   private lastFiltroEmail: string = '';
   private lastFiltroRFC: string = '';
 
+  // Pagos
+  montoAPagar: number = 0; // Se calculará o obtendrá del backend
+  conceptoPago: string = 'Suscripción Mensual';
+
   constructor(
     private authService: AuthService,
     private router: Router,
     private timbresService: TimbresService,
     private certificadosService: CertificadosService,
     private bitacoraService: BitacoraService,
+    private mercadoPagoService: MercadoPagoService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -564,5 +570,45 @@ export class DashboardComponent implements OnInit, DoCheck {
     if (this.activeTab === 'bitacora') {
       this.cargarBitacora();
     }
+  }
+
+  iniciarPago(): void {
+    // Calculamos el monto si es necesario o usamos el valor predeterminado
+    const monto = this.montoAPagar > 0 ? this.montoAPagar : 299; // Fallback a 299 si es 0
+    const titulo = this.conceptoPago || 'Suscripción Mensual';
+
+    Swal.fire({
+      title: 'Procesando pago...',
+      text: 'Generando enlace de pago con Mercado Pago',
+      icon: 'info',
+      showConfirmButton: false,
+      timerProgressBar: true,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    this.mercadoPagoService.createPreference(titulo, 1, monto).subscribe({
+      next: (response) => {
+        if (response.status === 200 && response.body) {
+          const initPoint = response.body.init_point;
+          // const sandboxInitPoint = response.body.sandbox_init_point; 
+
+          Swal.close();
+          // Redirigir a Mercado Pago
+          window.location.href = initPoint;
+        } else {
+          Swal.fire('Error', 'No se pudo generar el pago. Inténtalo de nuevo.', 'error');
+        }
+      },
+      error: (error) => {
+        console.error('Error al generar preferencia:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de conexión',
+          text: 'No se pudo conectar con el servidor de pagos. Por favor intenta más tarde.'
+        });
+      }
+    });
   }
 }
