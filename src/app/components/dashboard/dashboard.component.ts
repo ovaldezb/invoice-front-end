@@ -12,7 +12,8 @@ import { FacturaEmitida } from '../../models/facturasEmitidas';
 import { RegistroBitacora } from '../../models/bitacora';
 import Swal from 'sweetalert2';
 import { EmitirFacturaComponent } from "../emitir-factura/emitir-factura.component";
-import { MercadoPagoService } from '../../services/mercado-pago.service';
+import { ConfiguraPagosComponent } from '../configura-pagos/configura-pagos.component';
+import { PagosComponent } from '../pagos/pagos.component';
 
 interface DashboardStats {
   facturasDelMes: number;
@@ -31,14 +32,14 @@ interface FacturaMensual {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfiguraCsdComponent, EmitirFacturaComponent],
+  imports: [CommonModule, FormsModule, ConfiguraCsdComponent, EmitirFacturaComponent, ConfiguraPagosComponent, PagosComponent],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit, DoCheck {
   givenName: string = '';
   familyName: string = '';
   email: string = '';
-  activeTab: string = 'bitacora'; // Cambiado a bitacora como vista predeterminada
+  activeTab: string = 'bitacora';
   profile: string = '';
   loading: boolean = true;
 
@@ -76,8 +77,7 @@ export class DashboardComponent implements OnInit, DoCheck {
   private lastFiltroRFC: string = '';
 
   // Pagos
-  montoAPagar: number = 0; // Se calculará o obtendrá del backend
-  conceptoPago: string = 'Suscripción Mensual';
+  // Logic moved to PagosComponent
 
   constructor(
     private authService: AuthService,
@@ -85,7 +85,6 @@ export class DashboardComponent implements OnInit, DoCheck {
     private timbresService: TimbresService,
     private certificadosService: CertificadosService,
     private bitacoraService: BitacoraService,
-    private mercadoPagoService: MercadoPagoService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -96,8 +95,8 @@ export class DashboardComponent implements OnInit, DoCheck {
       this.familyName = user.tokens.idToken.payload.family_name;
       this.email = user.tokens.idToken.payload.email;
       this.inicializarFechasBitacora();
-      this.cargarBitacora(); // Cargar bitácora primero (vista predeterminada)
-      this.cargarDatosDashboard(); // Cargar datos personales en segundo plano
+      this.cargarBitacora();
+      this.cargarDatosDashboard();
     }).catch(error => {
       console.error('Error al obtener el usuario actual:', error);
       this.router.navigate(['/login'], { replaceUrl: true });
@@ -105,7 +104,6 @@ export class DashboardComponent implements OnInit, DoCheck {
   }
 
   ngDoCheck(): void {
-    // Detectar cambios en filtros y recalcular grupos si es necesario
     if (this.vistaAgrupada &&
       (this.lastFiltroStatus !== this.filtroStatus ||
         this.lastFiltroEmail !== this.filtroEmail ||
@@ -132,10 +130,8 @@ export class DashboardComponent implements OnInit, DoCheck {
     this.timbresService.getFacturasEmitidasByMes(this.email, desde, hasta).subscribe({
       next: (response) => {
         if (response.status === 200 && response.body) {
-          // El endpoint devuelve un array de Certificados con facturas_emitidas anidadas
           const certificados: Certificado[] = response.body;
 
-          // Extraer todas las facturas de todos los certificados
           this.facturasRecientes = [];
           certificados.forEach(cert => {
             if (cert.facturas_emitidas && cert.facturas_emitidas.length > 0) {
@@ -175,12 +171,7 @@ export class DashboardComponent implements OnInit, DoCheck {
 
   calcularEstadisticas(): void {
     this.stats.facturasDelMes = this.facturasRecientes.length;
-
-    // Calcular total facturado (esto requeriría más información del backend)
-    // Por ahora lo dejamos en 0 o podrías calcularlo si tienes los montos en las facturas
     this.stats.totalFacturado = 0;
-
-    // Contar facturas canceladas (si tienen algún indicador)
     this.stats.facturasCanceladas = 0;
   }
 
@@ -214,7 +205,6 @@ export class DashboardComponent implements OnInit, DoCheck {
     const hoy = new Date();
     const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-    // Obtener los últimos 6 meses
     for (let i = 5; i >= 0; i--) {
       const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
       const primerDia = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
@@ -226,10 +216,7 @@ export class DashboardComponent implements OnInit, DoCheck {
       this.timbresService.getFacturasEmitidasByMes(this.email, desde, hasta).subscribe({
         next: (response) => {
           if (response.status === 200 && response.body) {
-            // El endpoint devuelve Certificado[] con facturas_emitidas anidadas
             const certificados: Certificado[] = response.body;
-
-            // Contar todas las facturas de todos los certificados
             let totalFacturas = 0;
             certificados.forEach(cert => {
               if (cert.facturas_emitidas) {
@@ -240,9 +227,8 @@ export class DashboardComponent implements OnInit, DoCheck {
             this.facturacionMensual.push({
               mes: meses[fecha.getMonth()],
               cantidad: totalFacturas,
-              total: 0 // Aquí podrías calcular el total si tienes los montos
+              total: 0
             });
-            // Ordenar por mes
             this.facturacionMensual.sort((a, b) => {
               return meses.indexOf(a.mes) - meses.indexOf(b.mes);
             });
@@ -291,16 +277,13 @@ export class DashboardComponent implements OnInit, DoCheck {
       },
       error: (error) => {
         console.error('Error en logout:', error);
-        // Redirigir al login incluso si hay error en el logout
         this.router.navigate(['/login'], { replaceUrl: true });
       }
     });
   }
 
-  // Métodos de Bitácora
   inicializarFechasBitacora(): void {
     const hoy = new Date();
-    // Inicializar con la fecha de hoy para ambos campos
     this.fechaFinBitacora = this.formatearFechaInput(hoy);
     this.fechaInicioBitacora = this.formatearFechaInput(hoy);
   }
@@ -310,19 +293,7 @@ export class DashboardComponent implements OnInit, DoCheck {
       Swal.fire({
         icon: 'warning',
         title: '¡Atención!',
-        html: `
-          <div class="text-left space-y-2">
-            <p class="text-gray-700">Por favor selecciona un rango de fechas válido</p>
-          </div>
-        `,
-        confirmButtonText: 'Entendido',
-        confirmButtonColor: '#3b82f6',
-        customClass: {
-          popup: 'rounded-2xl shadow-2xl',
-          title: 'text-2xl font-bold text-gray-800',
-          htmlContainer: 'text-base',
-          confirmButton: 'px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200'
-        }
+        text: 'Por favor selecciona un rango de fechas válido'
       });
       return;
     }
@@ -339,109 +310,10 @@ export class DashboardComponent implements OnInit, DoCheck {
       error: (error) => {
         console.error('Error al cargar bitácora:', error);
         this.bitacoraLoading = false;
-
-        let icono: 'error' | 'warning' | 'info' = 'error';
-        let titulo = '¡Oops! Algo salió mal';
-        let mensaje = '';
-        let detalles = '';
-
-        if (error.status === 404) {
-          icono = 'info';
-          titulo = 'Sin registros';
-          mensaje = 'No se encontraron registros en el rango de fechas seleccionado';
-          detalles = `
-            <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div class="flex items-start space-x-3">
-                <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <div class="text-left">
-                  <p class="text-sm text-blue-800 font-medium">Sugerencias:</p>
-                  <ul class="text-sm text-blue-700 mt-1 space-y-1 list-disc list-inside">
-                    <li>Intenta ampliar el rango de fechas</li>
-                    <li>Verifica que las fechas sean correctas</li>
-                    <li>Prueba con fechas más recientes</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          `;
-        } else if (error.status === 502 || error.status === 503) {
-          icono = 'warning';
-          titulo = 'Servicio no disponible';
-          mensaje = 'El servidor de bitácora está temporalmente fuera de servicio';
-          detalles = `
-            <div class="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
-              <div class="flex items-start space-x-3">
-                <svg class="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                <div class="text-left">
-                  <p class="text-sm text-orange-800 font-medium">¿Qué puedes hacer?</p>
-                  <ul class="text-sm text-orange-700 mt-1 space-y-1 list-disc list-inside">
-                    <li>Intenta nuevamente en unos minutos</li>
-                    <li>Contacta al equipo de backend si persiste</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          `;
-        } else if (error.status === 401 || error.status === 403) {
-          icono = 'error';
-          titulo = 'Acceso denegado';
-          mensaje = 'No tienes permisos para acceder a esta información';
-          detalles = `
-            <div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
-              <div class="flex items-start space-x-3">
-                <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                </svg>
-                <div class="text-left">
-                  <p class="text-sm text-red-700">Contacta al administrador del sistema para obtener los permisos necesarios</p>
-                </div>
-              </div>
-            </div>
-          `;
-        } else {
-          mensaje = 'No se pudo cargar la información de la bitácora';
-          detalles = `
-            <div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <div class="flex items-start space-x-3">
-                <svg class="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <div class="text-left">
-                  <p class="text-sm text-gray-700 font-mono">Error ${error.status || 'desconocido'}</p>
-                  <p class="text-xs text-gray-600 mt-1">${error.message || 'Error de conexión'}</p>
-                </div>
-              </div>
-            </div>
-          `;
-        }
-
         Swal.fire({
-          icon: icono,
-          title: titulo,
-          html: `
-            <div class="text-left space-y-3">
-              <p class="text-gray-700 text-base">${mensaje}</p>
-              ${detalles}
-            </div>
-          `,
-          confirmButtonText: 'Entendido',
-          confirmButtonColor: icono === 'error' ? '#ef4444' : icono === 'warning' ? '#f59e0b' : '#3b82f6',
-          customClass: {
-            popup: 'rounded-2xl shadow-2xl',
-            title: 'text-2xl font-bold text-gray-800',
-            htmlContainer: 'text-base',
-            confirmButton: 'px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105'
-          },
-          showClass: {
-            popup: 'animate__animated animate__fadeInDown animate__faster'
-          },
-          hideClass: {
-            popup: 'animate__animated animate__fadeOutUp animate__faster'
-          }
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo cargar la bitácora'
         });
       }
     });
@@ -485,8 +357,6 @@ export class DashboardComponent implements OnInit, DoCheck {
         totalInfo: registros.filter(r => r.status === 'info').length
       };
     }).sort((a, b) => b.registros.length - a.registros.length);
-
-    console.log('🔄 Grupos calculados:', this.registrosAgrupadosPorRFC.length);
   }
 
   toggleRFC(key: string): void {
@@ -512,10 +382,7 @@ export class DashboardComponent implements OnInit, DoCheck {
       if (isNaN(fecha.getTime())) {
         return fechaHora;
       }
-
-      // MongoDB guarda en UTC, agregar 6 horas para zona horaria de México (CST)
       fecha.setHours(fecha.getHours() + 6);
-
       return fecha.toLocaleString('es-MX', {
         year: 'numeric',
         month: '2-digit',
@@ -572,43 +439,4 @@ export class DashboardComponent implements OnInit, DoCheck {
     }
   }
 
-  iniciarPago(): void {
-    // Calculamos el monto si es necesario o usamos el valor predeterminado
-    const monto = this.montoAPagar > 0 ? this.montoAPagar : 299; // Fallback a 299 si es 0
-    const titulo = this.conceptoPago || 'Suscripción Mensual';
-
-    Swal.fire({
-      title: 'Procesando pago...',
-      text: 'Generando enlace de pago con Mercado Pago',
-      icon: 'info',
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    this.mercadoPagoService.createPreference(titulo, 1, monto).subscribe({
-      next: (response) => {
-        if (response.status === 200 && response.body) {
-          const initPoint = response.body.init_point;
-          // const sandboxInitPoint = response.body.sandbox_init_point; 
-
-          Swal.close();
-          // Redirigir a Mercado Pago
-          window.location.href = initPoint;
-        } else {
-          Swal.fire('Error', 'No se pudo generar el pago. Inténtalo de nuevo.', 'error');
-        }
-      },
-      error: (error) => {
-        console.error('Error al generar preferencia:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error de conexión',
-          text: 'No se pudo conectar con el servidor de pagos. Por favor intenta más tarde.'
-        });
-      }
-    });
-  }
 }
