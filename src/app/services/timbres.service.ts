@@ -10,7 +10,11 @@ export class TimbresService {
 
   constructor(private _http: HttpClient) { }
 
-  public getFacturasEmitidasByMes(usuario:string, desde:string, hasta:string):Observable<any> {
+  public getFacturasEmitidasByMes(usuario: string, desde: string, hasta: string): Observable<any> {
     return this._http.get(`${Global.urlBackEnd}timbres/${usuario}?desde=${desde}&hasta=${hasta}`, { observe: 'response' });
+  }
+
+  public timbrarFactura(payload: any): Observable<any> {
+    return this._http.post(`${Global.urlBackEnd}timbrado-service`, payload, { observe: 'response' });
   }
 }
