@@ -19,9 +19,11 @@ export class ConfiguraPagosComponent implements OnInit {
 
     newConfig: PaymentConfig = {
         nombre_pago: '',
-        cantidad: 0,
+        costo: 0,
         codigo_sat: '',
-        descripcion_sat: ''
+        descripcion_sat: '',
+        clave_unidad: '',
+        unidad: ''
     };
 
     constructor(private mercadoPagoService: MercadoPagoService) { }
@@ -49,7 +51,7 @@ export class ConfiguraPagosComponent implements OnInit {
     }
 
     openModal() {
-        this.newConfig = { nombre_pago: '', cantidad: 0, codigo_sat: '', descripcion_sat: '' };
+        this.newConfig = { nombre_pago: '', costo: 0, codigo_sat: '', descripcion_sat: '', clave_unidad: '', unidad: '' };
         this.showModal = true;
     }
 
@@ -123,8 +125,10 @@ export class ConfiguraPagosComponent implements OnInit {
 
     isValid(): boolean {
         return this.newConfig.nombre_pago?.trim() !== '' &&
-            this.newConfig.cantidad > 0 &&
+            this.newConfig.costo > 0 &&
             this.newConfig.codigo_sat?.trim() !== '' &&
-            this.newConfig.descripcion_sat?.trim() !== '';
+            this.newConfig.descripcion_sat?.trim() !== '' &&
+            this.newConfig.clave_unidad?.trim() !== '' &&
+            this.newConfig.unidad?.trim() !== '';
     }
 }

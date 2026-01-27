@@ -6,7 +6,8 @@ import { MercadoPagoService } from '../../services/mercado-pago.service';
 import { FacturacionService } from '../../services/facturacion.service';
 import { CertificadosService } from '../../services/certificados.service';
 import { AuthService } from '../../services/auth.service';
-import { FacturaCalculatorService } from '../../services/factura-calculator.service';
+//import { FacturaCalculatorService } from '../../services/factura-calculator.service';
+import { FacturaServicioCalculatorService } from '../../services/factura-servicio-calculator.service';
 import { TimbresService } from '../../services/timbres.service';
 import { PaymentConfig } from '../../models/payment-config';
 import { RegimenFiscal } from '../../models/regimenfiscal';
@@ -47,12 +48,13 @@ export class EmitirFacturaComponent implements OnInit {
   invoiceCount: number = 0;
   //idUsuarioCognito: string = '';
   //certificado: Certificado | null = null;
-  emisor: Emisor = new Emisor('VAB0780711D41', 'OMAR VALDEZ BECERRIL', '612');
+  emisor: Emisor = new Emisor('VABO780711D41', 'OMAR VALDEZ BECERRIL', '612');
 
   constructor(
     private mercadoPagoService: MercadoPagoService,
     private facturacionService: FacturacionService,
-    private facturaCalculatorService: FacturaCalculatorService,
+    //private facturaCalculatorService: FacturaCalculatorService,
+    private facturaServicioCalculatorService: FacturaServicioCalculatorService,
     private timbresService: TimbresService
   ) { }
 
@@ -115,18 +117,9 @@ export class EmitirFacturaComponent implements OnInit {
     if (!this.isFormValid) return;
 
     this.isLoading = true;
-
-    // Create Receptor object from form data
-    /*const receptor = new Receptor(
-      this.rfc.toUpperCase(),
-      this.nombreRazonSocial.toUpperCase(),
-      this.codigoPostal,
-      this.regimenFiscal,
-      this.usoCfdi
-    );*/
     // Add email to receptor (not in constructor but needed for sending)
     this.receptor.email = this.correo;
-    const timbradoPayload = this.facturaCalculatorService.buildTimbradoServices(
+    const timbradoPayload = this.facturaServicioCalculatorService.buildTimbrado(
       this.paymentConfigs,
       this.receptor,
       this.emisor,
@@ -134,9 +127,11 @@ export class EmitirFacturaComponent implements OnInit {
       this.invoiceCount
     );
 
-    console.log('Sending Timbrado Payload:', timbradoPayload);
+    const payload = { timbrado: timbradoPayload };
 
-    this.timbresService.timbrarFactura(timbradoPayload).subscribe({
+    console.log('Sending Timbrado Payload:', payload);
+
+    this.timbresService.timbrarFactura(payload).subscribe({
       next: (response) => {
         console.log('Timbrado Response:', response);
         this.isLoading = false;
@@ -176,24 +171,26 @@ export class EmitirFacturaComponent implements OnInit {
   loadInvoiceConsumption(): void {
     const today = new Date();
     // Logic to get previous month
-    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    const month = lastMonthDate.getMonth() + 1;
-    const year = lastMonthDate.getFullYear();
+    // const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    // const month = lastMonthDate.getMonth() + 1;
+    // const year = lastMonthDate.getFullYear();
+    const month = 9;
+    const year = 2025;
 
     this.mercadoPagoService.getInvoiceCount(month, year).subscribe({
       next: (response) => {
         if (response.status === 200 && response.body) {
           const count = response.body.count;
-
+          this.invoiceCount = count;
           if (count > 0) {
-            const billingConfig = this.paymentConfigs.find(c => c.nombre_pago === 'Timbrado de facturas');
+            const billingConfig = this.paymentConfigs.find(c => c.nombre_pago === 'Timbrado de Facturas');
 
             if (billingConfig) {
-              const unitPrice = billingConfig.cantidad;
+              const unitPrice = billingConfig.costo;
               const totalCost = count * unitPrice;
 
-              billingConfig.nombre_pago = `Timbrado de facturas (x${count})`;
-              billingConfig.cantidad = totalCost;
+              billingConfig.nombre_pago = `Timbrado de Facturas (x${count})`;
+              billingConfig.costo = totalCost;
             }
           }
         }
@@ -209,6 +206,6 @@ export class EmitirFacturaComponent implements OnInit {
   }
 
   calculateTotal(): void {
-    this.totalAmount = this.paymentConfigs.reduce((sum, config) => sum + config.cantidad, 0);
+    this.totalAmount = this.paymentConfigs.reduce((sum, config) => sum + config.costo, 0);
   }
 }

@@ -17,6 +17,7 @@ export class PagosComponent implements OnInit {
   conceptoPago: string = 'Pago de Servicios';
   recentPayments: any[] = [];
   paymentConfigs: PaymentConfig[] = [];
+  isLoading: boolean = false;
 
   constructor(private mercadoPagoService: MercadoPagoService) { }
 
@@ -43,6 +44,7 @@ export class PagosComponent implements OnInit {
   }
 
   cargarConfiguracionPagos(): void {
+    this.isLoading = true;
     this.mercadoPagoService.getPaymentConfigs().subscribe({
       next: (response) => {
         if (response.status === 200 && response.body) {
@@ -58,10 +60,9 @@ export class PagosComponent implements OnInit {
   }
 
   cargarConsumoTimbres(): void {
-    const today = new Date();
-    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    const month = lastMonthDate.getMonth() + 1;
-    const year = lastMonthDate.getFullYear();
+    // Hardcoded for testing: September 2025
+    const month = 9;
+    const year = 2025;
 
     this.mercadoPagoService.getInvoiceCount(month, year).subscribe({
       next: (response) => {
@@ -69,28 +70,33 @@ export class PagosComponent implements OnInit {
           const count = response.body.count;
 
           if (count > 0) {
-            const billingConfig = this.paymentConfigs.find(c => c.nombre_pago === 'Timbrado de facturas');
+            // Buscamos el concepto de timbrado (ignorando mayúsculas/minúsculas)
+            const billingConfig = this.paymentConfigs.find(c =>
+              c.nombre_pago.toLowerCase().includes('timbrado de facturas')
+            );
 
             if (billingConfig) {
-              const unitPrice = billingConfig.cantidad;
+              const unitPrice = billingConfig.costo;
               const totalCost = count * unitPrice;
 
-              billingConfig.nombre_pago = `Timbrado de facturas x ${count}`;
-              billingConfig.cantidad = totalCost;
+              billingConfig.nombre_pago = `Timbrado de Facturas (x${count})`;
+              billingConfig.costo = totalCost;
             }
           }
 
           this.calcularTotalAPagar();
         }
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error al cargar consumo de timbres:', error);
+        this.isLoading = false;
       }
     });
   }
 
   calcularTotalAPagar(): void {
-    this.montoAPagar = this.paymentConfigs.reduce((total, config) => total + config.cantidad, 0);
+    this.montoAPagar = this.paymentConfigs.reduce((total, config) => total + config.costo, 0);
   }
 
   iniciarPago(): void {

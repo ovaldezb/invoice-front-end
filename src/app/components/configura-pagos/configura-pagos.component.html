@@ -49,7 +49,7 @@
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concepto
                     </th>
                     <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo
                     </th>
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código
@@ -57,6 +57,14 @@
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Descripción SAT</th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Clave Unidad
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Unidad
+                    </th>
                     <th scope="col"
                         class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones
                     </th>
@@ -66,10 +74,13 @@
                 <tr *ngFor="let config of configs; let i = index" class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{config.nombre_pago}}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{config.cantidad | currency:'MXN'}}
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{config.costo | currency:'MXN'}}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{{config.codigo_sat}}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{config.descripcion_sat}}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{{config.clave_unidad}}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{config.unidad}}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button (click)="deleteConfig(i)" class="text-red-600 hover:text-red-900 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,12 +129,12 @@
                                     placeholder="Ej. Servicio de Hosting">
                             </div>
                             <div>
-                                <label for="cantidad" class="block text-sm font-medium text-gray-700">Cantidad</label>
+                                <label for="costo" class="block text-sm font-medium text-gray-700">Costo</label>
                                 <div class="mt-1 relative rounded-md shadow-sm">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <span class="text-gray-500 sm:text-sm">$</span>
                                     </div>
-                                    <input type="number" [(ngModel)]="newConfig.cantidad" id="cantidad"
+                                    <input type="number" [(ngModel)]="newConfig.costo" id="costo"
                                         class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md py-2 px-3 border"
                                         placeholder="0.00">
                                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -144,6 +155,19 @@
                                 <input type="text" [(ngModel)]="newConfig.descripcion_sat" id="descripcion_sat"
                                     class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md py-2 px-3 border"
                                     placeholder="Ej. Servicios de internet">
+                            </div>
+                            <div>
+                                <label for="clave_prod_serv" class="block text-sm font-medium text-gray-700">Clave
+                                    Unidad</label>
+                                <input type="text" [(ngModel)]="newConfig.clave_unidad" id="clave_prod_serv"
+                                    class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md py-2 px-3 border"
+                                    placeholder="Ej. 12345678">
+                            </div>
+                            <div>
+                                <label for="unidad" class="block text-sm font-medium text-gray-700">Unidad</label>
+                                <input type="text" [(ngModel)]="newConfig.unidad" id="unidad"
+                                    class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md py-2 px-3 border"
+                                    placeholder="Ej. E48">
                             </div>
                         </div>
                     </div>

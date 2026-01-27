@@ -13,39 +13,86 @@
             <h4 class="text-lg font-medium text-gray-800 mb-2">Resumen de Cuenta</h4>
             <p class="text-gray-500 mb-6">Detalles de tu plan actual y saldo pendiente.</p>
 
-            <div class="space-y-4">
-                <div *ngFor="let config of paymentConfigs"
-                    class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
-                    <span class="text-gray-600 font-medium">{{ config.nombre_pago }}</span>
-                    <span class="font-bold text-gray-800">{{ config.cantidad | currency:'MXN' }}</span>
+            <!-- Spinner de Carga -->
+            <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-12 transition-all duration-300">
+                <div class="relative">
+                    <div class="w-12 h-12 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
+                    </div>
                 </div>
-
-                <div *ngIf="paymentConfigs.length === 0"
-                    class="text-center py-6 bg-gray-50 rounded-lg dashed-border border-gray-300">
-                    <p class="text-gray-500 text-sm">No hay servicios configurados actualmente.</p>
-                    <button (click)="irAConfiguracion()"
-                        class="mt-2 text-blue-600 text-xs font-medium hover:underline">Ir a Configuración</button>
-                </div>
+                <p class="mt-4 text-sm font-medium text-blue-600 animate-pulse">Cargando detalles de cuenta...</p>
             </div>
 
-            <div class="mt-8 pt-6 border-t border-blue-200">
-                <div class="flex justify-between items-end mb-2">
-                    <span class="text-gray-600 font-medium">Total a Pagar</span>
-                    <span class="text-3xl font-bold text-gray-900">{{ montoAPagar | currency:'MXN' }}</span>
+            <div *ngIf="!isLoading" class="space-y-4 animate-fadeIn">
+                <div class="overflow-hidden rounded-lg border border-blue-200 bg-white shadow-sm">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50/80">
+                            <tr>
+                                <th scope="col"
+                                    class="px-3 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-tight">
+                                    Concepto</th>
+                                <th scope="col"
+                                    class="px-3 py-2 text-right text-[10px] font-bold text-gray-500 uppercase tracking-tight">
+                                    Costo</th>
+                                <th scope="col"
+                                    class="px-3 py-2 text-right text-[10px] font-bold text-gray-500 uppercase tracking-tight">
+                                    IVA (16%)</th>
+                                <th scope="col"
+                                    class="px-3 py-2 text-right text-[10px] font-bold text-gray-500 uppercase tracking-tight">
+                                    Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white">
+                            <tr *ngFor="let config of paymentConfigs" class="hover:bg-blue-50/30 transition-colors">
+                                <td class="px-3 py-3">
+                                    <span class="text-xs font-medium text-gray-900 block leading-tight">{{
+                                        config.nombre_pago }}</span>
+                                </td>
+                                <td class="px-3 py-3 text-right whitespace-nowrap">
+                                    <span class="text-xs text-gray-600">{{ (config.costo / 1.16) | currency:'MXN'
+                                        }}</span>
+                                </td>
+                                <td class="px-3 py-3 text-right whitespace-nowrap">
+                                    <span class="text-xs text-gray-600">{{ (config.costo - (config.costo / 1.16)) |
+                                        currency:'MXN' }}</span>
+                                </td>
+                                <td class="px-3 py-3 text-right whitespace-nowrap">
+                                    <span class="text-xs font-bold text-gray-900">{{ config.costo | currency:'MXN'
+                                        }}</span>
+                                </td>
+                            </tr>
+                            <tr *ngIf="paymentConfigs.length === 0">
+                                <td colspan="4" class="px-3 py-6 text-center text-sm text-gray-500 italic">
+                                    No hay servicios configurados actualmente.
+                                    <button (click)="irAConfiguracion()"
+                                        class="block mx-auto mt-2 text-blue-600 text-xs font-bold hover:underline">Ir a
+                                        Configuración</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <p class="text-sm text-gray-500 text-right mb-6">Próximo cargo: 01 de {{ 'Febrero' }}</p>
 
-                <button (click)="iniciarPago()"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transform transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex justify-center items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    Pagar con Mercado Pago
-                </button>
-                <div class="mt-4 flex justify-center">
-                    <img src="https://img.icons8.com/color/48/mercado-pago.png" alt="Mercado Pago"
-                        class="h-8 opacity-80" />
+                <div class="mt-8 pt-6 border-t border-blue-200">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-gray-600 font-medium">Total a Pagar</span>
+                        <span class="text-3xl font-bold text-gray-900">{{ montoAPagar | currency:'MXN' }}</span>
+                    </div>
+                    <p class="text-sm text-gray-500 text-right mb-6">Próximo cargo: 01 de {{ 'Febrero' }}</p>
+
+                    <button (click)="iniciarPago()"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transform transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex justify-center items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        Pagar con Mercado Pago
+                    </button>
+                    <div class="mt-4 flex justify-center">
+                        <img src="https://img.icons8.com/color/48/mercado-pago.png" alt="Mercado Pago"
+                            class="h-8 opacity-80" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -69,7 +116,7 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-900">Suscripción</p>
+                            <p class="text-sm font-medium text-gray-900">Pago Mensual</p>
                             <p class="text-xs text-gray-500">{{ formatearFechaHora(pago.date_created) }}</p>
                         </div>
                     </div>

@@ -9,7 +9,6 @@ import { Traslados } from '../models/traslados';
 import { VentaTapete } from '../models/ventaTapete';
 import { Certificado } from '../models/certificado';
 import { Sucursal } from '../models/sucursal';
-import { PaymentConfig } from '../models/payment-config';
 import { Global } from './Global';
 
 /**
@@ -22,123 +21,6 @@ import { Global } from './Global';
 export class FacturaCalculatorService {
 
   constructor() { }
-
-  /**
-   * Construye el objeto Timbrado para servicios configurados
-   */
-  buildTimbradoServices(
-    configs: PaymentConfig[],
-    receptor: Receptor,
-    emisor: Emisor,
-    serie: string,
-    invoiceCount: number
-  ): Timbrado {
-    const conceptos = this.buildConceptosServices(configs, invoiceCount);
-    const impuestos = this.buildImpuestosFromConceptos(conceptos);
-
-    // Calcular subtotal
-    let subtotal = 0;
-    conceptos.forEach(concepto => {
-      subtotal += concepto.Importe;
-    });
-    const subtotalRedondeado = this.roundDecimal(subtotal);
-
-    // Total = Subtotal + Impuestos Trasladados
-    const totalFactura = this.roundDecimal(
-      subtotalRedondeado + impuestos.TotalImpuestosTrasladados
-    );
-
-    // Generar Folio YYMMDD
-    const hoy = new Date();
-    const folio = `${hoy.getFullYear().toString().slice(-2)}${this.padZero(hoy.getMonth() + 1)}${this.padZero(hoy.getDate())}`;
-
-    const timbrado = new Timbrado(
-      Global.Factura.Version,
-      serie,
-      folio,
-      this.getFechaFactura(),
-      '03', // Transferencia electrónica de fondos (formapago default para servicios?) - Ajustar si es necesario, user didn't specify
-      Global.Factura.CondicionesPago,
-      subtotalRedondeado,
-      0.00,
-      Global.Factura.Moneda,
-      Global.Factura.TipoCambio,
-      totalFactura,
-      'I', // Ingreso
-      Global.Factura.Exportacion,
-      'PUE', // Pago en una sola exhibición
-      emisor.Rfc,
-      new Emisor(emisor.Rfc, emisor.Nombre, emisor.RegimenFiscal), // Fallback regimen
-      new Receptor(
-        receptor.Rfc,
-        receptor.Nombre,
-        receptor.DomicilioFiscalReceptor,
-        receptor.RegimenFiscalReceptor,
-        receptor.UsoCFDI
-      ),
-      conceptos,
-      impuestos
-    );
-    return timbrado;
-  }
-
-  private buildConceptosServices(configs: PaymentConfig[], invoiceCount: number): Concepto[] {
-    return configs.map(config => {
-      let cantidad = 1;
-      let unidad = 'Servicio';
-      let claveUnidad = 'E48'; // Unidad de servicio
-
-      // Ajuste para "Timbrado de Facturas"
-      if (config.nombre_pago.toLowerCase().includes('timbrado de facturas')) {
-        cantidad = invoiceCount;
-        unidad = 'Actividad';
-        claveUnidad = 'ACT';
-      }
-
-      // El precio en config es BRUTO (Total), necesitamos desglozarlo a UNITARIO SIN IVA
-      // PrecioTotal = (ValorUnitario * Cantidad * 1.16)
-      // ValorUnitario = (PrecioTotal / Cantidad) / 1.16
-      const precioTotal = config.cantidad; // Este es el importe total con iva de la BD
-
-      // NOTA: Si es Timbrado de facturas, el precio total en BD es por el TOTAL del consumo
-      // Si la cantidad es > 1, necesitamos el precio unitario real.
-      // Si el precio en BD ya es el total a pagar, entonces para el unitario dividimos entre cantidad
-
-      const valorUnitarioConIva = precioTotal / cantidad;
-      const valorUnitarioSinIva = this.roundDecimal(valorUnitarioConIva / Global.Factura.FACTOR_DIV);
-
-      const base = this.roundDecimal(valorUnitarioSinIva * cantidad);
-      const importeImpuestoTraslado = this.roundDecimal(
-        valorUnitarioSinIva * Global.Factura.IVA * cantidad
-      );
-
-      // Impuestos del concepto
-      const impuestosConcepto: ImpuestosConcepto = {
-        Traslados: [
-          new Traslados(
-            base,
-            Global.Factura.ImpuestoIVA,
-            Global.Factura.Tasa,
-            Global.Factura.TasaOCuotaIVA,
-            importeImpuestoTraslado
-          )
-        ]
-      };
-
-      return new Concepto(
-        impuestosConcepto,
-        config.codigo_sat,
-        this.roundDecimal(cantidad, 2),
-        claveUnidad,
-        unidad,
-        config.descripcion_sat || config.nombre_pago,
-        valorUnitarioSinIva,
-        base,
-        0.00,
-        Global.Factura.ObjectoImpuesto
-      );
-    });
-  }
 
   /**
    * Construye el objeto Timbrado completo para facturación
@@ -331,18 +213,14 @@ export class FacturaCalculatorService {
   }
 
   /**
-   * Genera la fecha en formato ISO para la factura
+   * Genera la fecha en formato ISO para la factura (America/Mexico_City)
    */
   getFechaFactura(): string {
     const hoy = new Date();
-    const dia = this.padZero(hoy.getDate());
-    const mes = this.padZero(hoy.getMonth() + 1);
-    const year = hoy.getFullYear();
-    const hora = this.padZero(hoy.getHours());
-    const minuto = this.padZero(hoy.getMinutes());
-    const segundos = this.padZero(hoy.getSeconds());
-
-    return `${year}-${mes}-${dia}T${hora}:${minuto}:${segundos}`;
+    // Obtener la fecha en formato CDMX (UTC-6)
+    // El formato 'sv-SE' devuelve YYYY-MM-DD HH:mm:ss que es casi lo que necesitamos
+    const cdmxString = hoy.toLocaleString('sv-SE', { timeZone: 'America/Mexico_City' });
+    return cdmxString.replace(' ', 'T');
   }
 
   /**
