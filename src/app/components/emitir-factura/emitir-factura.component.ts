@@ -171,11 +171,9 @@ export class EmitirFacturaComponent implements OnInit {
   loadInvoiceConsumption(): void {
     const today = new Date();
     // Logic to get previous month
-    // const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    // const month = lastMonthDate.getMonth() + 1;
-    // const year = lastMonthDate.getFullYear();
-    const month = 9;
-    const year = 2025;
+    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const month = lastMonthDate.getMonth() + 1;
+    const year = lastMonthDate.getFullYear();
 
     this.mercadoPagoService.getInvoiceCount(month, year).subscribe({
       next: (response) => {

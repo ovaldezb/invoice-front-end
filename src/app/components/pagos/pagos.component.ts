@@ -60,9 +60,11 @@ export class PagosComponent implements OnInit {
   }
 
   cargarConsumoTimbres(): void {
-    // Hardcoded for testing: September 2025
-    const month = 9;
-    const year = 2025;
+    const today = new Date();
+    // Logic to get previous month
+    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const month = lastMonthDate.getMonth() + 1;
+    const year = lastMonthDate.getFullYear();
 
     this.mercadoPagoService.getInvoiceCount(month, year).subscribe({
       next: (response) => {
