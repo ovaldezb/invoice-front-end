@@ -58,17 +58,17 @@ export class FacturaServicioCalculatorService {
             serie,
             folio,
             fechaFactura,
-            '03', // Transferencia electrónica de fondos 
+            Global.Factura.FP_TRANSFERENCIA, // Transferencia electrónica de fondos 
             Global.Factura.CondicionesPago,
             subtotalRedondeado,
             0.00,
             Global.Factura.Moneda,
             Global.Factura.TipoCambio,
             totalFactura,
-            'I', // Ingreso
+            Global.Factura.TipoComprobante, // Ingreso
             Global.Factura.Exportacion,
-            'PUE', // Pago en una sola exhibición
-            '23000', // LugarExpedicion (CP) - Fixed from Emisor.Rfc
+            Global.Factura.MetodoPago, // Pago en una sola exhibición
+            Global.Factura.LugarExpedicion, // LugarExpedicion (CP) - Fixed from Emisor.Rfc
             new Emisor(emisor.Rfc, emisor.Nombre, emisor.RegimenFiscal),
             new Receptor(
                 receptor.Rfc,
@@ -98,10 +98,8 @@ export class FacturaServicioCalculatorService {
             // PrecioTotal = (ValorUnitario * Cantidad * 1.16)
             // ValorUnitario = (PrecioTotal / Cantidad) / 1.16
             const precioTotal = Number(config.costo) || 0;
-
             const valorUnitarioConIva = precioTotal / cantidad;
             const valorUnitarioSinIva = this.roundDecimal(valorUnitarioConIva / Global.Factura.FACTOR_DIV);
-
             const base = this.roundDecimal(valorUnitarioSinIva * cantidad);
             const importeImpuestoTraslado = this.roundDecimal(
                 valorUnitarioSinIva * Global.Factura.IVA * cantidad
