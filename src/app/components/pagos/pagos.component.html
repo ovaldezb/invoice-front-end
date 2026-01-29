@@ -81,17 +81,18 @@
                     </div>
                     <p class="text-sm text-gray-500 text-right mb-6">Próximo cargo: 01 de {{ 'Febrero' }}</p>
 
-                    <button (click)="iniciarPago()"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transform transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex justify-center items-center">
+
+                    <button (click)="iniciarPagoOpenPay()"
+                        class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transform transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 flex justify-center items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
-                        Pagar con Mercado Pago
+                        Pagar con OpenPay
                     </button>
-                    <div class="mt-4 flex justify-center">
-                        <img src="https://img.icons8.com/color/48/mercado-pago.png" alt="Mercado Pago"
-                            class="h-8 opacity-80" />
+
+                    <div class="mt-4 flex justify-center space-x-4 grayscale opacity-60">
+                        <img src="https://www.openpay.mx/img/logo.png" alt="OpenPay" class="h-8" />
                     </div>
                 </div>
             </div>
@@ -106,8 +107,8 @@
                     class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors border-b border-gray-100 last:border-0">
                     <div class="flex items-center space-x-3">
                         <div [ngClass]="{
-              'bg-green-100 text-green-600': pago.status === 'approved',
-              'bg-red-100 text-red-600': pago.status === 'rejected',
+              'bg-green-100 text-green-600': pago.status === 'approved' || pago.status === 'completed',
+              'bg-red-100 text-red-600': pago.status === 'rejected' || pago.status === 'failed',
               'bg-yellow-100 text-yellow-600': pago.status === 'pending' || pago.status === 'in_process'
             }" class="p-2 rounded-full">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -116,7 +117,13 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-900">Pago Mensual</p>
+                            <div class="flex items-center space-x-2">
+                                <p class="text-sm font-medium text-gray-900">Pago de Servicios</p>
+                                <span
+                                    class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 border border-gray-200">
+                                    {{ pago.provider || 'MP' }}
+                                </span>
+                            </div>
                             <p class="text-xs text-gray-500">{{ formatearFechaHora(pago.date_created) }}</p>
                         </div>
                     </div>
@@ -125,10 +132,11 @@
                             currency:'MXN'
                             }}</span>
                         <span [ngClass]="{
-              'text-green-600': pago.status === 'approved',
-              'text-red-600': pago.status === 'rejected',
+              'text-green-600': pago.status === 'approved' || pago.status === 'completed',
+              'text-red-600': pago.status === 'rejected' || pago.status === 'failed',
               'text-yellow-600': pago.status === 'pending' || pago.status === 'in_process'
-            }" class="text-xs font-medium uppercase">{{ pago.status === 'approved' ? 'Aprobado' : pago.status
+            }" class="text-xs font-medium uppercase">{{ (pago.status === 'approved' || pago.status === 'completed') ?
+                            'Exitoso' : pago.status
                             }}</span>
                     </div>
                 </div>
@@ -147,7 +155,7 @@
                     Información Importante
                 </h5>
                 <p class="text-xs text-gray-500 leading-relaxed">
-                    Los pagos se procesan de forma segura a través de Mercado Pago. Si tienes algún problema con tu
+                    Los pagos se procesan de forma segura a través de OpenPay. Si tienes algún problema con tu
                     facturación, por favor contacta a soporte.
                 </p>
             </div>

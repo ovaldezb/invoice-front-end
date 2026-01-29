@@ -90,7 +90,9 @@ export class DashboardComponent implements OnInit, DoCheck {
 
   ngOnInit(): void {
     this.authService.getCurrentUser().then(user => {
-      this.profile = user.tokens.idToken.payload["cognito:groups"][0];
+      const groups = user.tokens.idToken.payload["cognito:groups"] || [];
+      this.profile = groups.length > 0 ? groups[0] : '';
+
       this.givenName = user.tokens.idToken.payload.given_name;
       this.familyName = user.tokens.idToken.payload.family_name;
       this.email = user.tokens.idToken.payload.email;

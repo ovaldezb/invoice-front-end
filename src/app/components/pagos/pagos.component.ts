@@ -1,6 +1,7 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MercadoPagoService } from '../../services/mercado-pago.service';
+import { PagosService } from '../../services/pagos.service';
+import { OpenPayService } from '../../services/openpay.service';
 import { PaymentConfig } from '../../models/payment-config';
 import Swal from 'sweetalert2';
 
@@ -19,7 +20,10 @@ export class PagosComponent implements OnInit {
   paymentConfigs: PaymentConfig[] = [];
   isLoading: boolean = false;
 
-  constructor(private mercadoPagoService: MercadoPagoService) { }
+  constructor(
+    private pagosService: PagosService,
+    private openPayService: OpenPayService
+  ) { }
 
   ngOnInit(): void {
     this.cargarDatosPagos();
@@ -31,7 +35,7 @@ export class PagosComponent implements OnInit {
   }
 
   cargarHistorialPagos(): void {
-    this.mercadoPagoService.getLastPayments().subscribe({
+    this.pagosService.getLastPayments().subscribe({
       next: (response) => {
         if (response.status === 200 && response.body) {
           this.recentPayments = response.body;
@@ -45,7 +49,7 @@ export class PagosComponent implements OnInit {
 
   cargarConfiguracionPagos(): void {
     this.isLoading = true;
-    this.mercadoPagoService.getPaymentConfigs().subscribe({
+    this.pagosService.getPaymentConfigs().subscribe({
       next: (response) => {
         if (response.status === 200 && response.body) {
           this.paymentConfigs = response.body.payment_config || [];
@@ -66,7 +70,7 @@ export class PagosComponent implements OnInit {
     const month = lastMonthDate.getMonth() + 1;
     const year = lastMonthDate.getFullYear();
 
-    this.mercadoPagoService.getInvoiceCount(month, year).subscribe({
+    this.pagosService.getInvoiceCount(month, year).subscribe({
       next: (response) => {
         if (response.status === 200 && response.body) {
           const count = response.body.count;
@@ -101,7 +105,8 @@ export class PagosComponent implements OnInit {
     this.montoAPagar = this.paymentConfigs.reduce((total, config) => total + config.costo, 0);
   }
 
-  iniciarPago(): void {
+
+  iniciarPagoOpenPay(): void {
     const monto = this.montoAPagar;
     if (monto <= 0) {
       Swal.fire({
@@ -114,9 +119,16 @@ export class PagosComponent implements OnInit {
 
     const titulo = this.conceptoPago || 'Pago de Servicios';
 
+    const customer = {
+      name: 'Cliente Farzin',
+      last_name: 'Facturas',
+      phone_number: '7876765654',
+      email: 'farzin@correo.com'
+    };
+
     Swal.fire({
       title: 'Procesando pago...',
-      text: 'Generando enlace de pago con Mercado Pago',
+      text: 'Generando enlace de pago con OpenPay',
       icon: 'info',
       showConfirmButton: false,
       timerProgressBar: true,
@@ -125,28 +137,28 @@ export class PagosComponent implements OnInit {
       }
     });
 
-    this.mercadoPagoService.createPreference(titulo, 1, monto).subscribe({
+    this.openPayService.createCheckout(titulo, 1, monto, customer).subscribe({
       next: (response) => {
         if (response.status === 200 && response.body) {
-          const initPoint = response.body.init_point;
+          const checkoutUrl = response.body.checkout_url;
           Swal.close();
-          window.open(initPoint, '_blank');
+          window.open(checkoutUrl, '_blank');
           Swal.fire({
             icon: 'success',
             title: 'Pestaña de pago abierta',
-            text: 'Hemos abierto la página de Mercado Pago en una nueva pestaña.',
+            text: 'Hemos abierto la página de OpenPay en una nueva pestaña.',
             confirmButtonText: 'Entendido'
           });
         } else {
-          Swal.fire('Error', 'No se pudo generar el pago. Inténtalo de nuevo.', 'error');
+          Swal.fire('Error', 'No se pudo generar el pago con OpenPay. Inténtalo de nuevo.', 'error');
         }
       },
       error: (error) => {
-        console.error('Error al generar preferencia:', error);
+        console.error('Error al generar checkout de OpenPay:', error);
         Swal.fire({
           icon: 'error',
           title: 'Error de conexión',
-          text: 'No se pudo conectar con el servidor de pagos.'
+          text: 'No se pudo conectar con el servidor de pagos de OpenPay.'
         });
       }
     });
@@ -158,15 +170,18 @@ export class PagosComponent implements OnInit {
       if (isNaN(fecha.getTime())) {
         return fechaHora;
       }
+      // Ajuste de zona horaria si es necesario (el servidor suele devolver UTC)
       fecha.setHours(fecha.getHours() + 6);
-      return fecha.toLocaleString('es-MX', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
+
+      const day = fecha.getDate();
+      const monthNames = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+      ];
+      const month = monthNames[fecha.getMonth()];
+      const year = fecha.getFullYear();
+
+      return `${day} de ${month} de ${year}`;
     } catch (e) {
       return fechaHora;
     }

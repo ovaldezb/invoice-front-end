@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpResponse } from '@angular/common/http';
-import { MercadoPagoService } from '../../services/mercado-pago.service';
 import { FacturacionService } from '../../services/facturacion.service';
+import { PagosService } from '../../services/pagos.service';
 import { CertificadosService } from '../../services/certificados.service';
 import { AuthService } from '../../services/auth.service';
 //import { FacturaCalculatorService } from '../../services/factura-calculator.service';
@@ -51,8 +51,8 @@ export class EmitirFacturaComponent implements OnInit {
   emisor: Emisor = new Emisor('VABO780711D41', 'OMAR VALDEZ BECERRIL', '612');
 
   constructor(
-    private mercadoPagoService: MercadoPagoService,
     private facturacionService: FacturacionService,
+    private pagosService: PagosService,
     //private facturaCalculatorService: FacturaCalculatorService,
     private facturaServicioCalculatorService: FacturaServicioCalculatorService,
     private timbresService: TimbresService
@@ -152,8 +152,8 @@ export class EmitirFacturaComponent implements OnInit {
 
   loadPaymentConfig(): void {
     this.isLoading = true;
-    this.mercadoPagoService.getPaymentConfigs().subscribe({
-      next: (response) => {
+    this.pagosService.getPaymentConfigs().subscribe({
+      next: (response: any) => {
         if (response.status === 200 && response.body) {
           this.paymentConfigs = response.body.payment_config || [];
           this.loadInvoiceConsumption();
@@ -161,7 +161,7 @@ export class EmitirFacturaComponent implements OnInit {
           this.isLoading = false;
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading payment config:', error);
         this.isLoading = false;
       }
@@ -175,8 +175,8 @@ export class EmitirFacturaComponent implements OnInit {
     const month = lastMonthDate.getMonth() + 1;
     const year = lastMonthDate.getFullYear();
 
-    this.mercadoPagoService.getInvoiceCount(month, year).subscribe({
-      next: (response) => {
+    this.pagosService.getInvoiceCount(month, year).subscribe({
+      next: (response: any) => {
         if (response.status === 200 && response.body) {
           const count = response.body.count;
           this.invoiceCount = count;
@@ -195,7 +195,7 @@ export class EmitirFacturaComponent implements OnInit {
         this.calculateTotal();
         this.isLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading invoice count:', error);
         this.isLoading = false;
         this.calculateTotal();

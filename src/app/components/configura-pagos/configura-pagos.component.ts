@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MercadoPagoService } from '../../services/mercado-pago.service';
+import { PagosService } from '../../services/pagos.service';
 import { PaymentConfig } from '../../models/payment-config';
 import Swal from 'sweetalert2';
 
@@ -26,7 +26,7 @@ export class ConfiguraPagosComponent implements OnInit {
         unidad: ''
     };
 
-    constructor(private mercadoPagoService: MercadoPagoService) { }
+    constructor(private pagosService: PagosService) { }
 
     ngOnInit(): void {
         this.loadConfigs();
@@ -34,7 +34,7 @@ export class ConfiguraPagosComponent implements OnInit {
 
     loadConfigs() {
         this.isLoading = true;
-        this.mercadoPagoService.getPaymentConfigs().subscribe({
+        this.pagosService.getPaymentConfigs().subscribe({
             next: (res) => {
                 if (res.body && res.body.payment_config) {
                     this.configs = res.body.payment_config;
@@ -65,7 +65,7 @@ export class ConfiguraPagosComponent implements OnInit {
         this.isSaving = true;
         const updatedConfigs = [...this.configs, this.newConfig];
 
-        this.mercadoPagoService.savePaymentConfigs(updatedConfigs).subscribe({
+        this.pagosService.savePaymentConfigs(updatedConfigs).subscribe({
             next: () => {
                 this.configs = updatedConfigs;
                 this.isSaving = false;
@@ -102,7 +102,7 @@ export class ConfiguraPagosComponent implements OnInit {
         }).then((result) => {
             if (result.isConfirmed) {
                 const updatedConfigs = this.configs.filter((_, i) => i !== index);
-                this.mercadoPagoService.savePaymentConfigs(updatedConfigs).subscribe({
+                this.pagosService.savePaymentConfigs(updatedConfigs).subscribe({
                     next: () => {
                         this.configs = updatedConfigs;
                         Swal.fire(
