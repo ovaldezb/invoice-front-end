@@ -50,7 +50,8 @@
             </svg>
             <span>📊 Actividad del Sistema</span>
           </button>
-          <button name="configuraCSDTab" (click)="activeTab = 'configuracion'" [ngClass]="{
+
+          <button (click)="activeTab = 'configuracion'" [ngClass]="{
               'border-blue-500 text-blue-600 bg-blue-50': activeTab === 'configuracion',
               'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50': activeTab !== 'configuracion'
             }"
@@ -63,7 +64,20 @@
             </svg>
             <span>Configurar CSD</span>
           </button>
-          <button name="emitirFacturaTab" (click)="activeTab = 'emitirFactura'" [ngClass]="{
+
+          <button *ngIf="profile === 'ADMIN'" (click)="activeTab = 'configuraPagos'" [ngClass]="{
+              'border-blue-500 text-blue-600 bg-blue-50': activeTab === 'configuraPagos',
+              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50': activeTab !== 'configuraPagos'
+            }"
+            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-all duration-200 flex items-center space-x-2">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+            <span>Configuración Pagos</span>
+          </button>
+
+          <button *ngIf="profile === 'ADMIN'" name="emitirFacturaTab" (click)="activeTab = 'emitirFactura'" [ngClass]="{
               'border-blue-500 text-blue-600 bg-blue-50': activeTab === 'emitirFactura',
               'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50': activeTab !== 'emitirFactura'
             }"
@@ -75,19 +89,36 @@
             <span>Emitir Factura</span>
           </button>
 
+          <button name="pagoTab" (click)="activeTab = 'pago'" [ngClass]="{
+              'border-blue-500 text-blue-600 bg-blue-50': activeTab === 'pago',
+              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50': activeTab !== 'pago'
+            }"
+            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-all duration-200 flex items-center space-x-2">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            <span>Pagos</span>
+          </button>
+
         </nav>
       </div>
     </div>
 
     <!-- Tab Content -->
     <div class="px-4 sm:px-0">
-      <!-- Configuración Tab -->
+      <!-- Configuración CSD Tab -->
       <div *ngIf="activeTab === 'configuracion'" class="bg-white rounded-lg shadow-lg p-6">
         <app-configura-csd (certificadoActualizado)="onCertificadoActualizado()"></app-configura-csd>
       </div>
 
+      <!-- Configuración Pagos Tab -->
+      <div *ngIf="activeTab === 'configuraPagos' && profile === 'ADMIN'" class="bg-white rounded-lg shadow-lg p-6">
+        <app-configura-pagos></app-configura-pagos>
+      </div>
+
       <!-- Emitir Factura Tab -->
-      <div *ngIf="activeTab === 'emitirFactura'" class="bg-white rounded-lg shadow-lg p-6">
+      <div *ngIf="activeTab === 'emitirFactura' && profile === 'ADMIN'" class="bg-white rounded-lg shadow-lg p-6">
         <div class="mb-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <svg class="h-6 w-6 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -98,6 +129,11 @@
           </h3>
           <app-emitir-factura></app-emitir-factura>
         </div>
+      </div>
+
+      <!-- Pago Tab -->
+      <div *ngIf="activeTab === 'pago'" class="bg-white rounded-lg shadow-lg p-6">
+        <app-pagos (navigateToConfig)="activeTab = 'configuraPagos'"></app-pagos>
       </div>
 
       <!-- Bitácora Tab -->
@@ -370,6 +406,8 @@
                   </div>
                 </div>
               </div>
+
+
             </div>
           </div>
 

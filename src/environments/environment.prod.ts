@@ -8,5 +8,5 @@ export const environment = {
   },
   urlBackEnd: 'https://8gf95lar45.execute-api.us-east-1.amazonaws.com/prod/',
   urlDatosFactura: 'https://52xqff88ne.execute-api.us-east-1.amazonaws.com/prod/datosfactura',
-  envName: 'Prod'
+  envName: 'Prod',
 };

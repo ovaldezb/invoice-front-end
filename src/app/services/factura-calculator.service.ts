@@ -213,18 +213,14 @@ export class FacturaCalculatorService {
   }
 
   /**
-   * Genera la fecha en formato ISO para la factura
+   * Genera la fecha en formato ISO para la factura (America/Mexico_City)
    */
   getFechaFactura(): string {
     const hoy = new Date();
-    const dia = this.padZero(hoy.getDate());
-    const mes = this.padZero(hoy.getMonth() + 1);
-    const year = hoy.getFullYear();
-    const hora = this.padZero(hoy.getHours());
-    const minuto = this.padZero(hoy.getMinutes());
-    const segundos = this.padZero(hoy.getSeconds());
-
-    return `${year}-${mes}-${dia}T${hora}:${minuto}:${segundos}`;
+    // Obtener la fecha en formato CDMX (UTC-6)
+    // El formato 'sv-SE' devuelve YYYY-MM-DD HH:mm:ss que es casi lo que necesitamos
+    const cdmxString = hoy.toLocaleString('sv-SE', { timeZone: 'America/Mexico_City' });
+    return cdmxString.replace(' ', 'T');
   }
 
   /**

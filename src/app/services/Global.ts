@@ -1,7 +1,7 @@
 import { environment } from "../../environments/environment";
 
 export const Global = {
-  VERSION: '1.2.10',
+  VERSION: '1.3.0',
   ENV_NAME: environment.envName,
   urlBackEnd: environment.urlBackEnd,
   urlDatosFactura: environment.urlDatosFactura,
@@ -28,7 +28,8 @@ export const Global = {
     FP_TRANSFERENCIA: '03',
     FP_TARJETA: '04',
     IVA: 0.16,
-    FACTOR_DIV: 1.16
+    FACTOR_DIV: 1.16,
+    LugarExpedicion: '52756' // el CP desde donde se emite la factura
   },
   DECIMAL_FIXED: 2,
   INACTIVITY_TIMEOUT_MINUTES: 15 * 60 * 1000, // 15 minutos
