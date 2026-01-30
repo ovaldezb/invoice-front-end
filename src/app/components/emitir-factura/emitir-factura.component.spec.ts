@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 
 import { EmitirFacturaComponent } from './emitir-factura.component';
 
@@ -8,9 +9,10 @@ describe('EmitirFacturaComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EmitirFacturaComponent]
+      imports: [EmitirFacturaComponent],
+      providers: [provideHttpClient()]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(EmitirFacturaComponent);
     component = fixture.componentInstance;
