@@ -1,9 +1,12 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PagosService } from '../../services/pagos.service';
-import { OpenPayService } from '../../services/openpay.service';
+import { ClipService } from '../../services/clip.service';
 import { PaymentConfig } from '../../models/payment-config';
 import Swal from 'sweetalert2';
+import { environment } from '../../../environments/environment';
+
+declare var ClipSDK: any;
 
 @Component({
   selector: 'app-pagos',
@@ -19,10 +22,12 @@ export class PagosComponent implements OnInit {
   recentPayments: any[] = [];
   paymentConfigs: PaymentConfig[] = [];
   isLoading: boolean = false;
+  clipCard: any;
+  isClipInitialized: boolean = false;
 
   constructor(
     private pagosService: PagosService,
-    private openPayService: OpenPayService
+    private clipService: ClipService
   ) { }
 
   ngOnInit(): void {
@@ -93,12 +98,40 @@ export class PagosComponent implements OnInit {
           this.calcularTotalAPagar();
         }
         this.isLoading = false;
+        setTimeout(() => this.initClipSDK(), 300);
       },
       error: (error) => {
         console.error('Error al cargar consumo de timbres:', error);
         this.isLoading = false;
+        setTimeout(() => this.initClipSDK(), 300);
       }
     });
+  }
+
+  initClipSDK(): void {
+    if (this.isClipInitialized) return;
+
+    if (typeof ClipSDK !== 'undefined') {
+      try {
+        const clip = new ClipSDK(environment.clipApiKey);
+        this.clipCard = clip.element.create('Card', {
+          theme: 'light',
+          locale: 'es'
+        });
+
+        const container = document.getElementById('clip-checkout');
+        if (container) {
+          this.clipCard.mount('clip-checkout');
+          this.isClipInitialized = true;
+        } else {
+          setTimeout(() => this.initClipSDK(), 500);
+        }
+      } catch (err) {
+        console.error('Error initializing Clip SDK:', err);
+      }
+    } else {
+      setTimeout(() => this.initClipSDK(), 500);
+    }
   }
 
   calcularTotalAPagar(): void {
@@ -106,7 +139,7 @@ export class PagosComponent implements OnInit {
   }
 
 
-  iniciarPagoOpenPay(): void {
+  async iniciarPagoClip(): Promise<void> {
     const monto = this.montoAPagar;
     if (monto <= 0) {
       Swal.fire({
@@ -114,6 +147,11 @@ export class PagosComponent implements OnInit {
         title: 'Sin monto a pagar',
         text: 'No hay servicios configurados o el monto es 0.'
       });
+      return;
+    }
+
+    if (!this.isClipInitialized) {
+      Swal.fire('Cargando formulario', 'El entorno seguro de pago sigue cargando, por favor espera un momento.', 'info');
       return;
     }
 
@@ -126,42 +164,54 @@ export class PagosComponent implements OnInit {
       email: 'farzin@correo.com'
     };
 
-    Swal.fire({
-      title: 'Procesando pago...',
-      text: 'Generando enlace de pago con OpenPay',
-      icon: 'info',
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    this.openPayService.createCheckout(titulo, 1, monto, customer).subscribe({
-      next: (response) => {
-        if (response.status === 200 && response.body) {
-          const checkoutUrl = response.body.checkout_url;
-          Swal.close();
-          window.open(checkoutUrl, '_blank');
-          Swal.fire({
-            icon: 'success',
-            title: 'Pestaña de pago abierta',
-            text: 'Hemos abierto la página de OpenPay en una nueva pestaña.',
-            confirmButtonText: 'Entendido'
-          });
-        } else {
-          Swal.fire('Error', 'No se pudo generar el pago con OpenPay. Inténtalo de nuevo.', 'error');
+    try {
+      Swal.fire({
+        title: 'Procesando pago...',
+        text: 'Validando tarjeta de forma segura',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
         }
-      },
-      error: (error) => {
-        console.error('Error al generar checkout de OpenPay:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error de conexión',
-          text: 'No se pudo conectar con el servidor de pagos de OpenPay.'
-        });
-      }
-    });
+      });
+
+      const cardToken = await this.clipCard.cardToken();
+
+      this.clipService.processPayment(titulo, monto, cardToken.id, customer).subscribe({
+        next: (response) => {
+          if (response.status === 200 && response.body) {
+            const resBody = response.body;
+            if (resBody.status === 'approved' || resBody.status === 'pending') {
+              const esAprobado = resBody.status === 'approved';
+
+              Swal.fire({
+                icon: esAprobado ? 'success' : 'info',
+                title: esAprobado ? '¡Pago Exitoso!' : 'Pago en Proceso',
+                text: esAprobado
+                  ? `El pago ha sido aprobado. (Recibo: ${resBody.receipt_no || 'N/A'})`
+                  : `Tu pago está siendo procesado por Clip y se reflejará pronto. (Recibo: ${resBody.receipt_no || 'N/A'})`
+              });
+
+              // Reset card form and reload history
+              this.clipCard.unmount();
+              this.clipCard.mount('clip-checkout');
+              this.cargarHistorialPagos();
+            } else {
+              Swal.fire('Transacción Declinada', 'El pago fue rechazado. Revisa tus fondos o prueba con otra tarjeta.', 'error');
+            }
+          } else {
+            Swal.fire('Error', 'No se obtuvo una respuesta válida del servidor.', 'error');
+          }
+        },
+        error: (error) => {
+          console.error('Error al intentar cobrar Token de Clip:', error);
+          Swal.fire('Error de conexión', 'No se pudo procesar el pago en el servidor.', 'error');
+        }
+      });
+
+    } catch (err: any) {
+      console.error("Error SDK Clip:", err);
+      Swal.fire('Revise su tarjeta', err.message || 'Los datos de la tarjeta son inválidos.', 'warning');
+    }
   }
 
   formatearFechaHora(fechaHora: string): string {
