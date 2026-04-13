@@ -1,0 +1,270 @@
+<div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4">
+  <!-- Header con información del ticket -->
+  <div class="border-b pb-3 mb-3">
+    <div class="flex justify-center items-center mb-2">
+      <h2 class="text-lg font-bold text-gray-900">Sistema de Facturación</h2>
+    </div>
+    <div class="flex justify-between items-center">
+      <p class="text-sm text-gray-600">
+        Ticket: <span class="font-medium text-gray-800">{{ ventaTapete.ticket.noVenta }}</span>
+      </p>
+      <div class="flex items-center text-sm text-gray-600"> Fecha Venta:
+        <span class="font-medium text-gray-800">{{ ventaTapete.ticket.fecha | date:'dd/MM/yyyy hh:mm' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de productos -->
+  <div class="overflow-x-auto mb-3">
+    <div class="bg-white border border-gray-200 rounded-lg">
+      <table class="min-w-full table-fixed">
+        <thead>
+          <tr class="bg-gray-100 text-gray-700 uppercase text-xs leading-normal">
+            <th class="py-2 px-3 text-center" style="width:55%;">Producto</th>
+            <th class="py-2 px-3 text-center" style="width:15%;">Cantidad</th>
+            <th class="py-2 px-3 text-center" style="width:18%;">Precio Unitario</th>
+            <th class="py-2 px-3 text-center" style="width:12%;">Subtotal</th>
+          </tr>
+        </thead>
+      </table>
+      <div class="max-h-64 overflow-y-auto custom-scrollbar">
+        <table class="min-w-full table-fixed">
+          <tbody class="text-gray-600 text-xs font-medium">
+            <tr *ngFor="let producto of ventaTapete.detalle; trackBy: trackByProducto" class="table-row-hover">
+              <td class="py-2 px-3 text-center border-b" style="width:55%;">{{ producto.descripcio }}</td>
+              <td class="py-2 px-3 text-center border-b" style="width:15%;">{{ producto.cantidad }}</td>
+              <td class="py-2 px-3 text-center border-b" style="width:18%;">{{ producto.precio / 1.16 | currency }}
+              </td>
+              <td class="py-2 px-3 text-center border-b" style="width:12%;">{{ producto.precio * producto.cantidad /
+                1.16| currency }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen de totales -->
+  <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
+    <div class="flex justify-between text-sm">
+      <span class="text-gray-700">Subtotal:</span>
+      <span class="font-medium text-gray-900">{{ ventaTapete.ticket.subtotal | currency }}</span>
+    </div>
+    <div class="flex justify-between text-sm">
+      <span class="text-gray-700">IVA (16%):</span>
+      <span class="font-medium text-gray-900">{{ ventaTapete.ticket.impuesto| currency }}</span>
+    </div>
+    <div class="flex justify-between text-sm font-bold">
+      <span class="text-gray-900">Total:</span>
+      <span class="text-gray-900">{{ ventaTapete.ticket.total | currency }}</span>
+    </div>
+  </div>
+
+  <!-- Info: Maneras de llenar los datos -->
+  <div class="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+    <div class="flex items-start mb-2">
+      <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd"
+          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+          clip-rule="evenodd"></path>
+      </svg>
+      <div class="flex-1">
+        <h4 class="text-sm font-bold text-blue-900 mb-2">¿Cómo llenar los datos del receptor?</h4>
+        <div class="text-xs text-blue-800 space-y-2">
+          <div class="flex items-start">
+            <span class="font-semibold mr-2 text-blue-600">1.</span>
+            <p><span class="font-semibold">Con Constancia Fiscal (PDF):</span> Sube tu archivo PDF de Constancia de
+              Situación Fiscal y los datos se llenarán automáticamente.</p>
+          </div>
+          <div class="flex items-start">
+            <span class="font-semibold mr-2 text-blue-600">2.</span>
+            <p><span class="font-semibold">Cliente recurrente:</span> Si ya has usado el servicio, solo ingresa tu
+              RFC y presiona <kbd
+                class="px-1 py-0.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded">Enter</kbd>
+              o cambia de campo para cargar tus datos.</p>
+          </div>
+          <div class="flex items-start">
+            <span class="font-semibold mr-2 text-blue-600">3.</span>
+            <p><span class="font-semibold">Manualmente:</span> Completa todos los campos del formulario de forma
+              manual.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NUEVO: Bloque para subir Constancia de Situación Fiscal (PDF) -->
+  <div class="my-4 bg-white border border-gray-200 rounded-lg p-4">
+    <label for="pdfInput" class="text-md font-semibold mb-2">Constancia de Situación Fiscal (PDF)</label>
+
+    <div class="flex flex-col md:flex-row md:items-center gap-3">
+      <!-- input file oculto -->
+      <input type="file" accept="application/pdf" (change)="onPdfSelected($event)" #pdfInput id="pdfInput"
+        class="hidden" [disabled]="isUploadingPdf" />
+
+      <!-- Botón para seleccionar PDF -->
+      <label for="pdfInput" [class.cursor-not-allowed]="isUploadingPdf" [class.opacity-50]="isUploadingPdf"
+        class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 text-sm inline-flex items-center justify-center shadow-sm hover:shadow-md cursor-pointer"
+        [attr.aria-disabled]="isUploadingPdf">
+        Seleccionar PDF
+      </label>
+
+      <!-- Nombre del archivo seleccionado -->
+      <div class="text-sm text-gray-700 flex-1">
+        <span *ngIf="selectedPdfName">{{ selectedPdfName }}</span>
+        <span *ngIf="!selectedPdfName" class="text-gray-500">No se ha seleccionado ningún archivo</span>
+      </div>
+
+      <!-- Botón enviar con spinner -->
+      <button type="button" (click)="uploadPdf()" [disabled]="!selectedPdf || isUploadingPdf"
+        class="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center text-sm shadow-sm hover:shadow-md">
+        <svg *ngIf="isUploadingPdf" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+        </svg>
+        <span *ngIf="!isUploadingPdf">Enviar</span>
+        <span *ngIf="isUploadingPdf">Enviando...</span>
+      </button>
+    </div>
+
+    <p class="mt-2 text-xs text-gray-500">Sólo se permiten archivos PDF. Tamaño máximo recomendado: 5MB.</p>
+  </div>
+
+  <!-- Formulario de datos para facturación -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
+    <h3 class="text-md font-semibold text-blue-900 mb-3 text-center">Datos del Receptor</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <!-- RFC -->
+      <div class="relative">
+        <input type="text" id="rfc" [(ngModel)]="receptor.Rfc" (blur)="onRfcBlur()"
+          (keydown.enter)="onRfcEnter($event)" [disabled]="isLoadingFactura || isLoadingReceptor"
+          placeholder="RFC *"
+          class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed uppercase text-sm"
+          [class.border-red-500]="!receptor.Rfc && showValidationErrors"
+          [class.border-gray-300]="receptor.Rfc || !showValidationErrors" maxlength="13">
+        <!-- Spinner inside RFC input -->
+        <div *ngIf="isLoadingReceptor"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+          <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+          </svg>
+        </div>
+        <p *ngIf="!receptor.Rfc && showValidationErrors" class="mt-1 text-xs text-red-600">
+          El RFC es obligatorio
+        </p>
+      </div>
+
+      <!-- Domicilio Fiscal -->
+      <div>
+        <div *ngIf="isLoadingReceptor" class="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+        <input *ngIf="!isLoadingReceptor" type="text" id="domicilioFiscal"
+          [(ngModel)]="receptor.DomicilioFiscalReceptor" (ngModelChange)="onCpChange($event)"
+          (blur)="receptor.DomicilioFiscalReceptor = receptor.DomicilioFiscalReceptor ? receptor.DomicilioFiscalReceptor.trim() : ''"
+          [disabled]="isLoadingFactura" placeholder="Domicilio Fiscal (CP) *"
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+          [class.border-red-500]="!receptor.DomicilioFiscalReceptor && showValidationErrors"
+          [class.border-gray-300]="receptor.DomicilioFiscalReceptor || !showValidationErrors" maxlength="5">
+        <p *ngIf="!receptor.DomicilioFiscalReceptor && showValidationErrors && !isLoadingReceptor"
+          class="mt-1 text-xs text-red-600">
+          El código postal es obligatorio
+        </p>
+      </div>
+
+      <!-- Razón Social/Nombre -->
+      <div>
+        <div *ngIf="isLoadingReceptor" class="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+        <input *ngIf="!isLoadingReceptor" type="text" id="nombre" [(ngModel)]="receptor.Nombre"
+          (blur)="receptor.Nombre = receptor.Nombre ? receptor.Nombre.trim() : ''" [disabled]="isLoadingFactura"
+          placeholder="Razón Social/Nombre *"
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+          [class.border-red-500]="!receptor.Nombre && showValidationErrors"
+          [class.border-gray-300]="receptor.Nombre || !showValidationErrors">
+        <p *ngIf="!receptor.Nombre && showValidationErrors && !isLoadingReceptor" class="mt-1 text-xs text-red-600">
+          El nombre es obligatorio
+        </p>
+      </div>
+
+      <!-- Correo Electrónico -->
+      <div>
+        <div *ngIf="isLoadingReceptor" class="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+        <input *ngIf="!isLoadingReceptor" type="email" id="email" [(ngModel)]="receptor.email"
+          (blur)="receptor.email = receptor.email ? receptor.email.trim().toLowerCase() : ''"
+          [disabled]="isLoadingFactura" placeholder="Correo Electrónico *"
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+          [class.border-red-500]="(!receptor.email || !isValidEmail(receptor.email)) && showValidationErrors"
+          [class.border-gray-300]="(receptor.email && isValidEmail(receptor.email)) || !showValidationErrors">
+        <p *ngIf="!receptor.email && showValidationErrors && !isLoadingReceptor" class="mt-1 text-xs text-red-600">
+          El correo electrónico es obligatorio
+        </p>
+        <p *ngIf="receptor.email && !isValidEmail(receptor.email) && showValidationErrors && !isLoadingReceptor"
+          class="mt-1 text-xs text-red-600">
+          Ingrese un correo electrónico válido
+        </p>
+      </div>
+
+      <!-- Régimen Fiscal -->
+      <div>
+        <select id="regimenFiscal" [(ngModel)]="receptor.RegimenFiscalReceptor" (change)="buscaUsoCfdi($event)"
+          [disabled]="isLoadingFactura"
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+          [class.border-red-500]="!receptor.RegimenFiscalReceptor && showValidationErrors"
+          [class.border-gray-300]="receptor.RegimenFiscalReceptor || !showValidationErrors">
+          <option value="">Seleccione Régimen Fiscal *</option>
+          <option *ngFor="let regimen of listaRegimenFiscal" [value]="regimen.regimenfiscal">
+            {{ regimen.descripcion }}
+          </option>
+        </select>
+        <p *ngIf="!receptor.RegimenFiscalReceptor && showValidationErrors" class="mt-1 text-xs text-red-600">
+          El régimen fiscal es obligatorio
+        </p>
+      </div>
+
+      <!-- Uso de CFDI -->
+      <div>
+        <select id="usoCfdi" [(ngModel)]="receptor.UsoCFDI"
+          [disabled]="isLoadingFactura || !receptor.RegimenFiscalReceptor"
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+          [class.border-red-500]="!receptor.UsoCFDI && showValidationErrors"
+          [class.border-gray-300]="receptor.UsoCFDI || !showValidationErrors">
+          <option value="">Seleccione Uso de CFDI *</option>
+          <option *ngFor="let uso of listaUsoCfdiFiltrado" [value]="uso.usoCfdi">
+            {{ uso.descripcion }}
+          </option>
+        </select>
+        <p *ngIf="!receptor.UsoCFDI && showValidationErrors" class="mt-1 text-xs text-red-600">
+          El uso de CFDI es obligatorio
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botones de acción -->
+  <div class="flex justify-between pt-3 gap-3">
+    <button type="button" (click)="regresar()" [disabled]="isLoadingFactura"
+      class="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 text-sm shadow-sm hover:shadow-md">
+      Nueva Consulta
+    </button>
+    <button type="button" (click)="generarFactura()" [disabled]="isLoadingFactura || !isFormValid()"
+      class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:hover:scale-100 active:scale-[0.98] flex items-center justify-center min-w-[140px] text-sm shadow-md hover:shadow-lg">
+      <!-- Spinner -->
+      <svg *ngIf="isLoadingFactura" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
+      </svg>
+
+      <!-- Button Text -->
+      <span *ngIf="!isLoadingFactura">Generar Factura</span>
+      <span *ngIf="isLoadingFactura">Generando...</span>
+    </button>
+  </div>
+</div>
