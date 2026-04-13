@@ -12,12 +12,12 @@ jobs:
     name: Unit & E2E Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20' # Adjust based on your project
+          node-version: '24' # Adjust based on your project
           cache: 'npm'
 
       - name: Install dependencies
@@ -46,12 +46,12 @@ jobs:
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -79,7 +79,7 @@ jobs:
       # Deployment to S3 (Develop)
       - name: Deploy to S3 (Develop)
         if: github.ref == 'refs/heads/develop'
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -96,7 +96,7 @@ jobs:
       # Deployment via FTP (Main/Production)
       - name: Deploy via FTP (Production)
         if: github.ref == 'refs/heads/main'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.SFTP_SERVER }}
           username: ${{ secrets.SFTP_USERNAME }}
