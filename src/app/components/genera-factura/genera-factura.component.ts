@@ -104,7 +104,9 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           Swal.fire({
             icon: 'warning',
-            title: error.status != 500 ? error.error.message : 'Ticket no encontrado',
+            // error.error puede venir null (502, timeout, CORS); antes eso
+            // producía un diálogo sin título.
+            title: (error?.status != 500 ? error?.error?.message : null) || 'Ticket no encontrado',
             confirmButtonColor: '#3b82f6',
           });
         },

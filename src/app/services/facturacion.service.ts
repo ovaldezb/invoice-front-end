@@ -16,7 +16,7 @@ export class FacturacionService {
   }
 
   obtieneDatosVenta(ticket:string) {
-    return this.http.get(Global.urlBackEnd+'tapetes/'+ticket,  { observe: 'response' });
+    return this.http.get(Global.urlBackEnd+'tapetes/'+encodeURIComponent(ticket),  { observe: 'response' });
   }
 
   generaFactura(factura: any) {
@@ -24,7 +24,9 @@ export class FacturacionService {
   }
 
   obtieneDatosReceptorByRfc(rfc: string) {
-    return this.http.get(Global.urlBackEnd+'receptor/'+rfc, { observe: 'response' });
+    // encodeURIComponent es indispensable aquí: los RFC con Ñ (PEÑA, MUÑOZ)
+    // deben viajar percent-encoded en UTF-8 dentro del path.
+    return this.http.get(Global.urlBackEnd+'receptor/'+encodeURIComponent(rfc), { observe: 'response' });
   }
 
   guardaReceptor(receptor: Receptor) {
