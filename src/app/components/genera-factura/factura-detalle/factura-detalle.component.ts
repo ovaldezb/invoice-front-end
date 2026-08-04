@@ -190,22 +190,44 @@ export class FacturaDetalleComponent implements OnInit {
           Swal.fire({
             icon: 'error',
             title: 'Error al generar factura',
-            text: error.error.message || 'Ocurrió un error inesperado.',
+            // error.error es null en 502, timeouts y errores de CORS: leerlo
+            // directo dejaba el diálogo en blanco justo cuando más se necesita.
+            text: error?.error?.message || 'Ocurrió un error inesperado. Verifique en la bitácora si la factura llegó a timbrarse antes de reintentar.',
             confirmButtonColor: '#3b82f6',
           });
         }
       });
   }
 
+  /**
+   * Antepone la declaración XML con encoding si el CFDI no la trae.
+   * Sin ella, los programas que asumen la codificación local (cp1252) muestran
+   * mojibake en nombres con Ñ o acentos. NO se re-serializa el documento:
+   * el CFDI timbrado se conserva byte por byte.
+   */
+  private conDeclaracionUtf8(xml: string): string {
+    const contenido = xml.trimStart();
+    if (contenido.startsWith('<?xml')) {
+      const finDeclaracion = contenido.indexOf('?>');
+      const declaracion = contenido.slice(0, finDeclaracion + 2);
+      if (/encoding\s*=/i.test(declaracion)) {
+        return xml;
+      }
+      return '<?xml version="1.0" encoding="UTF-8"?>' + contenido.slice(finDeclaracion + 2);
+    }
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + xml;
+  }
+
   private handleSuccessResponse(response: any): void {
     const xmlContent = response.body?.cfdi;
     const uuid = response.body?.uuid;
     const pdfBase64 = response.body?.pdf_cfdi_b64;
+    const incidencias: string[] = response.body?.incidencias || [];
     let xmlUrl = '';
     let pdfUrl = '';
 
     if (xmlContent && uuid) {
-      const blob = new Blob([xmlContent], { type: 'application/xml' });
+      const blob = new Blob([this.conDeclaracionUtf8(xmlContent)], { type: 'application/xml;charset=utf-8' });
       xmlUrl = window.URL.createObjectURL(blob);
     }
 
@@ -220,33 +242,55 @@ export class FacturaDetalleComponent implements OnInit {
       pdfUrl = window.URL.createObjectURL(pdfBlob);
     }
 
-    if (uuid && (xmlUrl || pdfUrl)) {
+    // La factura pudo timbrarse y aun así faltar el PDF o el correo. Antes, si
+    // no había ningún archivo no se mostraba absolutamente nada y el usuario
+    // se quedaba sin saber si el CFDI existía.
+    if (!uuid) {
       Swal.fire({
-        icon: 'success',
-        title: '¡Factura generada!',
-        html: `
-          <p class="mb-4 text-gray-700">Se adjuntan los archivos generados</p>
+        icon: 'warning',
+        title: 'Respuesta incompleta',
+        text: 'El servidor no devolvió el folio fiscal. Consulte la bitácora antes de reintentar: la factura pudo haberse timbrado.',
+        confirmButtonColor: '#3b82f6'
+      }).then(() => this.regresar());
+      return;
+    }
+
+    const celdaXml = xmlUrl
+      ? `<a href="${xmlUrl}" download="${uuid}.xml" class="text-blue-600 hover:text-blue-700 font-semibold">Descargar XML</a>`
+      : '<span class="text-gray-400">No disponible</span>';
+    const celdaPdf = pdfUrl
+      ? `<a href="${pdfUrl}" download="${uuid}.pdf" class="text-blue-600 hover:text-blue-700 font-semibold">Descargar PDF</a>`
+      : '<span class="text-gray-400">No disponible</span>';
+    const avisoIncidencias = incidencias.length
+      ? `<p class="mt-4 text-sm text-amber-700">La factura se timbró correctamente, pero: ${incidencias.join('; ')}</p>`
+      : '';
+
+    Swal.fire({
+      icon: incidencias.length ? 'warning' : 'success',
+      title: '¡Factura generada!',
+      html: `
+          <p class="mb-2 text-gray-700">Se adjuntan los archivos generados</p>
+          <p class="mb-4 text-xs text-gray-500">Folio fiscal: ${uuid}</p>
           <table style="width:100%;text-align:center;border-collapse: collapse;">
             <tr>
               <th style="text-align:center;width:50%;border: 1px solid #e5e7eb;padding: 8px;background-color: #f9fafb;">XML</th>
               <th style="text-align:center;width:50%;border: 1px solid #e5e7eb;padding: 8px;background-color: #f9fafb;">PDF</th>
             </tr>
             <tr>
-              <td style="text-align:center;width:50%;border: 1px solid #e5e7eb;padding: 16px;">
-                <a href="${xmlUrl}" download="${uuid}.xml" class="text-blue-600 hover:text-blue-700 font-semibold">Descargar XML</a>
-              </td>
-              <td style="text-align:center;width:50%;border: 1px solid #e5e7eb;padding: 16px;">
-                <a href="${pdfUrl}" download="${uuid}.pdf" class="text-blue-600 hover:text-blue-700 font-semibold">Descargar PDF</a>
-              </td>
+              <td style="text-align:center;width:50%;border: 1px solid #e5e7eb;padding: 16px;">${celdaXml}</td>
+              <td style="text-align:center;width:50%;border: 1px solid #e5e7eb;padding: 16px;">${celdaPdf}</td>
             </tr>
           </table>
+          ${avisoIncidencias}
         `,
-        confirmButtonColor: '#3b82f6',
-        confirmButtonText: 'Cerrar'
-      }).then(() => {
-        this.regresar();
-      });
-    }
+      confirmButtonColor: '#3b82f6',
+      confirmButtonText: 'Cerrar'
+    }).then(() => {
+      // Liberar los blobs: se acumulaban por cada factura emitida.
+      if (xmlUrl) window.URL.revokeObjectURL(xmlUrl);
+      if (pdfUrl) window.URL.revokeObjectURL(pdfUrl);
+      this.regresar();
+    });
   }
 
   guardaReceptor() {
