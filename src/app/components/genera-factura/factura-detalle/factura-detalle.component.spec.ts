@@ -3,7 +3,8 @@ import { FacturaDetalleComponent } from './factura-detalle.component';
 import { FacturacionService } from '../../../services/facturacion.service';
 import { FacturaCalculatorService } from '../../../services/factura-calculator.service';
 import { ParsePdfService } from '../../../services/parse-pdf.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
+import Swal from 'sweetalert2';
 import { Receptor } from '../../../models/receptor';
 import { HttpClientModule, HttpResponse } from '@angular/common/http';
 import { VentaTapete } from '../../../models/ventaTapete';
@@ -158,4 +159,85 @@ describe('FacturaDetalleComponent', () => {
     expect(component.receptor.DomicilioFiscalReceptor).toBe('12345');
     expect(component.isUploadingPdf).toBeFalse();
   }));
+
+  describe('codificación del XML descargado', () => {
+    const NOMBRE_CON_ENIE = 'JOSE ANTONIO MUÑOZ PEÑA';
+
+    it('debe anteponer la declaración UTF-8 si el CFDI no la trae', () => {
+      const cfdiSinDeclaracion = `<cfdi:Comprobante Nombre="${NOMBRE_CON_ENIE}"/>`;
+
+      const resultado = (component as any).conDeclaracionUtf8(cfdiSinDeclaracion);
+
+      expect(resultado.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBeTrue();
+      expect(resultado).toContain(NOMBRE_CON_ENIE);
+    });
+
+    it('debe completar la declaración cuando existe pero no indica encoding', () => {
+      const cfdi = `<?xml version="1.0"?><cfdi:Comprobante Nombre="${NOMBRE_CON_ENIE}"/>`;
+
+      const resultado = (component as any).conDeclaracionUtf8(cfdi);
+
+      expect(resultado.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBeTrue();
+      expect(resultado).toContain(NOMBRE_CON_ENIE);
+      expect(resultado.match(/<\?xml/g)?.length).toBe(1);
+    });
+
+    it('no debe tocar el CFDI si ya declara su codificación', () => {
+      const cfdi = `<?xml version="1.0" encoding="UTF-8"?><cfdi:Comprobante Nombre="${NOMBRE_CON_ENIE}"/>`;
+
+      expect((component as any).conDeclaracionUtf8(cfdi)).toBe(cfdi);
+    });
+  });
+
+  describe('respuestas incompletas al generar factura', () => {
+    beforeEach(() => {
+      facturaCalculatorSpy.isReceptorValid.and.returnValue(true);
+      facturaCalculatorSpy.buildTimbrado.and.returnValue({} as any);
+      component.ventaTapete = new VentaTapete('venta', new Ticket('1', '2023-01-01', 1, 1, 1, 1), [], { formapago: '01' });
+      component.receptor = new Receptor('VABO780711D41', 'Juan Pérez', '12345', '601', 'G03', 'juan@email.com', 'ID123');
+    });
+
+    it('debe avisar cuando la factura se timbró pero no llegó el PDF', () => {
+      const spySwal = spyOn(Swal, 'fire').and.returnValue(Promise.resolve({} as any));
+      facturacionServiceSpy.generaFactura.and.returnValue(of(new HttpResponse({
+        body: { uuid: 'UUID123', cfdi: '<cfdi:Comprobante/>', pdf_cfdi_b64: null, incidencias: ['No se genero el PDF'] },
+        status: 200
+      })));
+
+      component.generarFactura();
+
+      const opciones = spySwal.calls.mostRecent().args[0] as any;
+      expect(opciones.icon).toBe('warning');
+      expect(opciones.html).toContain('UUID123');
+      expect(opciones.html).toContain('No se genero el PDF');
+    });
+
+    it('debe avisar cuando la respuesta no trae folio fiscal', () => {
+      const spySwal = spyOn(Swal, 'fire').and.returnValue(Promise.resolve({} as any));
+      facturacionServiceSpy.generaFactura.and.returnValue(of(new HttpResponse({
+        body: {}, status: 200
+      })));
+
+      component.generarFactura();
+
+      const opciones = spySwal.calls.mostRecent().args[0] as any;
+      expect(opciones.icon).toBe('warning');
+      expect(opciones.title).toBe('Respuesta incompleta');
+    });
+
+    it('no debe dejar el diálogo vacío cuando el error no trae cuerpo', () => {
+      const spySwal = spyOn(Swal, 'fire').and.returnValue(Promise.resolve({} as any));
+      facturacionServiceSpy.generaFactura.and.returnValue(
+        throwError(() => ({ status: 502, error: null }))
+      );
+
+      component.generarFactura();
+
+      const opciones = spySwal.calls.mostRecent().args[0] as any;
+      expect(opciones.icon).toBe('error');
+      expect(opciones.text).toBeTruthy();
+      expect(opciones.text).toContain('bitácora');
+      expect(component.isLoadingFactura).toBeFalse();
+    });
+  });
 });
