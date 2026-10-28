@@ -53,12 +53,16 @@ export class GeneraFacturaComponent implements OnInit, OnDestroy {
 
     this.getEnvironment();
 
-    // Detección de ticket por URL (QR) - Solo precargar el campo sin consultar automáticamente
+    // Detección de ticket por URL (QR): precarga el campo y consulta la venta.
+    // El guard de isLoading/isBusquedaTicket evita una segunda consulta si los
+    // queryParams vuelven a emitir mientras hay una en curso o ya se mostró.
     this.queryParamsSubscription = this.route.queryParams.subscribe(params => {
       const ticketParam = params['ticket'];
       if (ticketParam) {
         this.ticketNumber = ticketParam;
-        // Se elimina la llamada automática a consultarVenta() por requerimiento
+        if (!this.isLoading && this.isBusquedaTicket) {
+          this.consultarVenta();
+        }
       }
     });
   }
